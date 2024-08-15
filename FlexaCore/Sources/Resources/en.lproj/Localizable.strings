@@ -1,0 +1,53 @@
+// Auth main
+"global.ok" = "OK";
+"global.back" = "Back";
+
+// Privacy
+
+"auth.privacy.alerts.about.title" = "Email Address Privacy";
+"auth.privacy.alerts.about.message" = "Flexa uses your email address to sign you in and send you receipts for your payments. Your email address is never shared with %s or any other business.";
+
+// Main
+"auth.main.header.title" = "%s invites you to";
+"auth.main.header.subtitle" = "Pay with Flexa";
+"auth.main.sections.spend.title" = "Spend How You Want";
+"auth.main.sections.spend.description" = "Use your assets at thousands of places—with no card required.";
+"auth.main.sections.privacy.title" = "Designed for Privacy";
+"auth.main.sections.privacy.description" = "Flexa was built from the ground up to keep your personal data private.";
+"auth.main.textfields.email.placeholder" = "What’s your email address?";
+"auth.main.links.about.title" = "About Flexa & Privacy...";
+"auth.main.buttons.next.title" = "Continue";
+
+// Verify Email
+"auth.verify_email.header.sign_in.title" = "Sign in to Flexa";
+"auth.verify_email.header.sign_in.subtitle" = "Check your inbox and tap the link we just sent you to finish signing in.";
+"auth.verify_email.header.sign_up.title" = "Verify your Email Address";
+"auth.verify_email.header.sign_up.subtitle" = "Just one more step. Check your inbox and tap the link we sent you to verify your email address.";
+
+"auth.verify_email.table.rows.email.company" = "Flexa";
+"auth.verify_email.table.rows.email.to" = "To: ";
+"auth.verify_email.table.rows.sign_in.title" = "Sign in to Flexa";
+"auth.verify_email.table.rows.sign_up.title" = "Verify your email address";
+"auth.verify_email.buttons.open_email.title" = "Open \"Mail\"";
+"auth.verify_email.loading.text" = "Verifying...";
+
+// Sign Up
+"auth.personal_info.header.title" = "Create your
+Flexa Account";
+"auth.personal_info.header.subtitle" = "Please provide a few details to start making payments with Flexa.";
+"auth.personal_info.sections.terms_of_service" = "The information you provide is used only to comply with local financial regulations, and will never be shared with %s or any of the businesses you pay. By creating an account, you agree to Flexa’s [Terms of Service](https://flexa.network/legal/terms).";
+"auth.personal_info.buttons.about.title" = "About Flexa & Privacy...";
+"auth.personal_info.buttons.next.title" = "Get Started";
+"auth.personal_info.textfields.full_name.placeholder" = "Your Name";
+"auth.personal_info.textfields.given_name.placeholder" = "Given Name";
+"auth.personal_info.textfields.family_name.placeholder" = "Family Name";
+"auth.personal_info.textfields.date_of_birth.placeholder" = "Date of Birth";
+
+// Magic code
+"auth.magic_code.header.title" = "Enter your Verification Code";
+"auth.magic_code.loading.text" = "Verifying...";
+"auth.magic_code.links.no_code.title" = "Didn't get a code?";
+"auth.magic_code.alerts.no_code.title" = "Didn't get a code?";
+"auth.magic_code.alerts.no_code.message" = "The 6-digit verification code is displayed after you approve the sign-in request that was sent to your email address. If you don’t remember seeing a code, try opening your verification email again on this device.";
+"auth.magic_code.alerts.signed_in.title" = "Success!";
+"auth.magic_code.alerts.signed_in.message" = "You are signed in.";

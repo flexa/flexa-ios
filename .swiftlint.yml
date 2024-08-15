@@ -1,0 +1,169 @@
+disabled_rules:
+- notification_center_detachment
+- switch_case_alignment
+- static_over_final_class
+
+opt_in_rules:
+  - weak_delegate
+  - closure_end_indentation
+  - closure_spacing
+  - conditional_returns_on_newline
+  - contains_over_first_not_nil
+  - control_statement
+  - discarded_notification_center_observer
+  - empty_count
+  - fallthrough
+  - fatal_error_message
+  - first_where
+  - force_unwrapping
+  - implicit_return
+  - literal_expression_end_indentation
+  - multiline_arguments
+  - multiline_parameters
+  - operator_usage_whitespace
+  - switch_case_on_newline
+
+excluded:
+  - Plugins
+  - "**/Generated"
+  - build
+  - .swiftpm
+  - .build
+  - Example
+
+class_delegate_protocol: error
+closing_brace: error
+closure_parameter_position: error
+closure_end_indentation: error
+closure_spacing: error
+colon:
+  severity: error
+  flexible_right_spacing: false
+  apply_to_dictionaries: true
+comma: error
+conditional_returns_on_newline:
+  severity: error
+contains_over_first_not_nil: error
+control_statement: error
+discarded_notification_center_observer: error
+empty_count:
+  severity: error
+empty_enum_arguments: error
+empty_parameters: error
+empty_parentheses_with_trailing_closure: error
+fallthrough: error
+fatal_error_message: error
+file_length:
+  warning: 500
+  error: 1200
+first_where: error
+force_cast: error
+force_unwrapping:
+  severity: error
+force_try: error
+function_body_length:
+  warning: 50
+  error: 100
+function_parameter_count:
+  warning: 5
+  error: 8
+identifier_name:
+  min_length:
+    error: 3
+  excluded:
+    - id
+    - x
+    - y
+    - qr
+    - in
+    - lf
+    - to
+    - SSE
+implicit_getter: error
+implicit_return:
+  included:
+    - closure
+    - getter
+is_disjoint: error
+large_tuple:
+  warning: 5
+  error: 6
+leading_whitespace: error
+legacy_constant: error
+line_length:
+  warning: 120
+  error: 140
+  ignores_comments: true
+  ignores_interpolated_strings: true
+  ignores_urls: true
+literal_expression_end_indentation: error
+mark: error
+multiline_arguments:
+  severity: error
+multiline_parameters:
+  severity: error
+multiple_closures_with_trailing_closure: warning
+nesting:
+  type_level:
+    warning: 3
+    error: 6
+  function_level:
+    warning: 5
+    error: 10
+opening_brace:
+  severity: error
+operator_usage_whitespace:
+  severity: error
+operator_whitespace: warning
+private_over_fileprivate:
+  severity: error
+  validate_extensions: true
+protocol_property_accessors_order: error
+redundant_discardable_let: error
+redundant_optional_initialization: error
+redundant_string_enum_value: error
+redundant_void_return: error
+return_arrow_whitespace: error
+shorthand_operator: error
+statement_position:
+  severity: error
+superfluous_disable_command: error
+switch_case_on_newline: error
+syntactic_sugar: error
+todo: warning
+trailing_comma:
+  severity: error
+  mandatory_comma: false
+trailing_newline: error
+trailing_semicolon: error
+trailing_whitespace:
+  severity: error
+type_body_length:
+  - 300 # warning
+  - 400 # error
+type_name:
+  min_length:
+    warning: 4
+    error: 3
+  max_length:
+    warning: 40
+    error: 50
+  excluded:
+    - Code
+    - Key
+    - Cell
+    - Link
+    - Fee
+unneeded_break_in_switch: error
+unused_closure_parameter: warning
+unused_enumerated: error
+valid_ibinspectable: error
+vertical_parameter_alignment: error
+vertical_whitespace:
+  severity: error
+  max_empty_lines: 1
+void_return: error
+weak_delegate: warning
+xctfail_message: error
+
+reporter: "xcode"

@@ -1,0 +1,118 @@
+// Common
+"common.done" = "Done";
+"common.ok" = "Ok";
+"common.flexa" = "flexa";
+"common.loading" = "Loading";
+"common.cancel" = "Cancel";
+
+// Primary view
+"payment.pay_with_flexa.title" = "Pay with Flexa";
+"payment.using_ticker.subtitle" = "Using %s";
+"payment.pay_using.title" = "Pay Using";
+"payment.hide_short_balances.title" = "Hide Short Balances";
+"payment.error_login_to_authorize" = "Login to authorize the transaction.";
+"payment.currency_avaliable.title" = "%s Available";
+
+// No Assets View.
+// The description has different parameters, and different messages for each amount, that is why we are not using pluralization here
+"no_assets.title" = "Nothing to Spend";
+"no_assets.description.zero_assets" = "There are no assets in your wallet";
+"no_assets.description.one_invalid_asset" = "Flexa doesn’t currently support %s.";
+"no_assets.description.two_invalid_assets" = "Flexa doesn’t currently support %s or %s.";
+"no_assets.description.other_invalid_assets" = "Flexa doesn’t currently support %s, %s, or any of the other assets in your wallet.";
+"no_assets.add_asset_button.label" = "Add Assets";
+
+// Primary view Menu
+"payment.settings.items.find_places_to_pay.title" = "Find Places to Pay";
+"payment.settings.items.manage_flexa_id.title" = "Manage Flexa Account";
+"payment.settings.items.help.title" = "Help";
+"payment.settings.items.help.items.how_to_pay.title" = "Learn How to Pay";
+"payment.settings.items.help.items.report_issue.title" = "Report an Issue";
+
+// Notifications/messages
+"payment.message.title" = "You’re approaching your weekly spending limit.";
+"payment.message.description" = "Upgrade your Flexa ID for unlimited spending.";
+"payment.message.button" = "Learn More";
+
+// Payment Card
+"payment.done" = "Done";
+"payment.pay_now" = "Pay Now";
+"payment.description" = "%s avaliable";
+"payment.not_enough" = "Not enough %s for this payment";
+"payment.pay_merchant" = "Pay %s";
+"payment.using" = "Using";
+
+// Flexa Account
+"account.navigation.title" = "Account";
+"account.alerts.sign_out.title" = "Sign Out of Flexa?";
+"account.alerts.sign_out.message" = "Signing out will remove all Flexa data that is stored with %s on this device. Your wallet and your transaction history will not be affected.";
+"account.alerts.sign_out.buttons.sign_out.title" = "Sign Out";
+"account.header.labels.joined_in" = "Joined in %s";
+"account.sections.limit.header.title" = "Your Flexa Account";
+"account.sections.limit.footer.title" = "Limits reset on %s at %s.";
+"account.sections.data_and_privacy.cells.data_and_privacy.title" = "Data & Privacy";
+"account.sections.sign_out.cells.sign_out.title" = "Sign Out of Flexa";
+
+// Data and Privacy
+"data_and_privacy.navigation.title" = "Data & Privacy";
+"data_and_privacy.sections.header.title" = "Your Data & Privacy";
+"data_and_privacy.sections.header.description" = "Flexa is carefully designed to use only the data that’s directly necessary to process your payments. [Learn more…](https://flexa.network/privacy/)";
+"data_and_privacy.sections.header.account_email" = "Account Email";
+"data_and_privacy.sections.delete_account.cells.delete_account" = "Delete Your Flexa Account";
+"data_and_privacy.sections.delete_account.cells.deletion_pending.title" = "Account Deletion Pending";
+"data_and_privacy.sections.delete_account.cells.deletion_pending.subtitle" = "Please check your inbox to confirm the deletion of your Flexa Account";
+"data_and_privacy.sections.advanced.header.title" = "Advanced";
+"data_and_privacy.sections.advanced.cells.sdk_version" = "SDK Version";
+"data_and_privacy.sections.advanced.cells.export_debug_data" = "Export Debug Data";
+"data_and_privacy.sections.advanced.cells.reset_local_storage" = "Reset Local Flexa Storage";
+
+// Delete account
+"delete_account.header.title" = "Delete Your Flexa Account";
+"delete_account.header.subtitle" = "Deleting your Flexa Account will permanently erase your account and associated data from all Flexa systems and apps where you are signed in.\n\nAfter your account is deleted, you will no longer be able to receive refunds back to your wallet, and any active subscriptions will be canceled.\n\nDepending on where you live, we may not be permitted to delete all of your account data right away. We will, however, delete all of your account data as quickly as permitted by law.";
+"delete_account.buttons.cancel.title" = "Not Now";
+"delete_account.buttons.next.title" = "Continue";
+
+// Confirm Account Deletion
+"confirm_account_deletion.header.title" = "Confirm Deletion";
+"confirm_account_deletion.header.subtitle" = "Because we won’t be able to contact you after your account is deleted, we just sent you an email with important details about how and when your deletion request will be processed.\n\nPlease check your inbox now to review this important information and to confirm the final and permanent deletion of your Flexa Account.";
+"confirm_account_deletion.table.rows.email.company" = "Flexa";
+"confirm_account_deletion.table.rows.email.to" = "To: ";
+"confirm_account_deletion.table.rows.delete.title" = "Delete your Flexa Account";
+"confirm_account_deletion.buttons.open_email.title" = "Open \"Mail\"";
+
+// Web Links
+"brand.links.merchant_list" = "https://flexa.network/directory";
+"brand.links.merchant_locations" = "%@/%@/locations";
+
+// Exchange Rate
+"payment.asset.exchange_rate.info" = "Flexa automatically selects the best exchange rate and network fee for your payments.";
+"payment.asset.exchange_rate.learn_more" = "Learn more...";
+"payment.asset.exchange_rate.no_network_fee" = "No network fees";
+"payment.asset.exchange_rate.cannot_load_network_fee" = "Network fee cannot be loaded";
+"payment.asset.exchange_rate.network_fee" = "%s network fee";
+"payment.asset.exchange_rate.avaliable" = "%s avaliable";
+"payment.asset.exchange_rate.value" = "1 %s = %s";
+"payment.asset.exchange_rate.amount" = "%s %s";
+
+// Transaction Details
+"payment.transaction_details.footer" = "Flexa always selects the best available exchange rate for your payment.";
+"payment.transaction_details.title" = "Details";
+
+// Legacy flexcode tray
+"legacy_flexcode_tray.title" = "More instant payments";
+"legacy_flexcode_tray.edit_button.title" = "Edit";
+
+// Merchant sorter
+"merchant_sorter.title" = "Edit Pins";
+"merchant_sorter.description" = "Using Flexa at these brands requires an extra tap. To access your favorite brands more quickly, pin them to the beginning of the list.";
+"merchant_sorter.sections.pinned.header.title" = "Pinned";
+"merchant_sorter.sections.pinned.footer.title" = "There are not pinned merchants. You can select some from the list below.";
+"merchant_sorter.sections.other_brands.header.title" = "Other brands";
+"merchant_sorter.sections.other_brands.footer.title" = "Looks like you already pinned all the merchants!";
+
+// Legacy flexcode
+"legacy_flexcode.alerts.scan_help.title" = "Tips for Using Flexcodes at %@";
+"legacy_flexcode.amount_entry.labels.minimum_amount" = "Minimum Amount: %s";
+"legacy_flexcode.amount_entry.labels.maximum_amount" = "Maximum Amount: %s";
+"legacy_flexcode.amount_entry.buttons.enter_amount.title" = "Enter Amount";
+"legacy_flexcode.amount_entry.buttons.pay_now.title" = "Confirm";
