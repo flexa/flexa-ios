@@ -35,4 +35,8 @@ enum TransactionsResource: FlexaAPIResource, JWTAuthenticable {
             return ["signature": signature]
         }
     }
+
+    func wrappingError(_ error: Error?, traceId: String?) -> Error? {
+        ReasonableError(reason: .cannotSignTransaction(error))
+    }
 }

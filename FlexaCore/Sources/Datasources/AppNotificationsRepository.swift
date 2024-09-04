@@ -10,7 +10,7 @@ import Foundation
 import Factory
 
 class AppNotificationsRepository: AppNotificationsRepositoryProtocol {
-    @Injected(\.networkClient) var networkClient
+    @Injected(\.flexaNetworkClient) var networkClient
     @Injected(\.accountRepository) var accountRepository
     @Injected(\.keychainHelper) var keychain
 

@@ -10,7 +10,7 @@ import Foundation
 import Factory
 
 class AccountsRepository: AccountsRepositoryProtocol {
-    @Injected(\.networkClient) var networkClient
+    @Injected(\.flexaNetworkClient) var networkClient
     @Injected(\.keychainHelper) var keychainHelper
     @Injected(\.authStore) var authStore
 

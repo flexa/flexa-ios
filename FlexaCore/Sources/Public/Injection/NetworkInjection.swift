@@ -21,6 +21,8 @@ public extension Container {
         self {
             let config = URLSessionConfiguration.default
             config.urlCache = self.imageURLCache()
+            config.timeoutIntervalForRequest = 5
+            config.timeoutIntervalForResource = 20
             return config
         }.singleton
     }

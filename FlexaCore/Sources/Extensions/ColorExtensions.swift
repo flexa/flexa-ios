@@ -33,4 +33,11 @@ extension Color {
             })
         )
     }
+
+    public func shiftingHue(by degrees: CGFloat) -> Color {
+        Color(
+            UIColor(self)
+                .shiftingHue(by: degrees)
+        )
+    }
 }

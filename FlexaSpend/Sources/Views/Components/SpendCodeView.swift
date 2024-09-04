@@ -14,8 +14,12 @@ extension SpendCodeView {
     class ViewModel: Identifiable, Hashable, ObservableObject {
         @Injected(\.flexcodeGenerator) var flexcodeGenerator
 
-        @Published var flexcode: Flexcode?
         @Published var expiringProgress = 0.0
+        @Published var code: String = ""
+        @Published var pdf417Image: UIImage = UIImage()
+        @Published var code128Image: UIImage = UIImage()
+
+        private var flexcodes: [FlexcodeSymbology: Flexcode] = [:]
 
         private var createdDate = Date()
         private let timeInterval: TimeInterval = 30
@@ -24,6 +28,10 @@ extension SpendCodeView {
         let updateTimerInterval: TimeInterval = 1
         let id = UUID()
         var asset: AssetWrapper
+
+        var gradientMiddleColor: Color {
+            asset.assetColor ?? .purple
+        }
 
         var elapsedSeconds: TimeInterval {
             max(timeInterval - Date().timeIntervalSince(createdDate), 0.0)
@@ -37,6 +45,16 @@ extension SpendCodeView {
             Date() >= createdDate.addingTimeInterval(timeInterval)
         }
 
+        var hasFlexcodes: Bool {
+            !flexcodes.isEmpty
+        }
+
+        var hasImages: Bool {
+            flexcodes.values.contains {
+                $0.image != nil
+            }
+        }
+
         init(asset: AssetWrapper) {
             self.asset = asset
             updateCode()
@@ -48,9 +66,13 @@ extension SpendCodeView {
 
         func startTimer() {
             stopTimer()
-            update()
+            Task {
+                await update()
+            }
             let timer = Timer.scheduledTimer(withTimeInterval: updateTimerInterval, repeats: true) { _ in
-                self.update()
+                Task {
+                    await self.update()
+                }
             }
             RunLoop.main.add(timer, forMode: .common)
             self.timer = timer
@@ -61,6 +83,7 @@ extension SpendCodeView {
             timer = nil
         }
 
+        @MainActor
         private func update() {
             if isExpired {
                 updateCode()
@@ -72,8 +95,14 @@ extension SpendCodeView {
         }
 
         private func updateCode() {
-            flexcode = flexcodeGenerator.flexcode(for: asset.assetWithKey, type: .pdf417, scale: 5)
-            FlexaLogger.debug("\(asset.assetSymbol): \(flexcode?.code ?? "missing flexcode")")
+            flexcodes = flexcodeGenerator.flexcodes(for: asset.assetWithKey)
+            let code = flexcodes.values.first?.code
+            FlexaLogger.info("\(asset.assetSymbol): \(code ?? "missing flexcode")")
+
+            self.code = code ?? ""
+            self.pdf417Image = flexcodes[.pdf417]?.image ?? UIImage()
+            self.code128Image = flexcodes[.code128]?.image ?? UIImage()
+
             createdDate = Date()
             expiringProgress = 0
         }
@@ -99,16 +128,19 @@ struct SpendCodeView: View {
         VStack(alignment: .center, spacing: 8) {
             VStack {
                 ZStack {
-                    if let flexcode = viewModel.flexcode {
-                        if let image = flexcode.image {
-                            Image(uiImage: image)
-                                .resizable()
+                    if viewModel.hasFlexcodes {
+                        if viewModel.hasImages {
+                            FlexcodeView(
+                                pdf417Image: $viewModel.pdf417Image,
+                                code128Image: $viewModel.code128Image,
+                                gradientMiddleColor: viewModel.gradientMiddleColor
+                            )
                         } else {
-                            Rectangle().fill(Color(.systemGray6))
+                            FlexcodeView.placeholder
                             Button {
-                                UIPasteboard.general.string = flexcode.code
+                                UIPasteboard.general.string = viewModel.code
                             } label: {
-                                Text(flexcode.code)
+                                Text(viewModel.code)
                                     .font(.title.bold())
                                     .lineLimit(1)
                                     .minimumScaleFactor(0.5)
@@ -116,7 +148,7 @@ struct SpendCodeView: View {
                             }.padding()
                         }
                     } else {
-                        Rectangle().fill(Color(.systemGray6))
+                        FlexcodeView.placeholder
                         ProgressView()
                     }
                 }
@@ -167,9 +199,9 @@ private extension SpendCodeView {
 
     var padding: EdgeInsets {
         EdgeInsets(top: 36,
-                   leading: horizontalPadding,
+                   leading: 0,
                    bottom: 16,
-                   trailing: horizontalPadding)
+                   trailing: 0)
     }
 
     var backgroundColor: Color {

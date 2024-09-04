@@ -150,4 +150,21 @@ extension UIColor {
 
         return (red, green, blue, alpha)
     }
+
+    public func shiftingHue(by degrees: CGFloat) -> UIColor {
+        var hue: CGFloat = 0.0
+        var saturation: CGFloat = 0.0
+        var brightness: CGFloat = 0.0
+        var alpha: CGFloat = 0.0
+
+        guard getHue(&hue, saturation: &saturation, brightness: &brightness, alpha: &alpha) else {
+            return self
+        }
+
+        return UIColor(
+            hue: hue + degrees / 360.0,
+            saturation: saturation,
+            brightness: brightness,
+            alpha: alpha)
+    }
 }

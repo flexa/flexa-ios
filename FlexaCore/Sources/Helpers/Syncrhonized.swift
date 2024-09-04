@@ -20,7 +20,7 @@ class Synchronized<T> {
     var wrappedValue: T {
         get {
             queue.sync {
-                return value
+                value
             }
         }
         set {

@@ -16,7 +16,6 @@ struct NavigationMenu: View {
         Menu {
             Section {
                 Button {
-                    FlexaLogger.debug("Find Places to Pay")
                     showBrandDirectory = true
                 } label: {
                     Label(MenuStrings.FindPlacesToPay.title, systemImage: "magnifyingglass")
@@ -24,19 +23,16 @@ struct NavigationMenu: View {
             }
             Section {
                 Button {
-                    FlexaLogger.debug("Manage Flexa Account")
                     showManageFlexaIDModal = true
                 } label: {
                     Label(MenuStrings.ManageFlexaId.title, systemImage: "person.text.rectangle")
                 }
                 Menu {
                     Button {
-                        FlexaLogger.debug("Learn how to pay")
                     } label: {
                         Label(MenuStrings.Help.Items.HowToPay.title, systemImage: "rays")
                     }
                     Button {
-                        FlexaLogger.debug("Report an issue")
                     } label: {
                         Label(MenuStrings.Help.Items.ReportIssue.title, systemImage: "exclamationmark.bubble")
                     }
@@ -48,22 +44,5 @@ struct NavigationMenu: View {
         } label: {
             FlexaRoundedButton(.settings)
         }
-    }
-}
-
-struct NavigationMenu_Previews: PreviewProvider {
-    struct ParentView: View {
-        @State var showBrandDirectory: Bool = false
-        @State var showManageFlexaIDModal: Bool = false
-        var body: some View {
-            NavigationMenu(
-                showBrandDirectory: $showBrandDirectory,
-                showManageFlexaIDModal: $showManageFlexaIDModal
-            )
-        }
-    }
-
-    static var previews: some View {
-        ParentView()
     }
 }

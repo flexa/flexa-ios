@@ -4,84 +4,47 @@ import FlexaUICore
 
 struct LegacyFlexcodeModal: View {
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.theme) var theme
+
     public typealias Closure = () -> Void
+
     @Binding private var isShowing: Bool
     @State var showTransactionDetails: Bool = false
     @State var showInfo: Bool = false
-
-    @StateObject fileprivate var viewModel: SpendView.ViewModel
-    private var legacyFlexcodeViewModel: LegacyFlexcodeViewModel
+    @StateObject private var viewModel: LegacyFlexcodeViewModel
 
     public var didConfirm: Closure?
     public var didCancel: Closure?
     private var value: String
     private var brand: Brand?
 
-    var backgroundColor: Color {
-        Color(colorScheme == .dark ? .systemBackground : .secondarySystemBackground)
+    private var gradientStops: [Gradient.Stop] {
+        [
+            Gradient.Stop(color: viewModel.brandColor, location: 0.0),
+            Gradient.Stop(color: viewModel.brandColor, location: 0.5),
+            Gradient.Stop(color: viewModel.brandColor.opacity(0), location: 0.5),
+            Gradient.Stop(color: viewModel.brandColor.shiftingHue(by: 10).opacity(0.53), location: 1)
+        ]
     }
 
-    private let gradientStops: [Gradient.Stop] = [
-        Gradient.Stop(color: Color(hex: "#417D9B"), location: 0.5),
-        Gradient.Stop(color: Color(hex: "#417D9B").opacity(0), location: 0.5),
-        Gradient.Stop(color: Color(hex: "#22739C").opacity(0.53), location: 1)
-    ]
-
-    @ViewBuilder
-    var leftHeaderView: some View {
-        HStack(spacing: 8) {
-            RoundedRectangle(cornerRadius: 4.6)
-                .fill(AngularGradient(gradient: Gradient(stops: gradientStops), center: .center))
-                .frame(width: 24, height: 24)
-            Text(L10n.Common.flexa)
-                .font(.title2.weight(.bold))
-
-        }
+    private var backgroundColor: Color {
+        theme.views.sheet.backgroundColor
     }
 
-    @ViewBuilder
-    var rightHeaderView: some View {
-        if legacyFlexcodeViewModel.showInfoButton {
-            AnyView(FlexaRoundedButton(.info) {
-                showInfo = true
-            })
-        } else {
-            AnyView(EmptyView())
-        }
-    }
-
-    @ViewBuilder
-    var modal: some View {
-        SpendDragModalView(titleColor: Asset.flexaIdTitle.swiftUIColor,
-                           grabberColor: Asset.commonGrabber.swiftUIColor,
-                           closeButtonColor: Asset.commonCloseButton.swiftUIColor,
-                           isShowing: $isShowing,
-                           minHeight: 568,
-                           enableBlur: true,
-                           backgroundColor: backgroundColor,
-                           leftHeaderView: leftHeaderView,
-                           rightHeaderView: rightHeaderView,
-                           presentationMode: .card,
-                           didClose: { didCancel?() },
-                           contentView:
-                            LegacyFlexcodeContentView(value: value,
-                                                      legacyFlexcodeViewModel: legacyFlexcodeViewModel,
-                                                      didConfirm: didConfirm,
-                                                      viewModel: viewModel)
-        ).sheet(isPresented: $showInfo) { BrandView(brand).ignoresSafeArea() }
-    }
-
-    // MARK: - Initialization
     init(isShowing: Binding<Bool>,
-         viewModel: SpendView.ViewModel,
+         authorization: CommerceSessionAuthorization,
          value: String,
          brand: Brand?,
          didConfirm: Closure?,
          didCancel: Closure?
     ) {
         _isShowing = isShowing
-        _viewModel = StateObject(wrappedValue: viewModel)
-        self.legacyFlexcodeViewModel = LegacyFlexcodeViewModel(brand: brand)
+        _viewModel = StateObject(
+            wrappedValue: LegacyFlexcodeViewModel(
+                brand: brand,
+                authorization: authorization
+            )
+        )
         self.didConfirm = didConfirm
         self.didCancel = didCancel
         self.value = value
@@ -89,9 +52,53 @@ struct LegacyFlexcodeModal: View {
     }
 
     var body: some View {
-        modal
+        SpendDragModalView(
+            titleColor: Asset.flexaIdTitle.swiftUIColor,
+            grabberColor: Asset.commonGrabber.swiftUIColor,
+            closeButtonColor: Asset.commonCloseButton.swiftUIColor,
+            isShowing: $isShowing,
+            minHeight: 568,
+            enableBlur: true,
+            backgroundColor: backgroundColor,
+            leftHeaderView: leftHeaderView,
+            rightHeaderView: rightHeaderView,
+            presentationMode: .card,
+            didClose: { didCancel?() },
+            contentView: LegacyFlexcodeContentView(
+                value: value,
+                didConfirm: didConfirm,
+                viewModel: viewModel
+            )
+        ).sheet(isPresented: $showInfo) { BrandView(brand).ignoresSafeArea() }
     }
 
+    @ViewBuilder
+    var leftHeaderView: some View {
+        HStack(spacing: 8) {
+            RoundedRectangle(cornerRadius: 4.6)
+                .fill(
+                    AngularGradient(
+                        stops: gradientStops,
+                        center: .center,
+                        startAngle: .degrees(-180),
+                        endAngle: .degrees(540)
+                    )
+                )
+                .frame(width: 24, height: 24)
+            Text(L10n.Common.flexa)
+                .font(.title2.weight(.bold))
+        }
+
+    }
+
+    @ViewBuilder
+    var rightHeaderView: some View {
+        if viewModel.showInfoButton {
+            FlexaRoundedButton(.info) {
+                showInfo = true
+            }
+        }
+    }
 }
 
 struct LegacyFlexcodeContentView: View {
@@ -100,20 +107,17 @@ struct LegacyFlexcodeContentView: View {
     public typealias Closure = () -> Void
     public var didSelect: Closure?
     var value: String
-    var legacyFlexcodeViewModel: LegacyFlexcodeViewModel
     var didConfirm: Closure?
 
-    @StateObject fileprivate var viewModel: SpendView.ViewModel
+    @StateObject var viewModel: LegacyFlexcodeViewModel
     @State private var shouldCreateFlexcode = true
     @State private var showHelp = false
-
-    private let detailsColor = Color(hex: "#41819B")
 
     var body: some View {
         VStack(spacing: .stackSpacing) {
                 ZStack(alignment: .center) {
                     RemoteImageView(
-                        url: legacyFlexcodeViewModel.merchantLogoUrl,
+                        url: viewModel.merchantLogoUrl,
                         content: { image in
                             image.resizable()
                                 .frame(width: .merchantLogoSize, height: .merchantLogoSize)
@@ -128,7 +132,7 @@ struct LegacyFlexcodeContentView: View {
                         }
                     )
                 }.padding(.bottom, .listItemSpacing)
-                Text(L10n.Payment.payMerchant(legacyFlexcodeViewModel.brandName))
+                Text(L10n.Payment.payMerchant(viewModel.brandName))
                     .multilineTextAlignment(.center)
                     .font(.title3.weight(.semibold))
                     .foregroundColor(.primary.opacity(.colorOpacity))
@@ -139,24 +143,35 @@ struct LegacyFlexcodeContentView: View {
                     .padding(.bottom, .listItemSpacing)
                 VStack {
                     ZStack {
-                        if let image = viewModel.legacyFlexcode {
-                            Image(uiImage: image)
-                                .resizable()
+                        if viewModel.hasCodeImages {
+                            FlexcodeView(
+                                pdf417Image: $viewModel.pdf417Image,
+                                code128Image: $viewModel.code128Image,
+                                gradientMiddleColor: viewModel.brandColor
+                            )
                         } else {
-                            Rectangle().fill(Color(.systemGray6))
-                            ProgressView()
+                            FlexcodeView.placeholder
+                            Button {
+                                UIPasteboard.general.string = viewModel.authorization.number
+                            } label: {
+                                Text(viewModel.authorization.number)
+                                    .font(.title.bold())
+                                    .lineLimit(1)
+                                    .minimumScaleFactor(0.5)
+                                    .foregroundColor(.primary)
+                            }.padding()
                         }
                     }
                     .frame(maxWidth: .infinity)
                 }.frame(width: .flexCodeWidth, height: .flexCodeHeight)
 
-            Text(viewModel.commerceSession?.authorization?.instructions ?? "")
+            Text(viewModel.instructions)
                 .font(.footnote.weight(.medium))
                 .multilineTextAlignment(.center)
                 .foregroundColor(.primary.opacity(.colorOpacity))
                 .padding(.top, .listItemSpacing)
-            Text(viewModel.commerceSession?.authorization?.details ?? "")
-                .foregroundColor(detailsColor)
+            Text(viewModel.details)
+                .foregroundColor(viewModel.brandColor)
                 .bold()
         }.background(Color.clear)
                 .listRowBackground(Color.clear)

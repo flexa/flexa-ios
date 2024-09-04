@@ -29,4 +29,8 @@ enum AppNotificationsResource: FlexaAPIResource, JWTAuthenticable {
             [Self.idUrlParameter: id]
         }
     }
+
+    func wrappingError(_ error: Error?, traceId: String?) -> Error? {
+        ReasonableError(reason: .cannotDeleteAppNotification(error))
+    }
 }

@@ -32,9 +32,7 @@ public struct SpendCircleImage: View {
             image.resizable()
                 .clipShape(Circle())
                 .aspectRatio(contentMode: .fill)
-                .overlay(Circle().stroke(Color.gray, lineWidth: 4))
-                .shadow(radius: 1)
-                .scaledToFit()
+                .scaledToFill()
                 .frame(width: size, height: size)
         } else if let url {
             RemoteImageView(
@@ -44,7 +42,6 @@ public struct SpendCircleImage: View {
                         .frame(width: size, height: size)
                         .clipShape(Circle())
                         .aspectRatio(contentMode: .fill)
-                        .shadow(radius: 1)
                         .scaledToFit()
                         .frame(width: size, height: size)
                         .background(
@@ -57,11 +54,5 @@ public struct SpendCircleImage: View {
         } else {
             CircularGradientView(gradientColors: [.primary.opacity(0.2)], size: size)
         }
-    }
-}
-
-public struct SpendCircleImage_Previews: PreviewProvider {
-    public static var previews: some View {
-        SpendCircleImage(Image(systemName: "person.badge.shield.checkmark.fill"))
     }
 }

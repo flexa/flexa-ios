@@ -57,10 +57,6 @@ struct NotificationsList: View {
     }
 }
 
-#Preview {
-    NotificationsList(viewModel: NotificationsList.ViewModel())
-}
-
 private extension NotificationsList {
     struct AppNotificationWrapper: Hashable, Identifiable {
         var notification: AppNotification

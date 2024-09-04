@@ -24,11 +24,13 @@ struct TransactionAmountView: View {
 
     let grayColor = Color(UIColor.systemGray3)
 
-    let gradientColors: [Color] = [
-        Color(hex: "#416E9B"),
-        Color(hex: "#417D9B"),
-        Color(hex: "#418C9B")
-    ]
+    var gradientColors: [Color] {
+        [
+            viewModel.brandColor.shiftingHue(by: -10),
+            viewModel.brandColor,
+            viewModel.brandColor.shiftingHue(by: 10)
+        ]
+    }
 
     init(viewModel: ViewModel, viewModelAsset: AssetSelectionViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -89,16 +91,18 @@ struct TransactionAmountView: View {
     }
 
     var amountLabel: some View {
-        HStack(spacing: 0) {
-            Text(viewModel.leftAmountText)
-                .lineLimit(1)
-                .font(.system(size: 78, weight: .semibold))
-                .foregroundStyle(linearGradient)
-            Text(viewModel.rightAmountText)
-                .lineLimit(1)
-                .font(.system(size: 78, weight: .semibold))
-                .foregroundStyle(grayColor)
+        Group {
+            Text(viewModel.leftAmountText + viewModel.rightAmountText)
+                .overlay {
+                    Text("\(viewModel.leftAmountText)\(Text(viewModel.rightAmountText).foregroundColor(.clear))")
+                        .foregroundStyle(linearGradient)
+                }
         }
+        .minimumScaleFactor(0.7)
+        .lineLimit(1)
+        .truncationMode(.middle)
+        .font(.system(size: 78, weight: .semibold))
+        .foregroundStyle(grayColor)
     }
 
     var linearGradient: LinearGradient {

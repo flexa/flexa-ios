@@ -101,7 +101,6 @@ public extension FlexaSpend {
         private var appAccounts: [FXAppAccount] = []
 
         fileprivate init() {
-            FlexaLogger.debug("==> FlexaSpend.Builder - init")
         }
 
         /// Selects the app account and assets to be used by default on future transactions

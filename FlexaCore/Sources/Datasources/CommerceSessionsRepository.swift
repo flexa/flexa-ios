@@ -41,15 +41,6 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
             sseClient.addListener(for: event.rawValue, handler: eventHandler)
         }
 
-        sseClient.onComplete = { status, shouldRetry, error in
-        }
-
-        sseClient.onOpen = {
-        }
-
-        sseClient.onMessage = { event in
-        }
-
         sseClient.connect(lastEventId: lastEventId)
     }
 
@@ -87,7 +78,6 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
             let eventType = event.eventType,
             let sseCommerceSessionEvent = SSECommerceSessionEvent(rawValue: eventType),
             let data = event.data else {
-            FlexaLogger.debug("Discarding \(event)")
             return
         }
 

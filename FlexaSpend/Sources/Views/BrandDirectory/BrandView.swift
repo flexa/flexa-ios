@@ -26,9 +26,3 @@ struct BrandView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {
     }
 }
-
-struct SwiftUIView_Previews: PreviewProvider {
-    static var previews: some View {
-        BrandView()
-    }
-}

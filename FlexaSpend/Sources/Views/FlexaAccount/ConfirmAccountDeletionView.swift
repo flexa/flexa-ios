@@ -115,7 +115,3 @@ struct ConfirmAccountDeletionView: View {
         .overlay(Divider().background(Color(UIColor.systemGray3)), alignment: .top)
     }
 }
-
-#Preview {
-    ConfirmAccountDeletionView(viewModel: ConfirmAccountDeletionView.ViewModel())
-}

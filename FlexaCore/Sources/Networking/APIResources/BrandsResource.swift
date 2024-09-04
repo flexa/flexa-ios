@@ -26,4 +26,8 @@ enum BrandsResource: FlexaAPIResource, JWTAuthenticable {
             return paginationParams(limit: limit, startingAfter: startingAfter, query: "-legacy_flexcodes:null")
         }
     }
+
+    func wrappingError(_ error: Error?, traceId: String?) -> Error? {
+        ReasonableError(reason: .cannotGetBrands(error))
+    }
 }

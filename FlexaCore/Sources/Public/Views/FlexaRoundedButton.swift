@@ -69,7 +69,3 @@ public struct FlexaRoundedButton: View {
         }.buttonStyle(PlainButtonStyle())
     }
 }
-
-#Preview {
-    FlexaRoundedButton(.close, buttonAction: {})
-}

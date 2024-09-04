@@ -25,6 +25,7 @@ protocol AuthStoreProtocol {
     func signIn(with email: String) async throws -> AuthStoreState
     func verify(code: String?, link: String?) async throws -> AuthStoreState
     func refreshToken() async throws -> AuthStoreState
+    func refreshTokenIfNeeded() async throws -> AuthStoreState
     func signOut()
     func purgeIfNeeded()
 }
@@ -100,6 +101,11 @@ final class AuthStore: AuthStoreProtocol {
     }
 
     func refreshToken() async throws -> AuthStoreState {
+        guard isSignedIn, token != nil else {
+            state = .none
+            return state
+        }
+
         let verifier = try pkceHelper.generateVerifier()
         let challenge = try pkceHelper.generateChallenge(for: verifier)
 
@@ -115,6 +121,14 @@ final class AuthStore: AuthStoreProtocol {
         return state
     }
 
+    func refreshTokenIfNeeded() async throws -> AuthStoreState {
+        if let token = tokenData.token, token.isActive, !token.isExpired {
+            state = .loggedIn
+            return state
+        }
+        return try await refreshToken()
+    }
+
     func signOut() {
         Task {
             if let tokenId = tokenData.token?.id {
@@ -126,6 +140,7 @@ final class AuthStore: AuthStoreProtocol {
             }
 
             tokenData = TokenData()
+            state = .none
             saveTokenData()
         }
     }

@@ -91,19 +91,11 @@ struct ScannerView: View {
             return
         }
 
-        UIApplication.shared.open(settingsUrl) { (success) in
-            FlexaLogger.debug("Settings opened: \(success)")
-        }
+        UIApplication.shared.open(settingsUrl)
     }
 
     private func dismiss() {
         presentationMode.wrappedValue.dismiss()
         UIViewController.topMostViewController?.dismiss(animated: true)
-    }
-}
-
-struct ScannerView_Previews: PreviewProvider {
-    static var previews: some View {
-        ScannerView()
     }
 }

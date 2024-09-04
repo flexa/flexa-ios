@@ -78,6 +78,10 @@ struct AssetWrapper: Identifiable {
         []
     }
 
+    var assetColor: Color? {
+        assetsHelper.color(for: self)
+    }
+
     init(appAccount: AppAccount, asset: AppAccountAsset) {
         self.appAccount = appAccount
         self.asset = asset

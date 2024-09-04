@@ -115,7 +115,3 @@ struct VerifyEmailView: View {
             .padding(.top, 170)
     }
 }
-
-#Preview {
-    VerifyEmailView(viewModel: VerifyEmailView.ViewModel(emailAddress: "john.doe@example.com"))
-}

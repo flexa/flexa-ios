@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FlexaLoad"
-  s.version      = "1.0.0"
+  s.version      = "1.0.1"
   s.summary      = "FlexaLoad"
   s.description  = "FlexaLoad module by Flexa"
   s.homepage     = "https://github.com/flexa/flexa-ios"

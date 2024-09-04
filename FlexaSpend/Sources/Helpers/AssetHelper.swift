@@ -6,6 +6,7 @@
 
 import UIKit
 import Factory
+import SwiftUI
 
 protocol AssetHelperProtocol {
     func assetWithKey(for asset: AssetWrapper) -> AppAccountAsset
@@ -13,6 +14,7 @@ protocol AssetHelperProtocol {
     func displayName(for: AssetWrapper) -> String
     func logoImageUrl(for: AssetWrapper) -> URL?
     func logoImage(for: AssetWrapper) -> UIImage?
+    func color(for asset: AssetWrapper) -> Color?
     func fxAccount(for: AssetWrapper) -> FXAppAccount?
     func fxAsset(_ asset: AssetWrapper) -> FXAvailableAsset?
 }
@@ -60,6 +62,10 @@ struct AssetHelper: AssetHelperProtocol {
 
     func displayName(for asset: AssetWrapper) -> String {
         fxAsset(asset)?.displayName ?? assetsRepository.assets.findBy(id: asset.assetId)?.displayName ?? ""
+    }
+
+    func color(for asset: AssetWrapper) -> Color? {
+        assetsRepository.assets.findBy(id: asset.assetId)?.color
     }
 
     func fxAccount(for asset: AssetWrapper) -> FlexaCore.FXAppAccount? {

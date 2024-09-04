@@ -11,7 +11,7 @@ import Factory
 import Foundation
 import UIKit
 
-enum TokensResource: FlexaAPIResource, PublishableKeyAuthenticable {
+enum TokensResource: FlexaAPIResource, PublishableKeyAuthenticable, LogExcludedProtocol {
     private static let idUrlParameter = ":id"
     private static let path = "/tokens"
 
@@ -74,6 +74,23 @@ enum TokensResource: FlexaAPIResource, PublishableKeyAuthenticable {
             return input.dictionary
         case .delete:
             return nil
+        }
+    }
+
+    var allowRetry: Bool {
+        false
+    }
+
+    func wrappingError(_ error: Error?, traceId: String?) -> Error? {
+        switch self {
+        case .create:
+            ReasonableError(reason: .cannotCreateToken(error))
+        case .verify:
+            ReasonableError(reason: .cannotVerifyToken(error))
+        case .refresh:
+            ReasonableError(reason: .cannotRefreshToken(error))
+        case .delete:
+            ReasonableError(reason: .cannotDeleteToken(error))
         }
     }
 }

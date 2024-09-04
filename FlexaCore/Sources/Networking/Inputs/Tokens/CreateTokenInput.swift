@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-struct CreateTokenInput: FlexaModelProtocol {
+struct CreateTokenInput: FlexaModelProtocol, LogExcludedProtocol {
     enum CodingKeys: String, CodingKey {
         case email, challenge
         case deviceId = "device_id"
@@ -17,9 +17,9 @@ struct CreateTokenInput: FlexaModelProtocol {
     }
 
     var email: String
-    var challenge: String
     var deviceId: String
     var deviceModel: String
+    var challenge: String
 
     init(email: String,
          challenge: String,
@@ -29,5 +29,12 @@ struct CreateTokenInput: FlexaModelProtocol {
         self.challenge = challenge
         self.deviceId = deviceId
         self.deviceModel = deviceModel
+    }
+
+    static func == (lhs: CreateTokenInput, rhs: CreateTokenInput) -> Bool {
+        lhs.email == rhs.email &&
+        lhs.deviceId == rhs.deviceId &&
+        lhs.deviceModel == rhs.deviceModel &&
+        lhs.challenge == rhs.challenge
     }
 }

@@ -50,7 +50,6 @@ class AssetsRepository: AssetsRepositoryProtocol {
     }
 
     func backgroundRefresh() {
-        FlexaLogger.debug("Refreshing Assets")
         Task {
             do {
                 let assets = try await refresh()

@@ -88,12 +88,6 @@ struct SpendMessageView: View {
     }
 }
 
-struct SpendMessageView_Previews: PreviewProvider {
-    static var previews: some View {
-        SpendMessageView("title", "description", "button", closeAction: {}, buttonAction: {})
-    }
-}
-
 // MARK: Theming
 private extension SpendMessageView {
     var cornerRadius: CGFloat {

@@ -75,7 +75,21 @@ struct NotificationView: View {
         ZStack {
             if let iconUrl = notification.iconUrl {
                 if isSvgLogo {
-                    RemoteSvgView(url: iconUrl)
+                    RemoteSvgView(
+                        url: iconUrl,
+                        content: { view in
+                            AnyView(view)
+                        },
+                        placeholder: { failed in
+                            if !failed {
+                                ProgressView()
+                            } else {
+                                RoundedRectangle(cornerSize: CGSize(width: 8, height: 8))
+                                    .fill(.gray)
+                                    .frame(width: 36, height: 36)
+                            }
+                        }
+                    )
                 } else {
                     RemoteImageView(
                         url: iconUrl,

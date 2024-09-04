@@ -85,7 +85,3 @@ struct DeleteAccountView: View {
         }
     }
 }
-
-#Preview {
-    DeleteAccountView(viewModel: DeleteAccountView.ViewModel())
-}

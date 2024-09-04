@@ -7,11 +7,12 @@
 //
 
 import Foundation
+import SwiftUI
 
 public protocol Asset {
     var id: String { get }
     var symbol: String { get }
-    var colorString: String? { get }
+    var color: Color? { get }
     var iconUrl: URL? { get }
     var displayName: String { get }
     var livemode: Bool { get }

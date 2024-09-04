@@ -1,7 +1,9 @@
 //
 //  AssetsNavigationView.swift
+//  FlexaSpend
 //
-//  Created by Marcelo Korjenioski on 24/08/23.
+//  Created by Marcelo Korjenioski on 8/24/23.
+//  Copyright © 2022 Flexa. All rights reserved.
 //
 
 import Foundation
@@ -38,14 +40,6 @@ public struct AssetsNavigationView: View {
                 }, label: {
                     Text(L10n.Payment.done)
                         .foregroundColor(Color.purple)
-                })
-            )
-            .navigationBarItems(leading:
-                Button(action: {
-                    showAssetsModal = false
-                }, label: {
-                    Image(systemName: "ellipsis.circle.fill")
-                        .foregroundColor(Color.secondary.opacity(0.4))
                 })
             )
         }

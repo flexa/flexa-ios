@@ -25,7 +25,7 @@ class TokensRepository: TokensRepositoryProtocol {
     @Injected(\.networkClient) var networkClient
 
     func create(email: String, challenge: String) async throws -> Models.Token {
-        try await networkClient.sendRequest(
+        try await sendRequest(
             resource: TokensResource.create(
                 CreateTokenInput(email: email, challenge: challenge)
             )
@@ -48,11 +48,11 @@ class TokensRepository: TokensRepositoryProtocol {
             )
 
         )
-        return try await networkClient.sendRequest(resource: resource)
+        return try await sendRequest(resource: resource)
     }
 
     func delete(tokenId: String) async throws {
-        try await networkClient.sendRequest(resource: TokensResource.delete(tokenId))
+        try await sendRequest(resource: TokensResource.delete(tokenId))
     }
 
     func refresh(tokenId: String, verifier: String, challenge: String) async throws -> Models.Token {
@@ -63,6 +63,22 @@ class TokensRepository: TokensRepositoryProtocol {
                 challenge: challenge
             )
         )
-        return try await networkClient.sendRequest(resource: resource)
+        return try await sendRequest(resource: resource)
+    }
+
+    private func sendRequest(resource: TokensResource) async throws {
+        do {
+            try await networkClient.sendRequest(resource: resource)
+        } catch let error {
+            throw resource.wrappingError(error) ?? error
+        }
+    }
+
+    private func sendRequest<T: Decodable>(resource: TokensResource) async throws -> T {
+        do {
+            return try await networkClient.sendRequest(resource: resource)
+        } catch let error {
+            throw resource.wrappingError(error) ?? error
+        }
     }
 }

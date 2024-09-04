@@ -9,7 +9,12 @@
 import Foundation
 import UIKit
 
-struct RefreshTokenInput: FlexaModelProtocol {
-    let verifier: String
-    let challenge: String
+struct RefreshTokenInput: FlexaModelProtocol, LogExcludedProtocol {
+    var verifier: String
+    var challenge: String
+
+    static func == (lhs: RefreshTokenInput, rhs: RefreshTokenInput) -> Bool {
+        lhs.verifier == rhs.verifier &&
+        lhs.challenge == rhs.challenge
+    }
 }

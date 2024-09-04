@@ -53,13 +53,3 @@ public struct SpendButton: View {
         .cornerRadius(16)
     }
 }
-
-struct SpendButton_Previews: PreviewProvider {
-    static var previews: some View {
-        let theme = SpendButton.Theme(buttonFill: .black,
-                                    buttonText: .white,
-                                    buttonDisabledFill: .gray,
-                                    buttonDisabledText: .white)
-        SpendButton("Button 1", buttonAction: {}, theme: theme)
-    }
-}

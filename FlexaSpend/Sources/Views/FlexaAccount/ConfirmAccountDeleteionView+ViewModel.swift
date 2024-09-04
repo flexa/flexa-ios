@@ -22,7 +22,7 @@ extension ConfirmAccountDeletionView {
             if let url = URL(string: "message://"), UIApplication.shared.canOpenURL(url) {
                 UIApplication.shared.open(url)
             } else {
-                FlexaLogger.debug("Cannot open mail app")
+                FlexaLogger.error("Cannot open mail app")
             }
         }
     }

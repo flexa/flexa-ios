@@ -138,7 +138,3 @@ struct AccountView: View {
         }.frame(maxWidth: .infinity)
     }
 }
-
-#Preview {
-    AccountView(viewModel: AccountView.ViewModel())
-}

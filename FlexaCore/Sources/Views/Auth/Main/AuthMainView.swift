@@ -258,10 +258,6 @@ struct AuthMainView: View {
     }
 }
 
-#Preview {
-    AuthMainView()
-}
-
 extension CGFloat {
     static let mainSpacing: CGFloat = 30
     static let defaultPadding: CGFloat = 26

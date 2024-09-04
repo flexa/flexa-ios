@@ -10,4 +10,9 @@ import Foundation
 
 struct RefreshAppAccountsOutput: FlexaModelProtocol {
     let data: [Models.AppAccount]
+
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.data = try container.decodeIfPresent([Models.AppAccount].self, forKey: .data) ?? []
+    }
 }

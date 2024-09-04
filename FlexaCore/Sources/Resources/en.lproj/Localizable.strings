@@ -1,9 +1,22 @@
-// Auth main
+// Global
 "global.ok" = "OK";
 "global.back" = "Back";
 
-// Privacy
+// Log
+"log.hidden.text" = "[hidden value]";
 
+// Errors
+"errors.unknown.title" = "Error";
+"errors.unknown.message" = "Unknown error occured.";
+"errors.unknown.title" = "An error has occurred";
+"errors.invalid_value.title" = "Invalid value";
+"errors.invalid_value.message" = "Invalid value.";
+"errors.unimplemented.title" = "Soon";
+"errors.unimplemented.message" = "This feature is not available yet.";
+"errors.default.title" = "Something went wrong.";
+"errors.default.message" = "We’re sorry, we encountered a problem while connecting to Flexa. You can submit a report to help us fix the problem, or simply try again later.";
+
+// Privacy
 "auth.privacy.alerts.about.title" = "Email Address Privacy";
 "auth.privacy.alerts.about.message" = "Flexa uses your email address to sign you in and send you receipts for your payments. Your email address is never shared with %s or any other business.";
 

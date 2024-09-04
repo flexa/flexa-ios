@@ -48,7 +48,7 @@ public final class FlexaIdentity {
         Task {
             var status = ConnectResult.notConnected(nil)
             do {
-                switch try await authStore?.refreshToken() {
+                switch try await authStore?.refreshTokenIfNeeded() {
                 case .loggedIn:
                     status = .connected
                 default:

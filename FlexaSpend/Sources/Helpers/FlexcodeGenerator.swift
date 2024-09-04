@@ -23,14 +23,17 @@ struct Flexcode {
 }
 
 protocol FlexcodeGeneratorProtocol {
-    func flexcode(for: AppAccountAsset, type: FlexcodeSymbology, scale: CGFloat) -> Flexcode?
-    func flexcode(for: AppAccountAsset, types: [FlexcodeSymbology], scale: CGFloat) -> [FlexcodeSymbology: Flexcode]
-    func createImageCode(from code: String, type: FlexcodeSymbology, scale: CGFloat) -> UIImage?
+    func flexcodes(for: AppAccountAsset, types: [FlexcodeSymbology], scale: CGFloat) -> [FlexcodeSymbology: Flexcode]
+    func flexcodes(forCode: String, types: [FlexcodeSymbology], scale: CGFloat) -> [FlexcodeSymbology: Flexcode]
 }
 
 extension FlexcodeGeneratorProtocol {
-    func flexcode(for asset: AppAccountAsset, type: FlexcodeSymbology) -> Flexcode? {
-        flexcode(for: asset, type: type, scale: 1)
+    func flexcodes(for asset: AppAccountAsset) -> [FlexcodeSymbology: Flexcode] {
+        flexcodes(for: asset, types: [.pdf417, .code128], scale: 5)
+    }
+
+    func flexcodes(forCode code: String) -> [FlexcodeSymbology: Flexcode] {
+        flexcodes(forCode: code, types: [.pdf417, .code128], scale: 5)
     }
 }
 
@@ -60,7 +63,7 @@ struct FlexcodeGenerator: FlexcodeGeneratorProtocol {
         return Flexcode(code: code, image: image)
     }
 
-    func flexcode(for asset: AppAccountAsset, types: [FlexcodeSymbology], scale: CGFloat) -> [FlexcodeSymbology: Flexcode] {
+    func flexcodes(for asset: AppAccountAsset, types: [FlexcodeSymbology], scale: CGFloat) -> [FlexcodeSymbology: Flexcode] {
         types.reduce([FlexcodeSymbology: Flexcode]()) { partialResult, type in
             guard let flexcode = flexcode(for: asset, type: type, scale: scale) else {
                 return partialResult
@@ -69,6 +72,16 @@ struct FlexcodeGenerator: FlexcodeGeneratorProtocol {
             dictionary[type] = flexcode
             return dictionary
         }
+    }
+
+    func flexcodes(forCode code: String, types: [FlexcodeSymbology], scale: CGFloat) -> [FlexcodeSymbology: Flexcode] {
+        types
+            .reduce(into: [FlexcodeSymbology: Flexcode]()) {
+                $0[$1] = Flexcode(
+                    code: code,
+                    image: createImageCode(from: code, type: $1, scale: scale)
+                )
+            }
     }
 
     func createImageCode(from code: String, type: FlexcodeSymbology, scale: CGFloat) -> UIImage? {
@@ -103,6 +116,8 @@ struct FlexcodeGenerator: FlexcodeGeneratorProtocol {
             return filter
         case .pdf417:
             let filter = CIFilter.pdf417BarcodeGenerator()
+            filter.compactStyle = 1
+            filter.dataColumns = 1
             filter.message = data
             return filter
         case .qr:

@@ -111,14 +111,12 @@ struct SpendView: View {
 
     private var flexcodeCarousel: some View {
         let width = UIScreen.main.bounds.width - 2 * padding
-        // Flexcode padding, flexcode svg aspect ratio, vertical spacing
-        let height = width - 2 * (mainTheme.containers.content.padding ?? 0) * 0.73 + 10
         return SpendSnapCarousel(
             items: viewModel.flexCodes,
             selectedIndex: $selectedAssetIndex,
             itemSize: CGSize(
                 width: width,
-                height: height),
+                height: 300),
             spacing: 10,
             horizontalPadding: padding
         ) { code in
@@ -302,20 +300,21 @@ private extension SpendView {
             }
     }
 
+    @ViewBuilder
     var legacyFlexcodeCard: some View {
-        LegacyFlexcodeModal(isShowing: $viewModel.showLegacyFlexcode,
-                            viewModel: viewModel,
-                            value: viewModel.amountLabel,
-                            brand: selectedBrand,
-                            didConfirm: {
-            FlexaLogger.debug("didConfirm")
-        }, didCancel: {
-            FlexaLogger.debug("Legacy Payment Card canceled")
-            viewModel.clear()
-        }).zIndex(1)
+        if let authorization = viewModel.commerceSession?.authorization {
+            LegacyFlexcodeModal(isShowing: $viewModel.showLegacyFlexcode,
+                                authorization: authorization,
+                                value: viewModel.amountLabel,
+                                brand: selectedBrand,
+                                didConfirm: { },
+                                didCancel: { viewModel.clear() })
+            .zIndex(1)
+        }
     }
 
-    @ViewBuilder var paymentCard: some View {
+    @ViewBuilder
+    var paymentCard: some View {
         if let selectedAsset = viewModel.selectedAsset {
             PayNowModal(isShowing: $viewModel.showPaymentModal,
                         value: viewModel.amountLabel,
@@ -331,7 +330,6 @@ private extension SpendView {
                         didConfirm: {
                 viewModel.signAndSend()
             }, didCancel: {
-                FlexaLogger.debug("PayNowModal canceled")
                 viewModel.clear()
             }, didSelect: {
                 viewModel.viewModelAsset.showSelectedAssetDetail = false

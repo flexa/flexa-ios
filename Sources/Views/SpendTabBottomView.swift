@@ -55,16 +55,3 @@ struct TabItemView: View {
 struct TabItemData {
     let title: String
 }
-
-struct SpendTabBottomView_Previews: PreviewProvider {
-
-    static var previews: some View {
-        SpendTabBottomView(
-            tabbarItems: [
-                TabItemData(title: "Scan"),
-                TabItemData(title: "Load"),
-                TabItemData(title: "Pay")
-            ],
-            selectedIndex: .constant(0))
-    }
-}

@@ -102,7 +102,3 @@ struct MagicCodeView: View {
             }
     }
 }
-
-#Preview {
-    MagicCodeView(viewModel: MagicCodeView.ViewModel())
-}

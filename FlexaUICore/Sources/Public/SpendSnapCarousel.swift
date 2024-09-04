@@ -56,32 +56,3 @@ public struct SpendSnapCarousel<Content: View, T: Identifiable & Hashable>: View
         .padding(.horizontal, horizontalPadding - spacing / 2)
     }
 }
-
-struct SpendSnapCarousel_Previews: PreviewProvider {
-    private struct SnapCarouselItem: Identifiable, Hashable {
-        var id = UUID().uuidString
-        var color: Color = .red
-    }
-
-    @State static var index: Int = 0
-
-    static var previews: some View {
-
-        let items = [Color.red, Color.black, Color.yellow, Color.green, Color.pink].map { SnapCarouselItem(color: $0) }
-        ZStack {
-            SpendSnapCarousel(
-                items: items,
-                selectedIndex: $index,
-                itemSize: CGSize(width: 200, height: 200),
-                spacing: 10,
-                horizontalPadding: 16) { item in
-                Image(systemName: "figure.wave")
-                    .resizable()
-                    .foregroundColor(item.color)
-                    .aspectRatio(contentMode: .fit)
-                    .border(.green)
-
-            }.padding(.top, 80)
-        }.frame(width: 428, height: 926)
-    }
-}
