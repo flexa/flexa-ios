@@ -56,6 +56,7 @@ class AppStateManager: AppStateManagerProtocol {
     }
 
     func refresh() {
+        refreshAccessToken(force: true)
         startTimer()
         guard authStore.isSignedIn else {
             return
@@ -121,19 +122,17 @@ private extension AppStateManager {
         timer = nil
     }
 
-    func refreshAccessToken() {
-        guard shouldRefreshAccessToken else {
-            return
-        }
-
-        Task {
-            do {
-                _ = try await authStore.refreshToken()
-            } catch let error {
-                if error.isUnauthorized {
-                    flexaNotificationCenter.post(name: .flexaAuthorizationError, object: nil)
+    func refreshAccessToken(force: Bool = false) {
+        if shouldRefreshAccessToken || force {
+            Task {
+                do {
+                    _ = try await authStore.refreshToken()
+                } catch let error {
+                    if error.isUnauthorized {
+                        flexaNotificationCenter.post(name: .flexaAuthorizationError, object: nil)
+                    }
+                    FlexaLogger.error(error)
                 }
-                FlexaLogger.error(error)
             }
         }
     }

@@ -26,4 +26,8 @@ enum AssetConverterResource: FlexaAPIResource, JWTAuthenticable {
             return input.dictionary
         }
     }
+
+    func wrappingError(_ error: Error?, traceId: String?) -> Error? {
+        ReasonableError(reason: .cannotConvertAsset(error))
+    }
 }

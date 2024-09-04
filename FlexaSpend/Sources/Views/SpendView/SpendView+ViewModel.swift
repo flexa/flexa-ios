@@ -147,13 +147,6 @@ extension SpendView {
             commerceSession?.requestedTransaction != nil
         }
 
-        var legacyFlexcode: UIImage? {
-            guard let number = commerceSession?.authorization?.number else {
-                return nil
-            }
-            return flexcodeGenerator.createImageCode(from: number, type: .pdf417, scale: 5)
-        }
-
         required init(signTransaction: ((Result<FXTransaction, Error>) -> Void)?) {
             self.signTransaction = signTransaction
 

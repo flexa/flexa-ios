@@ -23,4 +23,8 @@ enum AssetsResource: FlexaAPIResource, JWTAuthenticable {
             return paginationParams(limit: limit, startingAfter: startingAfter)
         }
     }
+
+    func wrappingError(_ error: Error?, traceId: String?) -> Error? {
+        ReasonableError(reason: .cannotGetAssets(error))
+    }
 }

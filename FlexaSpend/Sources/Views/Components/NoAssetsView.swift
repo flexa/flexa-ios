@@ -72,12 +72,6 @@ struct NoAssetsView: View {
     }
 }
 
-struct NoAssetsView_Previews: PreviewProvider {
-    static var previews: some View {
-        NoAssetsView(NoAssetsView.ViewModel([]))
-    }
-}
-
 // MARK: Theming
 private extension NoAssetsView {
     var cornerRadius: CGFloat {

@@ -18,7 +18,7 @@ class FlexaNetworkService: Networkable {
         let (_, _, error) = await sendRequest(resource: resource) as (Data?, HTTPURLResponse?, Error?)
 
         if let error {
-            throw error
+            throw wrapError(error, resource: resource) ?? error
         }
     }
 
@@ -29,11 +29,12 @@ class FlexaNetworkService: Networkable {
         (object, _, error) = await sendRequest(resource: resource)
 
         if let error {
-            throw error
+            throw wrapError(error, resource: resource) ?? error
         }
 
         guard let object else {
-            throw NetworkError.decode(nil)
+            let error = NetworkError.decode(nil)
+            throw wrapError(error, resource: resource) ?? error
         }
 
         return object
@@ -61,19 +62,30 @@ class FlexaNetworkService: Networkable {
         }
 
         guard refreshTokenOnFailure else {
-            return (nil, nil, error)
+            return (nil, nil, wrapError(error, resource: resource))
         }
 
         return await refreshAndRetry(resource: resource, error: error)
     }
 
     func refreshAndRetry<T>(resource: APIResource, error: Error) async -> ResponseTuple<T> {
+        var resourceAllowRetry: Bool {
+            guard let flexaApiResource = resource as? FlexaAPIResource else {
+                return true
+            }
+            return flexaApiResource.allowRetry
+        }
+
+        guard resourceAllowRetry else {
+            return (nil, nil, wrapError(error, resource: resource))
+        }
+
         if let token = authStore.token, token.isExpired {
             return await refreshTokenAndSendRequest(resource: resource, error: error)
         } else if error.shouldRetry {
             return await refreshTokenAndSendRequest(resource: resource, error: error)
         } else {
-            return (nil, nil, error)
+            return (nil, nil, wrapError(error, resource: resource))
         }
     }
 
@@ -90,6 +102,13 @@ class FlexaNetworkService: Networkable {
             return (nil, nil, NetworkError.unauthorizedError(for: resource))
         }
     }
+
+    private func wrapError(_ error: Error?, resource: APIResource) -> Error? {
+        guard let flexaResource = resource as? FlexaAPIResource else {
+            return error
+        }
+        return flexaResource.wrappingError(error)
+    }
 }
 
 private extension Error {
@@ -98,5 +117,20 @@ private extension Error {
             return false
         }
         return error.isForbidden || error.isUnauthorized || error.isNotFound
+    }
+}
+
+private extension NetworkError {
+    var traceId: String? {
+        switch self {
+        case .custom(_, let request),
+                .invalidResponse(let request),
+                .missingData(let request),
+                .invalidStatus(_, _, let request),
+                .unknown(let request):
+            return request?.value(forHTTPHeaderField: "Client-Trace-Id")
+        default:
+            return nil
+        }
     }
 }

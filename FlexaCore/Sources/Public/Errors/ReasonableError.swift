@@ -53,58 +53,68 @@ public struct ReasonableError: Error, LocalizedError {
 }
 
 // MARK: Reason
-extension ReasonableError {
+public extension ReasonableError {
+    private typealias Strings = CoreStrings.Errors
+
     enum Reason {
         case unknown
         case invalidValue
         case custom(Error)
-        case missingMerchant(String)
         case customMessage(String, String)
         case uninplemented
-
-        private static let errorSeparator: Character = "\n"
+        case networkError(Error?)
+        case cannotCreateAccount(Error?)
+        case cannotGetAccount(Error?)
+        case cannotDeleteAccount(Error?)
+        case cannotSyncAppAccounts(Error?)
+        case cannotDeleteAppNotification(Error?)
+        case cannotConvertAsset(Error?)
+        case cannotGetAssets(Error?)
+        case cannotGetBrands(Error?)
+        case cannotSignTransaction(Error?)
+        case cannotCreateCommerceSession(Error?)
+        case cannotWatchSession(Error?)
+        case cannotCloseCommerceSession(Error?)
+        case cannotSetCommerceSessionPaymentAsset(Error?)
+        case cannotCreateToken(Error?)
+        case cannotVerifyToken(Error?)
+        case cannotRefreshToken(Error?)
+        case cannotDeleteToken(Error?)
 
         var title: String? {
             switch self {
             case .unknown:
-                return "Error"
+                return Strings.Unknown.title
             case .invalidValue:
-                return "Invalid value"
-            case .custom:
-                return "An error has occurred"
-            case .missingMerchant:
-                return "Merchant not found"
+                return Strings.InvalidValue.title
             case .customMessage(let title, _):
                 return title
             case .uninplemented:
-                return "Soon"
+                return Strings.Unimplemented.title
+            default:
+                return Strings.Default.title
             }
         }
 
         var message: String? {
             switch self {
             case .unknown:
-                return "Unknown error"
+                return Strings.Unknown.message
             case .invalidValue:
-                return "Invalid value"
+                return Strings.InvalidValue.message
             case .custom(let error):
                 return error.localizedDescription
-            case .missingMerchant:
-                return "Missing merchant"
             case .customMessage(_, let message):
                 return message
             case .uninplemented:
-                return "This feature is not available yet"
+                return Strings.Unimplemented.message
+            default:
+                return Strings.Default.message
             }
         }
 
         var debugMessage: String? {
-            switch self {
-                case .missingMerchant:
-                    return "Missing merchant"
-                default:
-                    return nil
-            }
+            nil
         }
 
         var code: Int {
@@ -150,8 +160,8 @@ extension ReasonableError {
         return reasonableError
     }
 
-    public static func missingMerchant(id: String) -> ReasonableError {
-        return ReasonableError(reason: .missingMerchant(id))
+    public static func withReason(_ reason: Reason, traceId: String? = nil) -> ReasonableError {
+        return ReasonableError(reason: reason, traceId: traceId)
     }
 
     public static let unknown = ReasonableError(reason: .unknown)

@@ -18,7 +18,7 @@ import FlexaNetworking
 final class FlexaNetworkServiceTests: AsyncSpec {
     override class func spec() {
         let resource = TestAPIResource()
-        var error = NetworkError.unknown
+        var error = NetworkError.unknown(nil)
         let faker = Faker()
         var responseTuple: FlexaNetworkService.ResponseTuple<String> = (nil, nil, nil)
 
@@ -88,7 +88,7 @@ final class FlexaNetworkServiceTests: AsyncSpec {
             Container.shared.networkClient.register { MockNetworkService() }
             beforeEach {
                 responseTuple = (nil, nil, nil)
-                error = .unknown
+                error = .unknown(nil)
             }
 
             context("token is already expired") {
@@ -362,7 +362,7 @@ final class FlexaNetworkServiceTests: AsyncSpec {
                     context("error is not meant to retry the request") {
                         beforeEach {
                             subject = ObserveRefreshTokenAndSendRequestNetworkService()
-                            error = .unknown
+                            error = .unknown(nil)
                             responseTuple = await subject.refreshAndRetry(resource: resource, error: error)
                         }
 
@@ -431,7 +431,7 @@ final class FlexaNetworkServiceTests: AsyncSpec {
 
                 context("error is not meant to retry the request") {
                     beforeEach {
-                        error = .unknown
+                        error = .unknown(nil)
                         responseTuple = await subject.refreshAndRetry(resource: resource, error: error)
                     }
 
@@ -570,6 +570,10 @@ private class TestAuthStore: AuthStoreProtocol {
         return state
     }
 
+    func refreshTokenIfNeeded() async throws -> FlexaCore.AuthStoreState {
+        try await refreshToken()
+    }
+
     func signOut() {
 
     }
@@ -682,7 +686,7 @@ extension NetworkError: Equatable {
         switch (lhs, rhs) {
         case (.unknown, .unknown):
             return true
-        case(.invalidStatus(let lhsStatus, _), .invalidStatus(let rhsStatus, _)):
+        case(.invalidStatus(let lhsStatus, _, _), .invalidStatus(let rhsStatus, _, _)):
             return lhsStatus == rhsStatus
         case(.decode(let lhsError), .decode(let rhsError)):
             return lhsError?.localizedDescription == rhsError?.localizedDescription

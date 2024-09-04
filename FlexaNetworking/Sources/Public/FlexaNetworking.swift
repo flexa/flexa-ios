@@ -10,13 +10,13 @@ import Foundation
 import WebKit
 
 public enum NetworkError: Error {
-    case custom(_ error: Error)
+    case custom(_ error: Error, URLRequest?)
     case decode(_ error: Error?)
     case invalidRequest
-    case invalidResponse
-    case missingData
-    case invalidStatus(status: Int, resource: APIResource)
-    case unknown
+    case invalidResponse(URLRequest?)
+    case missingData(URLRequest?)
+    case invalidStatus(status: Int, resource: APIResource, request: URLRequest?)
+    case unknown(URLRequest?)
 
     static let unauthorizedStatusCode = 401
     static let notFoundStatusCode = 404
@@ -35,11 +35,11 @@ public enum NetworkError: Error {
     }
 
     public static func unauthorizedError(for resource: APIResource) -> NetworkError {
-        .invalidStatus(status: unauthorizedStatusCode, resource: resource)
+        .invalidStatus(status: unauthorizedStatusCode, resource: resource, request: nil)
     }
 
     private func isStatusCode(_ statusCode: Int) -> Bool {
-        if case .invalidStatus(let status, _) = self, status == statusCode {
+        if case .invalidStatus(let status, _, _) = self, status == statusCode {
             return true
         }
         return false

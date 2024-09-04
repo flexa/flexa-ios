@@ -45,7 +45,11 @@ extension MerchantSorter {
                             .scaledToFit()
                             .padding(.leading, 6)
                     },
-                    placeholder: {}
+                    placeholder: {
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color.gray)
+                            .frame(width: 30, height: 30)
+                    }
                 )
 
                 Text(brand.name).font(.body)
@@ -57,7 +61,6 @@ extension MerchantSorter {
                         .foregroundColor(Color(UIColor.quaternaryLabel))
                 }
             }
-            .listRowBackground(Asset.messageBackground.swiftUIColor)
         }
     }
 }

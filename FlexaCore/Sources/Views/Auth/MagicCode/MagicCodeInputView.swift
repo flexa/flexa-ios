@@ -41,11 +41,11 @@ final class MagicCodeInputUIView: UIControl {
     private var tapRecognizer: UITapGestureRecognizer!
 
     private var labelBackgroundColor: UIColor {
-        isEnabled ? .white : .clear
+        isEnabled ? .tertiarySystemBackground : .clear
     }
 
     private var labelBorderButtonColor: UIColor {
-        isEnabled ? .white : .gray
+        isEnabled ? .tertiarySystemBackground : .gray
     }
 
     weak var delegate: MagicCodeInputUIViewDelegate?

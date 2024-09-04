@@ -61,6 +61,10 @@ public extension FlexaModelProtocol {
     func jsonString(encoding: String.Encoding = .utf8) throws -> String? {
         return String(data: try self.jsonData(), encoding: encoding)
     }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(self)
+    }
 }
 
 extension Array: FlexaModelProtocol where Iterator.Element: FlexaModelProtocol {

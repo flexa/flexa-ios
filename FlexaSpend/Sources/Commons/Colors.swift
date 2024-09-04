@@ -67,7 +67,7 @@ internal final class ColorAsset {
   #if os(iOS) || os(tvOS)
   @available(iOS 11.0, tvOS 11.0, *)
   internal func color(compatibleWith traitCollection: UITraitCollection) -> Color {
-    let bundle = Bundle.paymentBundle.colorsBundle
+    let bundle = Bundle.spendBundle.colorsBundle
     guard let color = Color(named: name, in: bundle, compatibleWith: traitCollection) else {
       fatalError("Unable to load color asset named \(name).")
     }
@@ -90,7 +90,7 @@ internal final class ColorAsset {
 internal extension ColorAsset.Color {
   @available(iOS 11.0, tvOS 11.0, watchOS 4.0, macOS 10.13, *)
   convenience init?(asset: ColorAsset) {
-    let bundle = Bundle.paymentBundle.colorsBundle
+    let bundle = Bundle.spendBundle.colorsBundle
     #if os(iOS) || os(tvOS)
     self.init(named: asset.name, in: bundle, compatibleWith: nil)
     #elseif os(macOS)
@@ -105,7 +105,7 @@ internal extension ColorAsset.Color {
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
 internal extension SwiftUI.Color {
   init(asset: ColorAsset) {
-    let bundle = Bundle.paymentBundle.colorsBundle
+    let bundle = Bundle.spendBundle.colorsBundle
     self.init(asset.name, bundle: bundle)
   }
 }

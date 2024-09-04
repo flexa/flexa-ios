@@ -164,7 +164,7 @@ final class SSEClientTests: QuickSpec {
                 subject.connect(lastEventId: nil)
 
                 let dataTask = MockDataTask(response: nil)
-                let networkError = NetworkError.unknown
+                let networkError = NetworkError.unknown(nil)
                 subject.urlSession(subject.urlSession!, task: dataTask, didCompleteWithError: networkError)
 
                 it("calls onComplete") {

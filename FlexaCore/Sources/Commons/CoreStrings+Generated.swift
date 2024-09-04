@@ -183,11 +183,43 @@ internal enum CoreStrings {
       }
     }
   }
+  internal enum Errors {
+    internal enum Default {
+      /// We’re sorry, we encountered a problem while connecting to Flexa. You can submit a report to help us fix the problem, or simply try again later.
+      internal static let message = CoreStrings.tr("Localizable", "errors.default.message", fallback: "We’re sorry, we encountered a problem while connecting to Flexa. You can submit a report to help us fix the problem, or simply try again later.")
+      /// Something went wrong.
+      internal static let title = CoreStrings.tr("Localizable", "errors.default.title", fallback: "Something went wrong.")
+    }
+    internal enum InvalidValue {
+      /// Invalid value.
+      internal static let message = CoreStrings.tr("Localizable", "errors.invalid_value.message", fallback: "Invalid value.")
+      /// Invalid value
+      internal static let title = CoreStrings.tr("Localizable", "errors.invalid_value.title", fallback: "Invalid value")
+    }
+    internal enum Unimplemented {
+      /// This feature is not available yet.
+      internal static let message = CoreStrings.tr("Localizable", "errors.unimplemented.message", fallback: "This feature is not available yet.")
+      /// Soon
+      internal static let title = CoreStrings.tr("Localizable", "errors.unimplemented.title", fallback: "Soon")
+    }
+    internal enum Unknown {
+      /// Unknown error occured.
+      internal static let message = CoreStrings.tr("Localizable", "errors.unknown.message", fallback: "Unknown error occured.")
+      /// An error has occurred
+      internal static let title = CoreStrings.tr("Localizable", "errors.unknown.title", fallback: "An error has occurred")
+    }
+  }
   internal enum Global {
     /// Back
     internal static let back = CoreStrings.tr("Localizable", "global.back", fallback: "Back")
     /// OK
     internal static let ok = CoreStrings.tr("Localizable", "global.ok", fallback: "OK")
+  }
+  internal enum Log {
+    internal enum Hidden {
+      /// [hidden value]
+      internal static let text = CoreStrings.tr("Localizable", "log.hidden.text", fallback: "[hidden value]")
+    }
   }
 }
 // swiftlint:enable explicit_type_interface function_parameter_count identifier_name line_length

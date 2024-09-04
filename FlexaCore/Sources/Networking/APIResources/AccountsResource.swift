@@ -52,4 +52,24 @@ enum AccountsResource: FlexaAPIResource, Authenticable {
             return nil
         }
     }
+
+    var allowRetry: Bool {
+        switch self {
+        case .create:
+            return false
+        default:
+            return true
+        }
+    }
+
+    func wrappingError(_ error: Error?, traceId: String?) -> Error? {
+        switch self {
+        case .create:
+            return ReasonableError.withReason(.cannotCreateAccount(error))
+        case .get:
+            return ReasonableError.withReason(.cannotGetAccount(error))
+        case .delete:
+            return ReasonableError.withReason(.cannotDeleteAccount(error))
+        }
+    }
 }

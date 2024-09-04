@@ -8,6 +8,7 @@
 
 import Foundation
 import Factory
+import SwiftUI
 
 extension TransactionAmountView.ViewModel {
     enum KeyType: RawRepresentable {
@@ -56,6 +57,7 @@ extension TransactionAmountView {
 
         @Injected(\.commerceSessionRepository) var commerceSessionRepository
         @Injected(\.assetConfig) var assetConfig
+        private var digitsAdded = false
 
         let usdAssetId = "iso4217/USD"
         let locale = Locale(identifier: "en-US")
@@ -65,6 +67,10 @@ extension TransactionAmountView {
 
         var brandLogoUrl: URL? {
             brand?.logoUrl
+        }
+
+        var brandColor: Color {
+            brand?.color ?? .purple
         }
 
         var decimalSeparator: Character {
@@ -85,7 +91,11 @@ extension TransactionAmountView {
 
         var leftAmountText: String {
             guard let amount = amountText.decimalValue, amount > 0 else {
-                return amountText.contains(decimalSeparator) ? "$0." : ""
+                if amountText.contains(decimalSeparator) {
+                    return "$0."
+                } else {
+                    return digitsAdded ? "$0" : ""
+                }
             }
 
             let split = amountText.split(separator: decimalSeparator)
@@ -201,10 +211,11 @@ extension TransactionAmountView {
             var amount = amountText.digitsAndSeparator ?? ""
             switch key {
             case .digit(let digit):
+                digitsAdded = true
                 let split = amount.split(separator: decimalSeparator)
 
                 if digit == String(decimalSeparator) && split.count < 2 ||
-                    split.count < 2 && amount.count < 6 ||
+                    split.count < 2 && amount.count < 10 ||
                     split.count > 1 && String(split[1]).count < 2 ||
                     split.count == 1 && amount.contains(decimalSeparator) {
                     amount += digit
@@ -213,6 +224,8 @@ extension TransactionAmountView {
                 if !amount.isEmpty {
                     amount = String(amount.dropLast())
                 }
+                showMaximumAmountMessage = false
+                digitsAdded = (amount.decimalValue ?? 0) > 0
             }
 
             if let value = amount.decimalValue, value > maximumAmount {
@@ -233,7 +246,7 @@ extension TransactionAmountView {
             } else {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     self.showMaximumAmountMessage = false
-                    self.showMinimumAmountMessage = !self.isAmountHigherThanMin
+                    self.showMinimumAmountMessage = !self.isAmountHigherThanMin && self.digitsAdded
                 }
             }
             showConfirmationButtonTitle = hasAmount && isAmountHigherThanMin

@@ -48,8 +48,10 @@ enum CommerceSessionResource: FlexaAPIResource, JWTAuthenticable {
             return "/events"
         case .create:
             return "/commerce_sessions"
-        case .close, .setPaymentAsset:
+        case .setPaymentAsset:
             return "/commerce_sessions/\(Self.idUrlParameter)"
+        case .close:
+            return "/commerce_sessions/\(Self.idUrlParameter)/close"
         }
     }
 
@@ -82,6 +84,19 @@ enum CommerceSessionResource: FlexaAPIResource, JWTAuthenticable {
             return [Self.idUrlParameter: id]
         default:
             return nil
+        }
+    }
+
+    func wrappingError(_ error: Error?, traceId: String?) -> Error? {
+        switch self {
+        case .create:
+            ReasonableError(reason: .cannotCreateCommerceSession(error))
+        case .watch:
+            ReasonableError(reason: .cannotWatchSession(error))
+        case .close:
+            ReasonableError(reason: .cannotCloseCommerceSession(error))
+        case .setPaymentAsset:
+            ReasonableError(reason: .cannotSetCommerceSessionPaymentAsset(error))
         }
     }
 }

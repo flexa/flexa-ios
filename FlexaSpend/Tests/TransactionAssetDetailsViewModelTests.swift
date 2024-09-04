@@ -233,6 +233,10 @@ private struct TestAssetHelper: AssetHelperProtocol {
         logoImage
     }
 
+    func color(for asset: AssetWrapper) -> Color? {
+        .purple
+    }
+
     func fxAccount(for: AssetWrapper) -> FXAppAccount? {
         nil
     }

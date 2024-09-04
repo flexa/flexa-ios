@@ -12,10 +12,11 @@ import FlexaNetworking
 import Factory
 
 public extension View {
-    @ViewBuilder func onError(error: Binding<Error?>, buttonTitle: String = "OK") -> some View {
+    @ViewBuilder
+    func onError(error: Binding<Error?>, buttonTitle: String? = nil) -> some View {
         if let networkError = error.wrappedValue as? FlexaNetworking.NetworkError,
            networkError.isUnauthorized,
-           case NetworkError.invalidStatus(_, let resource) = networkError,
+           case NetworkError.invalidStatus(_, let resource, _) = networkError,
            resource is JWTAuthenticable {
             self.task {
                 Container.shared.flexaNotificationCenter().post(name: .flexaAuthorizationError, object: nil)
@@ -25,7 +26,7 @@ public extension View {
         }
     }
 
-    func errorAlert(error: Binding<Error?>, buttonTitle: String = "OK") -> some View {
+    func errorAlert(error: Binding<Error?>, buttonTitle: String? = nil) -> some View {
         var reasonableError = error.wrappedValue as? ReasonableError
 
         if let wrappedError = error.wrappedValue, reasonableError == nil {
@@ -36,7 +37,7 @@ public extension View {
             Alert(
                 title: Text(reasonableError?.title ?? ""),
                 message: Text(reasonableError?.recoverySuggestion ?? ""),
-                dismissButton: .default(Text(buttonTitle), action: {
+                dismissButton: .default(Text(buttonTitle ?? CoreStrings.Global.ok), action: {
                     error.wrappedValue = nil
                 })
             )

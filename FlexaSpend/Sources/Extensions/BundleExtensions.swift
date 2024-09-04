@@ -9,7 +9,7 @@
 import Foundation
 
 extension Bundle {
-    static var paymentBundle: Bundle {
+    static var spendBundle: Bundle {
         #if SWIFT_PACKAGE
         return Bundle.module
         #else
@@ -24,6 +24,11 @@ extension Bundle {
 
     var colorsBundle: Bundle {
         let bundleUrl = bundleURL.appendingPathComponent("FlexaSpendColors.bundle")
+        return Bundle(url: bundleUrl) ?? self
+    }
+
+    var svgBundle: Bundle {
+        let bundleUrl = bundleURL.appendingPathComponent("FlexaSpendSVG.bundle")
         return Bundle(url: bundleUrl) ?? self
     }
 }

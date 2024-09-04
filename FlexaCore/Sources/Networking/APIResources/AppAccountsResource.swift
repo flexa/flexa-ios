@@ -27,4 +27,8 @@ enum AppAccountsResource: FlexaAPIResource, JWTAuthenticable {
             input.dictionary
         }
     }
+
+    func wrappingError(_ error: Error?, traceId: String?) -> Error? {
+       ReasonableError.withReason(.cannotSyncAppAccounts(error))
+    }
 }

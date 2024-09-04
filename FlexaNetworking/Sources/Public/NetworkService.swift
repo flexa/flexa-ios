@@ -56,13 +56,14 @@ public final class NetworkService: Networkable {
         }
 
         guard let response = urlResponse as? HTTPURLResponse else {
-            return (nil, nil, NetworkError.invalidResponse)
+            return (nil, nil, NetworkError.invalidResponse(request))
         }
 
         guard 200...299 ~= response.statusCode else {
             let error = NetworkError.invalidStatus(
                 status: response.statusCode,
-                resource: resource
+                resource: resource,
+                request: request
             )
             return (nil, response, error)
         }

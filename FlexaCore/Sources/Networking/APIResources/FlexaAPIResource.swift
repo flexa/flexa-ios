@@ -16,6 +16,8 @@ protocol Authenticable {
 }
 
 protocol FlexaAPIResource: APIResource, Authenticable {
+    func wrappingError(_: Error?, traceId: String?) -> Error?
+    var allowRetry: Bool { get }
 }
 
 extension FlexaAPIResource {
@@ -31,7 +33,7 @@ extension FlexaAPIResource {
     }
 
     var host: String {
-        customHost.isEmpty ? "api.flexa.co" : customHost
+        "api.flexa.co"
     }
 
     var method: RequestMethod {
@@ -46,6 +48,10 @@ extension FlexaAPIResource {
             "User-Agent": userAgent,
             "Client-Trace-Id": UUID().uuidString
         ]
+    }
+
+    var allowRetry: Bool {
+        true
     }
 
     func paginationParams(limit: Int? = nil, startingAfter: String? = nil, query: String? = nil) -> [String: String] {
@@ -63,13 +69,17 @@ extension FlexaAPIResource {
         return dictionary
     }
 
+    func wrappingError(_ error: Error?, traceId: String?) -> Error? {
+        error
+    }
+
+    func wrappingError(_ error: Error?) -> Error? {
+        wrappingError(error, traceId: nil)
+    }
+
     private var userAgent: String {
         let osVersion = Device.current.systemVersion ?? "unknown"
         return "iOS/\(osVersion) Flexa/\(Flexa.version) \(Bundle.applicationBundleId)/\(Bundle.applicationVersion)"
-    }
-
-    private var customHost: String {
-        UserDefaults.standard.value(forKey: .apiHost) ?? ""
     }
 }
 
