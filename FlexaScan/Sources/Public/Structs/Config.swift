@@ -16,7 +16,10 @@ public extension FlexaScan {
 
         public static let `default` = FlexaScan.Config()
 
-        public init(allowedSymbols: [VNBarcodeSymbology] = [.qr, .pdf417, .code128], minConfidence: VNConfidence = 0.9) {
+        public init(
+            allowedSymbols: [VNBarcodeSymbology] = [.qr, .pdf417, .code128],
+            minConfidence: VNConfidence = 0.9
+        ) {
             self.allowedSymbols = allowedSymbols
             self.minConfidence = minConfidence
         }

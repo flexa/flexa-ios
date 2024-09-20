@@ -54,6 +54,7 @@ class SSEClient: NSObject, SSEClientProtocol {
     var urlSession: URLSession?
     var responseErrorStatusCode: Int?
     var listeners: [String: (SSE.Event) -> Void] = [:]
+    var eventsParser = SSE.Parser()
     let customHeaders = ["Accept", "Cache-Control", "Last-Event-ID"]
 
     required init(request: URLRequest, timeoutInterval: TimeInterval) {
@@ -137,7 +138,12 @@ extension SSEClient: URLSessionDataDelegate {
 
         if let responseStatusCode = (task.response as? HTTPURLResponse)?.statusCode {
             statusCode = responseStatusCode
-            shouldReconnect = 201..<300 ~= responseStatusCode
+            if responseStatusCode == 204 || responseStatusCode == 200 && readyState == .closed {
+                // Server indicates to close the connection, or the connection was closed by the client
+                shouldReconnect = false
+            } else {
+                shouldReconnect = true
+            }
         }
 
         send(notification: .complete(responseStatus: statusCode, shouldReconnect: shouldReconnect, error: error))
@@ -163,7 +169,7 @@ extension SSEClient: URLSessionDataDelegate {
             return
         }
 
-        let events = SSE.Event.eventsFrom(data: data)
+        let events = eventsParser.append(data: data)
         send(notifications: events)
     }
 }

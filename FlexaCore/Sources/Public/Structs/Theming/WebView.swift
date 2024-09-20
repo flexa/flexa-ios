@@ -14,7 +14,7 @@ public extension FXTheme {
         public var webViewThemeConfig: String?
 
         public var backgroundColor: Color {
-            Color(hex: (colorScheme == .light ? "#F2F2F2" : "#232524")) // FIXME:
+            Color(hex: (colorScheme == .light ? "#F2F2F2" : "#232524"))
         }
 
         public init(webViewThemeConfig: String? = nil) {

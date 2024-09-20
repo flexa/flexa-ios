@@ -19,6 +19,7 @@ extension Models {
             case sessionPreferences = "preferences"
             case statusString = "status"
             case sessionTransactions = "transactions"
+            case sessionAuthorization = "authorization"
         }
         var id: String
         var asset: String
@@ -32,15 +33,28 @@ extension Models {
         var sessionAuthorization: Authorization?
 
         init(from decoder: any Decoder) throws {
-            let container: KeyedDecodingContainer<Models.CommerceSession.CodingKeys> = try decoder.container(keyedBy: CodingKeys.self)
+            let container: KeyedDecodingContainer<Models.CommerceSession.CodingKeys> = try decoder.container(
+                keyedBy: CodingKeys.self
+            )
             self.id = try container.decode(String.self, forKey: CodingKeys.id)
             self.asset = try container.decode(String.self, forKey: CodingKeys.asset)
             self.label = try container.decodeIfPresent(String.self, forKey: CodingKeys.label)
             self.amount = try container.decode(String.self, forKey: CodingKeys.amount)
             self.sessionRate = try container.decode(Models.Rate.self, forKey: CodingKeys.sessionRate)
-            self.sessionPreferences = try container.decode(Models.CommerceSession.Preference.self, forKey: CodingKeys.sessionPreferences)
             self.statusString = try container.decode(String.self, forKey: CodingKeys.statusString)
-            self.sessionTransactions = try container.decodeIfPresent([Models.Transaction].self, forKey: CodingKeys.sessionTransactions)
+
+            self.sessionPreferences = try container.decode(
+                Models.CommerceSession.Preference.self,
+                forKey: CodingKeys.sessionPreferences
+            )
+            self.sessionTransactions = try container.decodeIfPresent(
+                [Models.Transaction].self,
+                forKey: CodingKeys.sessionTransactions
+            )
+            self.sessionAuthorization = try container.decodeIfPresent(
+                Models.CommerceSession.Authorization.self,
+                forKey: CodingKeys.sessionAuthorization
+            )
 
             do {
                 self.sessionBrand = try container.decodeIfPresent(Models.Brand.self, forKey: CodingKeys.sessionBrand)
@@ -69,7 +83,8 @@ extension Models.CommerceSession {
 
 extension Models.CommerceSession {
     struct Authorization: FlexaModelProtocol, CommerceSessionAuthorization {
-        var instructions, number, details: String
+        var instructions, details: String?
+        var number: String
     }
 }
 
@@ -103,8 +118,8 @@ extension Models.CommerceSession: CommerceSession {
                 sessionAuthorization =
                 Models.CommerceSession.Authorization(
                     instructions: newValue.instructions,
-                    number: newValue.number,
-                    details: newValue.details
+                    details: newValue.details,
+                    number: newValue.number
                 )
             } else {
                 sessionAuthorization = nil

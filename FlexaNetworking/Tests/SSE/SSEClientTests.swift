@@ -214,12 +214,12 @@ final class SSEClientTests: QuickSpec {
                 }
             }
 
-            context("completed with status code outside 201..<300") {
+            context("completed with status code outside 204") {
                 let subject = buildClient().0!
                 var onCompleteCalled = false
                 var status: Int?
                 var retry: Bool?
-                let responseStatus = faker.number.randomInt(min: 300, max: 399)
+                let responseStatus = 204
 
                 subject.onComplete = { resultStatus, resultRetry, _ in
                     onCompleteCalled = true

@@ -33,14 +33,32 @@ public extension Container {
         }
     }
 
+    var operationQueue: Factory<OperationQueue> {
+        self {
+            let queue = OperationQueue()
+            queue.qualityOfService = .utility
+            return queue
+        }
+    }
+
     var urlSession: Factory<URLSession> {
-        self { URLSession(configuration: self.urlSessionConfiguration()) }
+        self {
+            URLSession(
+                configuration: self.urlSessionConfiguration(),
+                delegate: nil,
+                delegateQueue: self.operationQueue()
+            )
+        }
     }
 
     var sseUrlSession: ParameterFactory<(String?, TimeInterval, URLSessionDelegate?), URLSession> {
         self { lastEventId, timeout, delegate in
             let configuration = self.sseUrlSessionConfiguration((lastEventId, timeout))
-            return URLSession(configuration: configuration, delegate: delegate, delegateQueue: nil)
+            return URLSession(
+                configuration: configuration,
+                delegate: delegate,
+                delegateQueue: self.operationQueue()
+            )
         }
     }
 

@@ -34,7 +34,11 @@ struct WalletSelectorView: View {
                     .foregroundColor(.primary)
                 Spacer()
                 if let logoImage = asset.logoImage {
-                    SpendCircleImage(Image(uiImage: logoImage), size: 18, gradientColors: asset.gradientColors).padding(4)
+                    SpendCircleImage(
+                        Image(uiImage: logoImage),
+                        size: 18,
+                        gradientColors: asset.gradientColors
+                    ).padding(4)
                 } else {
                     SpendCircleImage(asset.logoImageUrl, size: 18, gradientColors: asset.gradientColors).padding(4)
                 }

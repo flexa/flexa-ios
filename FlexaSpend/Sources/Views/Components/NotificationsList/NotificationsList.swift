@@ -73,7 +73,10 @@ private extension NotificationsList {
             hasher.combine(id)
         }
 
-        static func == (lhs: NotificationsList.AppNotificationWrapper, rhs: NotificationsList.AppNotificationWrapper) -> Bool {
+        static func == (
+            lhs: NotificationsList.AppNotificationWrapper,
+            rhs: NotificationsList.AppNotificationWrapper
+        ) -> Bool {
             lhs.id == rhs.id
         }
     }

@@ -14,4 +14,8 @@ public extension Container {
     var appStateManager: Factory<AppStateManagerProtocol> {
         self { AppStateManager() }.singleton
     }
+
+    var eventNotifier: Factory<EventNotifierProtocol> {
+        self { EventNotifier() }.singleton
+    }
 }

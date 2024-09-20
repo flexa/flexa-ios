@@ -15,6 +15,7 @@ enum KeychainKey: String, CaseIterable {
     case flexaAccount = "flexa-account"
     case lastAppAccountsSyncOffset = "accounts-data-sync-date-offset"
     case deletedAppNotifications = "deleted-app-notifications"
+    case currentCommerceSession = "current-commerce-session"
 }
 
 protocol KeychainHelperProtocol {
@@ -29,8 +30,8 @@ struct KeychainHelper: KeychainHelperProtocol {
 
     func keychains(forKey key: KeychainKey) -> [Keychain] {
         switch key {
-        case .authToken, .deletedAppNotifications:
-            return [deviceKeychain, synchronizedKeychain]
+        case .authToken, .deletedAppNotifications, .currentCommerceSession:
+            return [synchronizedKeychain]
         default:
             return [deviceKeychain]
         }

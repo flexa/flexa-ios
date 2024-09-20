@@ -16,6 +16,7 @@ class AppAccountsRepository: AppAccountsRepositoryProtocol {
     @Injected(\.assetsRepository) private var assetsRepository
     @Injected(\.assetConfig) private var assetConfig
     @Injected(\.keychainHelper) private var keychainHelper
+    @Injected(\.eventNotifier) private var eventNotifier
 
     var appAccounts: [AppAccount] {
         storedAppAccounts
@@ -30,6 +31,7 @@ class AppAccountsRepository: AppAccountsRepositoryProtocol {
     @Synchronized private var storedAppAccounts: [Models.AppAccount] = [] {
         didSet {
             keychainHelper.setValue(storedAppAccounts, forKey: .appAccounts)
+            eventNotifier.post(name: .appAccountsDidUpdate)
         }
     }
 
@@ -67,6 +69,7 @@ class AppAccountsRepository: AppAccountsRepositoryProtocol {
         syncDateOffset = keychainHelper.value(forKey: .lastAppAccountsSyncOffset)
     }
 
+    @discardableResult
     func refresh() async throws -> [AppAccount] {
         var output: RefreshAppAccountsOutput?
         var response: HTTPURLResponse?
@@ -99,7 +102,7 @@ class AppAccountsRepository: AppAccountsRepositoryProtocol {
     func backgroundRefresh() {
         Task {
             do {
-                _ = try await refresh()
+                try await refresh()
             } catch let error {
                 FlexaLogger.error(error)
             }

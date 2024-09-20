@@ -12,6 +12,8 @@ import Factory
 public protocol AppAccountsRepositoryProtocol {
     var appAccounts: [AppAccount] { get }
     var syncDateOffset: TimeInterval? { get }
+
+    @discardableResult
     func refresh() async throws -> [AppAccount]
     func backgroundRefresh()
     func sanitizeSelectedAsset()

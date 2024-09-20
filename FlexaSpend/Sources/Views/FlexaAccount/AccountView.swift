@@ -18,6 +18,20 @@ struct AccountView: View {
 
     private let circleColor = Color(hex: "#76787C")
 
+    private var arrowsImageName: String {
+        if #available(iOS 17, *) {
+            return "arrow.down.left.arrow.up.right"
+        }
+        return "arrow.left.arrow.right"
+    }
+
+    private var arrowsImageRotationAngle: Double {
+        if #available(iOS 17, *) {
+            return 0
+        }
+        return -45
+    }
+
     var body: some View {
         NavigationView {
             List {
@@ -53,7 +67,7 @@ struct AccountView: View {
     private var headerSection: some View {
         VStack(alignment: .center) {
             ZStack {
-                headerSectionCircle.frame(width: 90)
+                headerSectionCircle.frame(width: 90, height: 90)
                 Text(viewModel.nameInitials)
                     .font(.system(size: 38, weight: .bold, design: .rounded))
                     .foregroundStyle(Color.white)
@@ -71,7 +85,7 @@ struct AccountView: View {
             Circle()
                 .fill(circleColor.gradient)
         } else {
-            Circle().foregroundStyle(circleColor)
+            Circle().fill(circleColor)
         }
     }
 
@@ -81,11 +95,12 @@ struct AccountView: View {
                 let limitValue = limit.wrappedValue
                 HStack(spacing: 16) {
                     CircularProgressView.gauge(progress: limitValue.remainingPercentage) {
-                        Image(systemName: "arrow.down.left.arrow.up.right")
+                        Image(systemName: arrowsImageName)
                             .resizable()
                             .frame(width: 16, height: 16)
                             .font(.body.weight(.heavy))
                             .foregroundStyle(.purple)
+                            .rotationEffect(.degrees(arrowsImageRotationAngle))
                     }
                     .frame(width: 40)
                     .offset(y: 4)

@@ -17,7 +17,8 @@ class AppStateManager: AppStateManagerProtocol {
     @Injected(\.brandsRepository) var brandsRepository
     @Injected(\.assetsRepository) var assetsRepository
     @Injected(\.authStore) var authStore
-    @Injected(\.flexaNotificationCenter) var flexaNotificationCenter
+    @Injected(\.eventNotifier) var eventNotifier
+    @Injected(\.flexaClient) var flexaClient
 
     private let notificationCenter = NotificationCenter.default
     private let queue = DispatchQueue(label: "refreshTokenQueue")
@@ -48,24 +49,48 @@ class AppStateManager: AppStateManagerProtocol {
     }
 
     @objc func appDidBecomeActive() {
-        refresh()
+        backgroundRefresh()
     }
 
     @objc func appDidEnterBackground() {
         stopTimer()
     }
 
-    func refresh() {
-        refreshAccessToken(force: true)
+    func backgroundRefresh() {
+        Task {
+            await refreshAccessToken(force: true)
+            guard authStore.isSignedIn else {
+                return
+            }
+
+            accountsRepository.backgroundRefresh()
+            assetsRepository.backgroundRefresh()
+            brandsRepository.backgroundRefresh()
+
+            if !flexaClient.appAccounts.isEmpty {
+                appAccountsRepository.backgroundRefresh()
+            }
+        }
+
         startTimer()
+    }
+
+    func refresh() async {
         guard authStore.isSignedIn else {
             return
         }
+        do {
+            try await accountsRepository.refresh()
+            try await assetsRepository.refresh()
+            try await brandsRepository.refresh()
+            try await brandsRepository.refreshLegacyFlexcodeBrands()
 
-        accountsRepository.backgroundRefresh()
-        assetsRepository.backgroundRefresh()
-        brandsRepository.backgroundRefresh()
-        appAccountsRepository.backgroundRefresh()
+            if !flexaClient.appAccounts.isEmpty {
+                try await appAccountsRepository.refresh()
+            }
+        } catch let error {
+            FlexaLogger.error(error)
+        }
     }
 
     func addTransaction(commerceSessionId: String, transactionId: String) {
@@ -112,7 +137,12 @@ private extension AppStateManager {
         timer = DispatchSource.makeTimerSource(queue: queue)
         timer?.schedule(deadline: .now(), repeating: .seconds(timerCadence))
         timer?.setEventHandler { [weak self] in
-            self?.refreshAccessToken()
+            guard let self else {
+                return
+            }
+            Task {
+                await self.refreshAccessToken()
+            }
         }
         timer?.resume()
     }
@@ -122,17 +152,15 @@ private extension AppStateManager {
         timer = nil
     }
 
-    func refreshAccessToken(force: Bool = false) {
+    func refreshAccessToken(force: Bool = false) async {
         if shouldRefreshAccessToken || force {
-            Task {
-                do {
-                    _ = try await authStore.refreshToken()
-                } catch let error {
-                    if error.isUnauthorized {
-                        flexaNotificationCenter.post(name: .flexaAuthorizationError, object: nil)
-                    }
-                    FlexaLogger.error(error)
+            do {
+                try await authStore.refreshToken()
+            } catch let error {
+                if error.isUnauthorized {
+                    eventNotifier.post(name: .flexaAuthorizationError)
                 }
+                FlexaLogger.error(error)
             }
         }
     }

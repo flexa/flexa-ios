@@ -47,16 +47,21 @@ class AccountsRepository: AccountsRepositoryProtocol {
         ) as Models.EmptyAccount
     }
 
+    @discardableResult
     func getAccount() async throws -> Account {
         let account = try await networkClient.sendRequest(resource: AccountsResource.get) as Models.Account
         modelAccount = account
         return account
     }
 
+    func refresh() async throws {
+        await try getAccount()
+    }
+
     func backgroundRefresh() {
         Task {
             do {
-                _ = try await getAccount()
+                try await getAccount()
             } catch let error {
                 FlexaLogger.error(error)
             }

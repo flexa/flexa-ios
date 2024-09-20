@@ -21,7 +21,7 @@ extension DeleteAccountView {
             isLoading = true
             Task {
                 do {
-                    _ = try await accountsRepository.deleteAccount()
+                    try await accountsRepository.deleteAccount()
                     await handleDeletion()
                 } catch let error {
                     await handleDeletion(error)

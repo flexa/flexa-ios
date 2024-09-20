@@ -22,7 +22,10 @@ struct MerchantSorter: View {
                 header()
                 Section(
                     header: sectionHeader(Strings.Sections.Pinned.Header.title),
-                    footer: sectionFooter(isEmpty: viewModel.pinnedBrands.isEmpty, text: Strings.Sections.Pinned.Footer.title)
+                    footer: sectionFooter(
+                        isEmpty: viewModel.pinnedBrands.isEmpty,
+                        text: Strings.Sections.Pinned.Footer.title
+                    )
                 ) {
                     ForEach(viewModel.pinnedBrands, id: \.id) { brand in
                         Row(pinned: true, brand: brand, action: togglePinState)
@@ -32,7 +35,10 @@ struct MerchantSorter: View {
 
                 Section(
                     header: sectionHeader(Strings.Sections.OtherBrands.Header.title),
-                    footer: sectionFooter(isEmpty: viewModel.otherBrands.isEmpty, text: Strings.Sections.OtherBrands.Footer.title)
+                    footer: sectionFooter(
+                        isEmpty: viewModel.otherBrands.isEmpty,
+                        text: Strings.Sections.OtherBrands.Footer.title
+                    )
                 ) {
                     ForEach(viewModel.otherBrands, id: \.id) { brand in
                         Row(pinned: false, brand: brand, action: togglePinState)

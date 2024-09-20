@@ -73,6 +73,7 @@ public extension ReasonableError {
         case cannotGetBrands(Error?)
         case cannotSignTransaction(Error?)
         case cannotCreateCommerceSession(Error?)
+        case cannotGetCommerceSession(Error?)
         case cannotWatchSession(Error?)
         case cannotCloseCommerceSession(Error?)
         case cannotSetCommerceSessionPaymentAsset(Error?)

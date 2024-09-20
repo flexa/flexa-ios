@@ -26,7 +26,7 @@ struct SpendView: View {
     @State private var showNotification = true
     @State private var showBrandDirectory = false
     @State private var userData: UserData?
-    @State private var selectedAssetIndex: Int = 0
+    @State private var selectedAssetIndex: Int
     @State private var selectedBrand: Brand?
 
     // MARK: - Initialization
@@ -36,8 +36,11 @@ struct SpendView: View {
             wrappedValue: viewModel.viewModelAsset
         )
         _transactionAmountViewModel = StateObject(
-            wrappedValue: TransactionAmountView.ViewModel(brand: nil)
+            wrappedValue: viewModel.transactionAmountViewModel
         )
+
+        let index = viewModel.flexCodes.firstIndex(where: { $0.asset.assetId == viewModel.selectedAsset?.assetId }) ?? 0
+        _selectedAssetIndex = State(initialValue: index)
     }
 
     var body: some View {
@@ -49,6 +52,14 @@ struct SpendView: View {
                             Divider()
                             NoAssetsView(Container.shared.noAssetsViewModel(viewModel.invalidUserAssets))
                                 .padding(.horizontal, padding)
+                        } else if viewModel.missingAppAccounts {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: containerBorderRadius)
+                                    .foregroundColor(.white)
+                                ProgressView()
+                            }.frame(height: 300)
+                                .padding(.horizontal, padding)
+                                .padding(.top, 20)
                         } else {
                             assetSwitcherButton
                             flexcodeCarousel
@@ -56,7 +67,7 @@ struct SpendView: View {
                         if showNotification {
                             notificationsList
                         }
-                        if !viewModel.showInvalidAssetMessage {
+                        if viewModel.showLegacyFlexcodeList {
                             LegacyFlexcodeList(didSelect: { brand in
                                 selectedBrand = brand
                                 transactionAmountViewModel.clear()
@@ -97,6 +108,19 @@ struct SpendView: View {
             largeTitleAttributes: [.font: UIFont.systemFont(ofSize: 28, weight: .bold)],
             largeTitleLeftMargin: largeNavigationTitleLeftMargin
         )
+        .onAppear {
+            viewModel.loadAppAccounts()
+            viewModel.startWatching()
+
+            FlexaIdentity
+                .getUserData { result in
+                    userData = result
+                }
+        }
+        .onDisappear {
+            viewModel.clear()
+            viewModel.stopWatching()
+        }
 
         if #available(iOS 16, *) {
             assetsSwitcherSheet
@@ -129,17 +153,6 @@ struct SpendView: View {
             )
         }
         .padding(.vertical)
-        .onAppear {
-            FlexaIdentity
-                .getUserData { result in
-                    userData = result
-                }
-            viewModel.startWatching()
-        }
-        .onDisappear {
-            viewModel.clear()
-            viewModel.stopWatching()
-        }
     }
 
     private var assetSwitcherButton: some View {
@@ -177,6 +190,10 @@ private extension SpendView {
 
     var sheetsTheme: FXTheme.Views.Sheet {
         mainTheme.views.sheet
+    }
+
+    var containerBorderRadius: CGFloat {
+        mainTheme.containers.content.borderRadius
     }
 
     var padding: CGFloat {
@@ -287,8 +304,10 @@ private extension SpendView {
                 onDismiss: {
                     viewModel.clearIfAuthorizationIsPending()
                     viewModel.updateSelectedAsset()
+
                     if let selectedAssetId = viewModel.selectedAsset?.asset.assetId {
-                        selectedAssetIndex = viewModel.flexCodes.firstIndex { $0.asset.assetId == selectedAssetId } ?? 0
+                        let index = viewModel.flexCodes.firstIndex { $0.asset.assetId == selectedAssetId } ?? 0
+                        selectedAssetIndex = index
                     }
                 }) {
                 TransactionAmountView(

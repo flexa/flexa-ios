@@ -91,7 +91,7 @@ class FlexaNetworkService: Networkable {
 
     func refreshTokenAndSendRequest<T>(resource: APIResource, error: Error) async -> ResponseTuple<T> {
         do {
-            _ = try await authStore.refreshToken()
+           try await authStore.refreshToken()
         } catch let error {
             FlexaLogger.error(error)
         }

@@ -11,8 +11,9 @@ import Factory
 import Foundation
 
 enum CommerceSessionResource: FlexaAPIResource, JWTAuthenticable {
-    case watch([String])
     case create(CreateCommerceSessionInput)
+    case get(String)
+    case watch([String])
     case setPaymentAsset(String, SetPaymentAssetInput)
     case close(String)
 
@@ -20,7 +21,7 @@ enum CommerceSessionResource: FlexaAPIResource, JWTAuthenticable {
 
     var method: RequestMethod {
         switch self {
-        case .watch:
+        case .watch, .get:
             return .get
         case .setPaymentAsset:
             return .patch
@@ -48,7 +49,7 @@ enum CommerceSessionResource: FlexaAPIResource, JWTAuthenticable {
             return "/events"
         case .create:
             return "/commerce_sessions"
-        case .setPaymentAsset:
+        case .setPaymentAsset, .get:
             return "/commerce_sessions/\(Self.idUrlParameter)"
         case .close:
             return "/commerce_sessions/\(Self.idUrlParameter)/close"
@@ -69,7 +70,7 @@ enum CommerceSessionResource: FlexaAPIResource, JWTAuthenticable {
 
     var bodyParams: [String: Any]? {
         switch self {
-        case .watch, .close:
+        case .watch, .close, .get:
             return nil
         case .create(let input):
             return input.dictionary
@@ -80,7 +81,7 @@ enum CommerceSessionResource: FlexaAPIResource, JWTAuthenticable {
 
     var pathParams: [String: String]? {
         switch self {
-        case .close(let id), .setPaymentAsset(let id, _):
+        case .close(let id), .setPaymentAsset(let id, _), .get(let id):
             return [Self.idUrlParameter: id]
         default:
             return nil
@@ -91,6 +92,8 @@ enum CommerceSessionResource: FlexaAPIResource, JWTAuthenticable {
         switch self {
         case .create:
             ReasonableError(reason: .cannotCreateCommerceSession(error))
+        case .get:
+            ReasonableError(reason: .cannotGetCommerceSession(error))
         case .watch:
             ReasonableError(reason: .cannotWatchSession(error))
         case .close:

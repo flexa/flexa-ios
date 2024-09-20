@@ -10,12 +10,8 @@ import UIKit
 
 class BrandNavigationBar: UIView {
   private let initialIntensity: CGFloat = 0
-    private let lightGrabberColor = UIColor { trait in
-        trait.userInterfaceStyle == .dark ? UIColor.white.withAlphaComponent(0.1) : UIColor.white.withAlphaComponent(0.1)
-    }
-    private let darkGrabberColor = UIColor { trait in
-        trait.userInterfaceStyle == .dark ? UIColor.black.withAlphaComponent(0.1) : UIColor.black.withAlphaComponent(0.1)
-    }
+  private let lightGrabberColor = UIColor.white.withAlphaComponent(0.1)
+  private let darkGrabberColor = UIColor.black.withAlphaComponent(0.1)
 
   private var effectView: IntensityVisualEffectView!
   private var titleLabel: UILabel!
@@ -106,7 +102,10 @@ class BrandNavigationBar: UIView {
   }
 
   private func setupBlurEffect() {
-    let effectView = IntensityVisualEffectView(effect: UIBlurEffect(style: blurEffectStyle), intensity: initialIntensity)
+    let effectView = IntensityVisualEffectView(
+        effect: UIBlurEffect(style: blurEffectStyle),
+        intensity: initialIntensity
+    )
     effectView.translatesAutoresizingMaskIntoConstraints = false
     insertSubview(effectView, at: 0)
     self.effectView = effectView

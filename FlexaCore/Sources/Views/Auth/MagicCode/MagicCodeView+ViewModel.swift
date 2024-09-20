@@ -60,19 +60,19 @@ extension MagicCodeView {
             Task { [self] in
                 do {
                     let result = try await authStore.verify(code: code, link: url?.absoluteString)
-                    await MainActor.run {
-                        appStateManager.refresh()
-                        self.isLoading = false
-                        self.validated = result == .loggedIn
-                    }
+                    await appStateManager.refresh()
+                    await handleState(result)
                 } catch let error {
-                    await MainActor.run {
-                        self.isLoading = false
-                        self.validated = false
-                        self.error = error
-                    }
+                    await handleState(error: error)
                 }
             }
+        }
+
+        @MainActor
+        private func handleState(_ state: AuthStoreState = .none, error: Error? = nil) async {
+            self.isLoading = false
+            self.validated = state == .loggedIn
+            self.error = error
         }
     }
 }

@@ -91,8 +91,10 @@ struct LegacyFlexcodeList: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
                     animate = false
                 }
-                viewModel.refreshMerchants()
+                viewModel.refreshBrands()
             })
+        }.onAppear {
+            viewModel.loadBrands()
         }
     }
 }

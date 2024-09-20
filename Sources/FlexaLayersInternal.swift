@@ -28,21 +28,21 @@ final class FlexaInternal: Flexa {
     }()
 
     private var spendContent: (() -> AnyView)? {
-        if let spend = spendBuilder?.build() {
-            return {
-                AnyView(spend.createView())
-            }
+        guard let spendBuilder else {
+            return nil
         }
-        return nil
+        return {
+            AnyView(spendBuilder.createView())
+        }
     }
 
     private var scanContent: (() -> AnyView)? {
-        if let scan = scanBuilder?.build() {
-            return {
-                AnyView(scan.createView())
-            }
+        guard let scanBuilder else {
+            return nil
         }
-        return nil
+        return {
+            AnyView(scanBuilder.createView())
+        }
     }
 
     /// Opens the main screen

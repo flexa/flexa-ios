@@ -52,7 +52,7 @@ public extension FXTheme {
             self.cell = try container.decodeIfPresent(FXTheme.Tables.Cells.self, forKey: FXTheme.Tables.CodingKeys.cell) ?? Tables.default.cell
             self.separator = try container.decodeIfPresent(FXTheme.Tables.Separator.self, forKey: FXTheme.Tables.CodingKeys.separator) ?? Tables.default.separator
         }
-        // swiftlint:enable line_lenght
+        // swiftlint:enable line_length
     }
 }
 

@@ -14,11 +14,16 @@ import Factory
 /// The entry point of FlexaSpend
 public final class FlexaSpend {
     private var auth: FlexaIdentity!
+    private var viewModel = Container.shared.spendViewViewModel(nil)
 
     /// Block that will be called when a Transaction is ready to be sent.
     ///
     /// This block/callback will be used by FlexaSpend to notify the parent application it should review, sign and send a transaction
-    public var onTransactionRequestCallback: Flexa.TransactionRequestCallback?
+    public var onTransactionRequestCallback: Flexa.TransactionRequestCallback? {
+        didSet {
+            viewModel.signTransaction = onTransactionRequestCallback
+        }
+    }
 
     private init() {
         auth = Flexa
@@ -45,9 +50,8 @@ public final class FlexaSpend {
     /// The returned view could be embedded inside other views.
     public func createView() -> some View {
         ZStack(alignment: .center) {
-            let viewModel = Container.shared.spendViewViewModel(self.onTransactionRequestCallback)
             MainViewWrapper(spend: self) {
-                SpendView(viewModel: viewModel)
+                SpendView(viewModel: self.viewModel)
             }
         }
         .ignoresSafeArea()
@@ -91,14 +95,22 @@ public final class FlexaSpend {
 // MARK: FlexaSpend.Builder
 public extension FlexaSpend {
     final class Builder {
-        @Injected(\.assetConfig) private var sharedAssetConfig
+        @Injected(\.assetConfig) private var assetConfig
         @Injected(\.flexaClient) private var flexaClient
         @Injected(\.appAccountsRepository) private var appAccountsRepository
         @Injected(\.assetsRepository) private var assetsRepository
 
-        private var spend: FlexaSpend = FlexaSpend()
-        private var assetConfig: FXAssetConfig = FXAssetConfig()
+        private var spend: FlexaSpend?
         private var appAccounts: [FXAppAccount] = []
+
+        private var safeSpend: FlexaSpend {
+            if let spend {
+                return spend
+            }
+            let newInstance = FlexaSpend()
+            spend = newInstance
+            return newInstance
+        }
 
         fileprivate init() {
         }
@@ -120,6 +132,7 @@ public extension FlexaSpend {
         @discardableResult
         public func appAccounts(_ appAccounts: [FXAppAccount]) -> Self {
             self.appAccounts = appAccounts
+            flexaClient.appAccounts = appAccounts
             return self
         }
 
@@ -128,19 +141,20 @@ public extension FlexaSpend {
         /// - returns self instance in order to chain other methods
         @discardableResult
         public func onTransactionRequest(_ callback: @escaping Flexa.TransactionRequestCallback) -> Self {
-            self.spend.onTransactionRequestCallback = callback
+            self.safeSpend.onTransactionRequestCallback = callback
             return self
         }
 
         /// Builds a new instance of FlexaSpend based on the configuration specified by the other builder methods (`assetConfig`, `themeConfig`, callbacks)
         public func build() -> FlexaSpend {
-            Flexa.updateAppAccounts(appAccounts)
-            Flexa.selectedAsset(assetConfig.selectedAppAccountId, assetConfig.selectedAssetId)
             assetsRepository.backgroundRefresh()
-            appAccountsRepository.backgroundRefresh()
 
-            let payment = self.spend
-            self.spend = FlexaSpend()
+            if !appAccounts.isEmpty {
+                Flexa.updateAppAccounts(appAccounts)
+            }
+
+            let payment = self.safeSpend
+            self.spend = nil
             return payment
         }
 

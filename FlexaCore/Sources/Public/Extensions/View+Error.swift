@@ -19,7 +19,7 @@ public extension View {
            case NetworkError.invalidStatus(_, let resource, _) = networkError,
            resource is JWTAuthenticable {
             self.task {
-                Container.shared.flexaNotificationCenter().post(name: .flexaAuthorizationError, object: nil)
+                Container.shared.eventNotifier().post(name: .flexaAuthorizationError)
             }
         } else {
             self.errorAlert(error: error, buttonTitle: buttonTitle)

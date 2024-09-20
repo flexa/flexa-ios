@@ -24,6 +24,8 @@ protocol AuthStoreProtocol {
 
     func signIn(with email: String) async throws -> AuthStoreState
     func verify(code: String?, link: String?) async throws -> AuthStoreState
+
+    @discardableResult
     func refreshToken() async throws -> AuthStoreState
     func refreshTokenIfNeeded() async throws -> AuthStoreState
     func signOut()
@@ -43,6 +45,7 @@ final class AuthStore: AuthStoreProtocol {
     @Injected(\.pkceHelper) private var pkceHelper
 
     private(set) var state: AuthStoreState = .none
+    private var refreshTokenAsyncTask: Task<AuthStoreState, Error>?
 
     var isSignedIn: Bool {
         switch state {
@@ -101,24 +104,12 @@ final class AuthStore: AuthStoreProtocol {
     }
 
     func refreshToken() async throws -> AuthStoreState {
-        guard isSignedIn, token != nil else {
-            state = .none
-            return state
+        if refreshTokenAsyncTask == nil {
+            let result = try await refreshTokenTask()
+            refreshTokenAsyncTask = nil
+            return result ?? self.state
         }
-
-        let verifier = try pkceHelper.generateVerifier()
-        let challenge = try pkceHelper.generateChallenge(for: verifier)
-
-        tokenData.token = try await tokensRepository.refresh(
-            tokenId: tokenData.token?.id ?? "",
-            verifier: tokenData.verifier,
-            challenge: challenge
-        )
-
-        tokenData.verifier = verifier
-        saveTokenData()
-        state = .loggedIn
-        return state
+        return try await refreshTokenAsyncTask?.value ?? self.state
     }
 
     func refreshTokenIfNeeded() async throws -> AuthStoreState {
@@ -150,5 +141,29 @@ final class AuthStore: AuthStoreProtocol {
 
     private func saveTokenData() {
         keychainHelper.setValue(tokenData, forKey: .authToken)
+    }
+
+    private func refreshTokenTask() async throws -> AuthStoreState? {
+        refreshTokenAsyncTask = Task { () -> AuthStoreState in
+            guard isSignedIn, token != nil else {
+                state = .none
+                return state
+            }
+
+            let verifier = try pkceHelper.generateVerifier()
+            let challenge = try pkceHelper.generateChallenge(for: verifier)
+
+            tokenData.token = try await tokensRepository.refresh(
+                tokenId: tokenData.token?.id ?? "",
+                verifier: tokenData.verifier,
+                challenge: challenge
+            )
+
+            tokenData.verifier = verifier
+            saveTokenData()
+            state = .loggedIn
+            return state
+        }
+        return try await refreshTokenAsyncTask?.value
     }
 }

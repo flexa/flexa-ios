@@ -16,6 +16,7 @@ extension SpendView {
     class ViewModel: ObservableObject, Identifiable {
         enum State: Equatable {
             case loading
+            case appAccountsLoaded
             case commerceSessionCreated
             case commerceSessionUpdated
             case transactionSent
@@ -25,6 +26,7 @@ extension SpendView {
             public static func == (lhs: State, rhs: State) -> Bool {
                 switch (lhs, rhs) {
                 case (.loading, .loading),
+                    (.appAccountsLoaded, .appAccountsLoaded),
                     (.commerceSessionCreated, .commerceSessionCreated),
                     (.commerceSessionUpdated, .commerceSessionUpdated),
                     (.transactionSent, .transactionSent),
@@ -54,6 +56,7 @@ extension SpendView {
         @Injected(\.assetConfig) var assetConfig
         @Injected(\.appStateManager) var appStateManager
         @Injected(\.flexcodeGenerator) var flexcodeGenerator
+        @Injected(\.eventNotifier) var eventNotifier
 
         @Published var activeSheet: ActiveSheet?
         @Published var paymentCompleted = false
@@ -110,13 +113,14 @@ extension SpendView {
         var legacyMode = false
         var legacyCommerceSessionIds: [String] = []
         var viewModelAsset: AssetSelectionViewModel!
+        var transactionAmountViewModel: TransactionAmountView.ViewModel!
 
         var selectedAssetSymbol: String {
             selectedAsset?.assetSymbol ?? ""
         }
 
         var networkFee: String {
-            "\(Decimal(0).asCurrency) network fee"
+            ""
         }
 
         var amount: Decimal {
@@ -140,6 +144,17 @@ extension SpendView {
         }
 
         var showInvalidAssetMessage: Bool {
+            if state == .loading {
+                return false
+            }
+            return missingAppAccounts
+        }
+
+        var showLegacyFlexcodeList: Bool {
+            state != .loading && !showInvalidAssetMessage
+        }
+
+        var missingAppAccounts: Bool {
             appAccounts.isEmpty || appAccounts.allSatisfy { $0.accountAssets.isEmpty }
         }
 
@@ -156,20 +171,11 @@ extension SpendView {
                 amount,
                 selectedAsset)
 
-            if !appAccountsRepository.appAccounts.isEmpty {
-                updateAppAccounts()
-                updateInvalidAssets()
-                updateSelectedAsset()
-            }
+            transactionAmountViewModel = TransactionAmountView.ViewModel(brand: nil)
 
-            Task {
-                _ = try? await appAccountsRepository.refresh()
-                DispatchQueue.main.async { [self] in
-                    updateAppAccounts()
-                    updateInvalidAssets()
-                    updateSelectedAsset()
-                }
-            }
+            appAccounts = appAccountsRepository.appAccounts
+
+            loadAppAccounts()
         }
     }
 }
@@ -205,6 +211,10 @@ extension SpendView.ViewModel {
         appAccounts = appAccountsRepository.appAccounts
         updateSelectAsset()
 
+        if state == .loading {
+            state = .appAccountsLoaded
+        }
+
         if hideShortBalances {
             self.walletsWithSufficientBalance = appAccounts.filter { enoughWalletAmount($0) }
         } else {
@@ -219,6 +229,8 @@ extension SpendView.ViewModel {
             )
         }
         viewModelAsset.appAccounts = self.walletsWithSufficientBalance
+        updateInvalidAssets()
+        updateSelectedAsset()
     }
 
     func closeCommerceSession() {
@@ -257,6 +269,7 @@ extension SpendView.ViewModel {
             appStateManager.addTransaction(commerceSessionId: commerceSession.id, transactionId: transaction.id ?? "")
             paymentButtonEnabled = false
             state = .transactionSent
+            commerceSessionRepository.setCurrent(commerceSession, isLegacy: legacyMode, wasTransactionSent: true)
         }
 
         Task {
@@ -292,6 +305,10 @@ extension SpendView.ViewModel {
 
         selectedAsset = AssetWrapper(appAccount: appAccount, asset: asset)
         viewModelAsset.selectedAsset = selectedAsset
+
+        if !transactionAmountViewModel.isLoading {
+            transactionAmountViewModel.selectedAsset = selectedAsset
+        }
     }
 
     func updateSelectAsset() {
@@ -305,7 +322,7 @@ extension SpendView.ViewModel {
         self.selectedAsset = selectedAsset
         assetConfig.selectedAppAccountId = selectedAsset.appAccount.accountId
         assetConfig.selectedAssetId = selectedAsset.asset.assetId
-        paymentButtonEnabled = enoughAmount(selectedAsset.asset)
+        paymentButtonEnabled = state != .transactionSent && enoughAmount(selectedAsset.asset)
         updateCommerceSessionAsset()
     }
 
@@ -319,10 +336,11 @@ extension SpendView.ViewModel {
 
     func clear() {
         legacyMode = false
+        paymentCompleted = false
         showLegacyFlexcode = false
         showPaymentModal = false
         closeCommerceSession()
-        state = .loading
+        state = .appAccountsLoaded
     }
 
     func clearIfAuthorizationIsPending() {
@@ -332,17 +350,46 @@ extension SpendView.ViewModel {
         clear()
     }
 
+    func loadAppAccounts() {
+        appAccounts = appAccountsRepository.appAccounts
+        if !appAccounts.isEmpty {
+            updateAppAccounts()
+        }
+        Task {
+            let appAccounts = try? await appAccountsRepository.refresh()
+            if appAccounts != nil {
+                handleAppAccountsDidUpdate()
+            }
+        }
+    }
+
     func startWatching() {
-        commerceSessionRepository.watch { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success(let event):
-                    self?.handleCommerceSessionEvent(event)
-                case .failure(let error):
-                    FlexaLogger.error(error)
+        Task {
+            do {
+                let current = try await commerceSessionRepository.getCurrent()
+                await resumeCommerceSession(
+                    current.commerceSession,
+                    isLegacy: current.isLegacy,
+                    wasTransactionSent: current.wasTransactionSent
+                )
+            } catch let error {
+                FlexaLogger.error(error)
+                commerceSessionRepository.clearCurrent()
+            }
+
+            eventNotifier.addObserver(self, selector: #selector(handleAppAccountsDidUpdate), name: .appAccountsDidUpdate)
+            commerceSessionRepository.watch(currentOnly: true) { [weak self] result in
+                DispatchQueue.main.async { [weak self] in
+                    switch result {
+                    case .success(let event):
+                        self?.handleCommerceSessionEvent(event)
+                    case .failure(let error):
+                        FlexaLogger.error(error)
+                    }
                 }
             }
         }
+
     }
 
     func stopWatching() {
@@ -351,6 +398,59 @@ extension SpendView.ViewModel {
 }
 
 private extension SpendView.ViewModel {
+    @MainActor
+    func resumeCommerceSession(_ commerceSession: CommerceSession?, isLegacy: Bool, wasTransactionSent: Bool) {
+
+        // If there is not a commerce session or is closed then just clear the current commerce session
+        guard let commerceSession, !commerceSession.isClosed else {
+            commerceSessionRepository.clearCurrent()
+            return
+        }
+
+        var event = CommerceSessionEvent.created(commerceSession)
+
+        // Check completion for next gen, we need to display the success card
+        if isLegacy {
+            self.legacyCommerceSessionIds.append(commerceSession.id)
+        } else if commerceSession.isCompleted {
+            event = .completed(commerceSession)
+        }
+
+        // If the transaction was already sent, then we should display the CommerceSession's transaction
+        if wasTransactionSent {
+            let appAccount = flexaClient.appAccounts
+                .first(where:
+                        { $0.availableAssets.contains(where: { $0.assetId == commerceSession.preferences.paymentAsset })
+                })
+
+            if let appAccount {
+                assetConfig.selectedAppAccountId = appAccount.accountId
+                assetConfig.selectedAssetId = commerceSession.preferences.paymentAsset
+                selectedAsset = AssetWrapper(appAccountId: appAccount.accountId, assetId: commerceSession.preferences.paymentAsset)
+                viewModelAsset.selectedAsset = selectedAsset
+            }
+        }
+
+        // Set state
+        self.state = wasTransactionSent ? .transactionSent : .commerceSessionCreated
+        self.commerceSession = commerceSession
+        self.legacyMode = isLegacy
+        self.handleCommerceSessionEvent(event)
+
+        // Patch CommerceSession's asset if we need to
+        if !isLegacy && !wasTransactionSent {
+            updateCommerceSessionAsset()
+        }
+    }
+
+    @objc func handleAppAccountsDidUpdate() {
+        Task {
+            await MainActor.run {
+                updateAppAccounts()
+            }
+        }
+    }
+
     func updateCommerceSessionAsset() {
         guard let id = commerceSession?.id,
               let assetId = selectedAsset?.assetId,
@@ -399,14 +499,24 @@ private extension SpendView.ViewModel {
             if !showPaymentModal {
                 self.commerceSession = commerceSession
                 showPaymentModal = true
-                paymentButtonEnabled = true
-                state = .commerceSessionCreated
+
+                if state != .transactionSent {
+                    state = .commerceSessionCreated
+                }
+
+                paymentButtonEnabled = state == .commerceSessionCreated
 
                 if let selectedAsset, selectedAsset.assetId != commerceSession.preferences.paymentAsset {
                     updateCommerceSessionAsset()
                 }
             }
+            commerceSessionRepository.setCurrent(commerceSession, isLegacy: false, wasTransactionSent: state == .transactionSent)
         case .updated(let commerceSession):
+            guard !commerceSession.isClosed else {
+                commerceSessionRepository.clearCurrent()
+                return
+            }
+
             if state == .commerceSessionCreated {
                 state = .commerceSessionUpdated
             }
@@ -420,17 +530,32 @@ private extension SpendView.ViewModel {
         case .completed(let commerceSession):
             self.commerceSession = commerceSession
             state = .commerceSessionCompleted
+            showPaymentModal = true
             paymentCompleted = true
+            commerceSessionRepository.clearCurrent()
         }
     }
 
     func handleLegacyFlexcodeCommerceSessionEvent(_ event: CommerceSessionEvent) {
         switch event {
         case .created(let commerceSession):
-            if !commerceSession.transactions.isEmpty || commerceSession.authorization != nil {
+            if showInputAmountView {
+                if !commerceSession.transactions.isEmpty || commerceSession.authorization != nil {
+                    self.commerceSession = commerceSession
+                }
+            } else {
                 self.commerceSession = commerceSession
+                transactionAmountViewModel.setCommerceSession(commerceSession)
+                showInputAmountView = commerceSession.authorization == nil
             }
+
+            commerceSessionRepository.setCurrent(commerceSession, isLegacy: true, wasTransactionSent: true)
         case .updated(let commerceSession):
+            guard !commerceSession.isClosed else {
+                commerceSessionRepository.clearCurrent()
+                return
+            }
+
             if state == .commerceSessionCreated {
                 state = .commerceSessionUpdated
             }
@@ -438,6 +563,7 @@ private extension SpendView.ViewModel {
             if !commerceSession.transactions.isEmpty || commerceSession.authorization != nil {
                 self.commerceSession = commerceSession
             }
+            commerceSessionRepository.setCurrent(commerceSession, isLegacy: true, wasTransactionSent: true)
         case .completed(let commerceSession):
             self.commerceSession = commerceSession
             state = .commerceSessionCompleted

@@ -49,6 +49,7 @@ extension AuthMainView {
                         self.shouldGoVerifyEmail = result == .verifying || result == .loggedIn
                     }
                 } catch let error {
+                    FlexaLogger.error(error)
                     await MainActor.run {
                         self.isLoading = false
                         self.shouldGoPersonalInfo = true

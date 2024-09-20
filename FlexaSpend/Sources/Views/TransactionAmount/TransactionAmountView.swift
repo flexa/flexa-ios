@@ -129,7 +129,7 @@ struct TransactionAmountView: View {
                         .frame(width: 16, height: 16, alignment: .center)
                 }
             }.opacity(viewModel.showAmountMessage ? 0 : 1)
-                .disabled(viewModel.showAmountMessage)
+                .disabled(viewModel.showAmountMessage || viewModel.isLoading)
                 .transition(.opacity)
                 .animation(.easeInOut(duration: 1), value: viewModel.showAmountMessage)
 
@@ -184,7 +184,10 @@ struct TransactionAmountView: View {
                         }
                         Text(viewModel.payButtonTitle)
                     }
-                }.flexaButton(background: linearGradient, disabledTextColor: gradientColors.first?.opacity(0.4) ?? .white)
+                }.flexaButton(
+                    background: linearGradient,
+                    disabledTextColor: gradientColors.first?.opacity(0.4) ?? .white
+                )
                     .animation(.default, value: viewModel.showConfirmationButtonTitle)
             }.disabled(!viewModel.paymentButtonEnabled)
 
@@ -327,7 +330,7 @@ private extension TransactionAmountView {
     var assetSwitcherCard: some View {
         AssetSelectionModal(isShowing: $showAssetsModal,
                             viewModelAsset: viewModelAsset,
-                            updateAsset: { selectedAsset in
+                            updateAsset: { _ in
             showAssetsModal = false
         }).zIndex(2)
     }

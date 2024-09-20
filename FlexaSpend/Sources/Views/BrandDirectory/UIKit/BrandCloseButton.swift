@@ -35,8 +35,12 @@ class BrandCloseButton: UIButton {
         commonInit()
     }
 
-    func setDisplayMode(_ displayMode: DisplayMode, animated: Bool = false, animationDuration: CGFloat = 0.2, delay: CGFloat = 0) {
-
+    func setDisplayMode(
+        _ displayMode: DisplayMode,
+        animated: Bool = false,
+        animationDuration: CGFloat = 0.2,
+        delay: CGFloat = 0
+    ) {
         guard animated, self.displayMode != displayMode else {
             self.displayMode = displayMode
             updateColors()

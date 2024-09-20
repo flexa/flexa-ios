@@ -9,7 +9,8 @@
 import Foundation
 
 public protocol AppStateManagerProtocol {
-    func refresh()
+    func backgroundRefresh()
+    func refresh() async
     func signTransaction(commerceSessionId: String, signature: String)
     func addTransaction(commerceSessionId: String, transactionId: String)
 }

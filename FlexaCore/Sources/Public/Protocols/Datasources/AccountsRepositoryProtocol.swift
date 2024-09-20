@@ -12,6 +12,7 @@ import Factory
 public protocol AccountsRepositoryProtocol {
     var account: Account? { get }
 
+    @discardableResult
     func create(email: String,
                 givenName: String,
                 familyName: String,
@@ -20,6 +21,9 @@ public protocol AccountsRepositoryProtocol {
     ) async throws -> EmptyAccount
 
     func getAccount() async throws -> Account
+    func refresh() async throws
     func backgroundRefresh()
+
+    @discardableResult
     func deleteAccount() async throws -> Account
 }

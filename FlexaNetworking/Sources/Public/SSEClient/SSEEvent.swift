@@ -49,7 +49,7 @@ public extension SSE {
                 .contains { !$0.isEmpty }
         }
 
-        static func eventFrom(data: Data) -> Self? {
+        static func eventFrom(data: Data) -> SSE.Event? {
             let rows = data.split(separator: SSE.lfChar)
             var dictionary: [String: String?] = [:]
             for row in rows {
@@ -79,6 +79,40 @@ public extension SSE {
 
         static func eventsFrom(data: Data) -> [Self] {
             data.split(with: [SSE.lfChar, SSE.lfChar]).compactMap { eventFrom(data: $0) }
+        }
+    }
+}
+
+public extension SSE {
+    struct Parser {
+        private var data = Data()
+
+        mutating func append(data: Data?) -> [SSE.Event] {
+            guard let data else {
+                return []
+            }
+            self.data.append(data)
+
+            guard let parsedData = parseEvents() else {
+                return []
+            }
+            let events = SSE.Event.eventsFrom(data: parsedData)
+            return events
+        }
+
+        private mutating func parseEvents() -> Data? {
+            guard let range = data.lastRange(of: [SSE.lfChar, SSE.lfChar]), !range.isEmpty else {
+                return nil
+            }
+            let completedEventsRange = Range<Int>(uncheckedBounds: (lower: 0, upper: range.lowerBound))
+            let completedEventsData = data.subdata(in: completedEventsRange)
+            if range.upperBound < data.count {
+                let remainingRange = Range<Int>(uncheckedBounds: (lower: range.upperBound, upper: data.count))
+                data = data.subdata(in: remainingRange)
+            } else {
+                data = Data()
+            }
+            return completedEventsData
         }
     }
 }

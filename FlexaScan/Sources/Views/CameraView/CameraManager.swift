@@ -102,7 +102,10 @@ class CameraManager: NSObject, ObservableObject {
 
     private func setError(withStatus status: Status = .failed) {
         DispatchQueue.main.async {
-            self.error = ReasonableError.custom(title: "Camera error", message: "There was an error getting the video device")
+            self.error = ReasonableError.custom(
+                title: "Camera error",
+                message: "There was an error getting the video device"
+            )
             self.status = status
         }
     }

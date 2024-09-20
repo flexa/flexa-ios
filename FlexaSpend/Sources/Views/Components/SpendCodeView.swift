@@ -97,7 +97,6 @@ extension SpendCodeView {
         private func updateCode() {
             flexcodes = flexcodeGenerator.flexcodes(for: asset.assetWithKey)
             let code = flexcodes.values.first?.code
-            FlexaLogger.info("\(asset.assetSymbol): \(code ?? "missing flexcode")")
 
             self.code = code ?? ""
             self.pdf417Image = flexcodes[.pdf417]?.image ?? UIImage()

@@ -154,6 +154,8 @@ type_name:
     - Cell
     - Link
     - Fee
+    - SSE
+    - Row
 unneeded_break_in_switch: error
 unused_closure_parameter: warning
 unused_enumerated: error

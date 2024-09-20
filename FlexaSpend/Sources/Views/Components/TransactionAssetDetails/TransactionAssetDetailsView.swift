@@ -84,9 +84,17 @@ struct TransactionAssetDetailsView: View {
                     }
                     Spacer()
                     if let image = viewModel.logoImage {
-                        SpendCircleImage(Image(uiImage: image), size: .circleImageSize, gradientColors: viewModel.gradientColors)
+                        SpendCircleImage(
+                            Image(uiImage: image),
+                            size: .circleImageSize,
+                            gradientColors: viewModel.gradientColors
+                        )
                     } else {
-                        SpendCircleImage(viewModel.logoUrl, size: .circleImageSize, gradientColors: viewModel.gradientColors)
+                        SpendCircleImage(
+                            viewModel.logoUrl,
+                            size: .circleImageSize,
+                            gradientColors: viewModel.gradientColors
+                        )
                     }
                 }
                 VStack(alignment: .leading) {

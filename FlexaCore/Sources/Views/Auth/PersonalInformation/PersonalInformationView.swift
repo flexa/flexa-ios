@@ -77,7 +77,12 @@ struct PersonalInformationView: View {
             }
         }
         NavigationLink(
-            destination: VerifyEmailView(viewModel: VerifyEmailView.ViewModel(emailAddress: viewModel.emailAddress, registering: true)),
+            destination: VerifyEmailView(
+                viewModel: VerifyEmailView.ViewModel(
+                    emailAddress: viewModel.emailAddress,
+                    registering: true
+                )
+            ),
             isActive: $viewModel.shouldGoVerifyEmail) {
         }
     }

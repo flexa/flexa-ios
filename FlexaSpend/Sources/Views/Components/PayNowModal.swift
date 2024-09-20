@@ -95,12 +95,9 @@ struct PayNowModal: View {
             TransactionAssetDetailsView(
                 showView: $showTransactionDetails,
                 viewModel: TransactionAssetDetailsViewModel(
-                displayMode: .transaction,
+                displayMode: .dynamicTransaction,
                 asset: asset,
-                secondaryAmount: value,
-                mainAmount: baseAmount,
-                networkFee: networkFee,
-                baseNetworkFee: baseNetworkFee,
+                mainAmount: value,
                 baseNetworkFeeColor: Color(hex: "#F7931A"))
             )
         }
@@ -246,6 +243,7 @@ struct PayNowContentView: View {
                             didSelect?()
                         }.frame(idealHeight: 44)
                             .padding(.top, 10)
+                            .disabled(!payButtonEnabled)
 
                         Button {
                             didConfirm?()

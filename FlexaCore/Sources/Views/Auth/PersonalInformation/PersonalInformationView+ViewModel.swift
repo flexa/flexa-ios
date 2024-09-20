@@ -73,7 +73,7 @@ extension PersonalInformationView {
 
             Task {
                 do {
-                    _ = try await accountRepository.create(
+                    try await accountRepository.create(
                         email: emailAddress,
                         givenName: givenName,
                         familyName: familyName,

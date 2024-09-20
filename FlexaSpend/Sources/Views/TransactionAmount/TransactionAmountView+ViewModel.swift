@@ -264,7 +264,6 @@ extension TransactionAmountView {
                         amount: amountText.decimalValue ?? 0,
                         assetId: usdAssetId,
                         paymentAssetId: assetConfig.selectedAssetId)
-
                     await handleCommerceSessionCreation(commerceSession: commerceSession)
                 } catch let error {
                     FlexaLogger.error(error)
@@ -273,8 +272,22 @@ extension TransactionAmountView {
             }
         }
 
+        func setCommerceSession(_ commerceSession: CommerceSession) {
+            clear()
+            self.commerceSession = commerceSession
+            brand = commerceSession.brand
+            isLoading = true
+            amountText = commerceSession.amount.asCurrency
+        }
+
         @MainActor
         func handleCommerceSessionCreation(commerceSession: CommerceSession? = nil, error: Error? = nil) {
+            commerceSessionRepository.setCurrent(
+                commerceSession,
+                isLegacy: true,
+                wasTransactionSent: commerceSession != nil
+            )
+
             self.commerceSession = commerceSession
             self.commerceSessionCreated = commerceSession != nil
             self.isLoading = error == nil

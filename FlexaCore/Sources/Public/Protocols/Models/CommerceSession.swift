@@ -9,7 +9,7 @@
 import Foundation
 
 public enum CommerceSessionStatus: String {
-    case completed, unknown
+    case completed, unknown, closed
     case requiresPaymentAsset = "requires_payment_asset"
     case requiresTransaction = "requires_transaction"
 }
@@ -33,13 +33,21 @@ public protocol CommerceSessionPreference {
 }
 
 public protocol CommerceSessionAuthorization {
-    var instructions: String { get }
+    var instructions: String? { get }
     var number: String { get }
-    var details: String { get }
+    var details: String? { get }
 }
 
 public extension CommerceSession {
     var requestedTransaction: FlexaCore.Transaction? {
         transactions.first { $0.status == .requested }
+    }
+
+    var isClosed: Bool {
+        status == .closed
+    }
+
+    var isCompleted: Bool {
+        status == .completed
     }
 }

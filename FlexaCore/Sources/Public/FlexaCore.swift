@@ -20,6 +20,7 @@ open class Flexa {
     @Injected(\.assetConfig) private static var assetConfig
     @Injected(\.appStateManager) private static var appStateManager
     @Injected(\.appAccountsRepository) private static var appAccountsRepository
+    private static var isInitialized = false
 
     /// Initializes Flexa SDK with the specified settings.
     ///
@@ -29,10 +30,14 @@ open class Flexa {
     ///
     /// - parameter settings: The FXClient used to configure Flexa SDK.
     public static func initialize(_ client: FXClient) {
-        Self.flexaClient.publishableKey = client.publishableKey
-        Self.flexaClient.appAccounts = client.appAccounts
-        Self.flexaClient.theme = client.theme
-        Self.appStateManager.refresh()
+        flexaClient.publishableKey = client.publishableKey
+        flexaClient.appAccounts = client.appAccounts
+        flexaClient.theme = client.theme
+
+        if !isInitialized {
+            appStateManager.backgroundRefresh()
+            isInitialized.toggle()
+        }
     }
 
     ///  Updates the list of assets with their balances for each user's wallet.

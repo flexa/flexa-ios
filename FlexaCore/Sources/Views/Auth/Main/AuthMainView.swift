@@ -112,13 +112,15 @@ struct AuthMainView: View {
     }
 
     private var privacyImage: some View {
-        Image(systemName: "key.horizontal.fill")
+        Image(systemName: "key.fill")
             .renderingMode(.template)
             .resizable()
             .aspectRatio(contentMode: .fit)
             .foregroundStyle(Color.purple)
+            .rotationEffect(.degrees(90))
             .frame(width: .bulletPrivateIconWidth, height: .bulletPrivateIconHeight)
-            .padding(0)
+            .padding(.horizontal, 0)
+            .padding(.top, -4)
     }
 
     private var bulletsView: some View {
@@ -274,7 +276,7 @@ extension CGFloat {
     static let appIconShadowY: CGFloat = 12
 
     static let bulletInstantPaymentIconSize: CGFloat = 36
-    static let bulletPrivateIconHeight: CGFloat = 36
+    static let bulletPrivateIconHeight: CGFloat = 45
     static let bulletPrivateIconWidth: CGFloat = 45
     static let bulletIconPadding: CGFloat = 16
     static let bulletIconTopPadding: CGFloat = 16

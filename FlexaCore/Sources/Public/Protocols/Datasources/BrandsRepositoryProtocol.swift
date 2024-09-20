@@ -13,7 +13,10 @@ public protocol BrandsRepositoryProtocol {
     var legacyFlexcodeBrands: [Brand] { get }
     var pinnedBrandIds: [String] { get }
 
+    @discardableResult
     func refresh() async throws -> [Brand]
+    @discardableResult
+    func refreshLegacyFlexcodeBrands() async throws -> [Brand]
     func backgroundRefresh()
     func pinBrand(_: Brand)
     func unpinBrand(_: Brand)

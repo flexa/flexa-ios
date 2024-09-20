@@ -63,7 +63,11 @@ struct FlexcodeGenerator: FlexcodeGeneratorProtocol {
         return Flexcode(code: code, image: image)
     }
 
-    func flexcodes(for asset: AppAccountAsset, types: [FlexcodeSymbology], scale: CGFloat) -> [FlexcodeSymbology: Flexcode] {
+    func flexcodes(
+        for asset: AppAccountAsset,
+        types: [FlexcodeSymbology],
+        scale: CGFloat
+    ) -> [FlexcodeSymbology: Flexcode] {
         types.reduce([FlexcodeSymbology: Flexcode]()) { partialResult, type in
             guard let flexcode = flexcode(for: asset, type: type, scale: scale) else {
                 return partialResult

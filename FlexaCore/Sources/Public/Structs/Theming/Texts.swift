@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import FlexaCore
 
 public extension FXTheme {
     struct Texts: Codable {

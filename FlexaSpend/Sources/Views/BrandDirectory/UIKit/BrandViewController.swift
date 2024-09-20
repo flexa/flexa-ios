@@ -14,7 +14,7 @@ import Factory
 extension BrandViewController {
     enum Link {
         static var brandDirectoryUrlString: String {
-            return L10n.Brand.Links.merchantList
+            L10n.Brand.Links.merchantList
         }
 
         case merchantList
@@ -327,7 +327,10 @@ class BrandViewController: UIViewController {
 
 // MARK: WKNavigationDelegate
 extension BrandViewController: WKNavigationDelegate {
-    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
+    func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationAction: WKNavigationAction
+    ) async -> WKNavigationActionPolicy {
         guard let url = navigationAction.request.url,
               navigationAction.navigationType == .linkActivated
                || (navigationAction.navigationType == .other) && !isLoading else {
@@ -420,7 +423,10 @@ extension BrandViewController: UIScrollViewDelegate {
 
         let minOffset: CGFloat = 0
         let transition: CGFloat = 120
-        let intensity = max(0, min((scrollView.contentOffset.y - navigationBar.bounds.height - minOffset) / transition, 1))
+        let intensity = max(
+            0,
+            min((scrollView.contentOffset.y - navigationBar.bounds.height - minOffset) / transition, 1)
+        )
 
         navigationBar.updateIntensity(intensity)
 

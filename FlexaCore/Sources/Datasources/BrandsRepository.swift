@@ -61,6 +61,7 @@ class BrandsRepository: BrandsRepositoryProtocol {
         pinnedBrandIds = brandIds
     }
 
+    @discardableResult
     func refresh() async throws -> [Brand] {
         var output = PaginatedOutput<Models.Brand>()
         var brands: [Models.Brand] = []
@@ -78,6 +79,7 @@ class BrandsRepository: BrandsRepositoryProtocol {
         return brands
     }
 
+    @discardableResult
     func refreshLegacyFlexcodeBrands() async throws -> [Brand] {
         var output = PaginatedOutput<Models.Brand>()
         var brands: [Models.Brand] = []
@@ -105,7 +107,7 @@ class BrandsRepository: BrandsRepositoryProtocol {
             }
 
             do {
-                _ = try await refreshLegacyFlexcodeBrands()
+                try await refreshLegacyFlexcodeBrands()
             } catch let error {
                 FlexaLogger.error(error)
             }

@@ -24,11 +24,11 @@ class LegacyFlexcodeViewModel: ObservableObject, Identifiable {
     }
 
     var instructions: String {
-        authorization.instructions
+        authorization.instructions ?? ""
     }
 
     var details: String {
-        authorization.details
+        authorization.details ?? ""
     }
 
     var hasCodeImages: Bool {

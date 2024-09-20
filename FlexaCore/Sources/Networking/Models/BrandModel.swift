@@ -53,7 +53,10 @@ extension Models {
             self.slug = try container.decode(String.self, forKey: .slug)
             self.colorString = try container.decodeIfPresent(String.self, forKey: .colorString)
             self.logoUrl = try container.decodeIfPresent(URL.self, forKey: .logoUrl)
-            self.brandLegacyFlexcodes = try container.decodeIfPresent([Models.Brand.LegacyFlexcode].self, forKey: .brandLegacyFlexcodes)
+            self.brandLegacyFlexcodes = try container.decodeIfPresent(
+                [Models.Brand.LegacyFlexcode].self,
+                forKey: .brandLegacyFlexcodes
+            )
         }
     }
 }

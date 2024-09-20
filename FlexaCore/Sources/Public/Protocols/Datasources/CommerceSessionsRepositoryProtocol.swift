@@ -24,9 +24,18 @@ public enum CommerceSessionEvent {
 }
 
 public protocol CommerceSessionsRepositoryProtocol {
-    func stopWatching()
-    func watch(_ onEvent: @escaping (Result<CommerceSessionEvent, Error>) -> Void)
-    func create(brand: Brand, amount: Decimal, assetId: String, paymentAssetId: String) async throws -> CommerceSession
+    func watch(currentOnly: Bool, onEvent: @escaping (Result<CommerceSessionEvent, Error>) -> Void)
+    func get(_ id: String) async throws -> CommerceSession
+    func getCurrent() async throws -> (
+        commerceSession: CommerceSession?,
+        isLegacy: Bool,
+        wasTransactionSent: Bool,
+        lastEventId: String?
+    )
+    func setCurrent(_ commerceSession: CommerceSession?, isLegacy: Bool, wasTransactionSent: Bool)
+    func clearCurrent()
     func close(_ id: String) async throws
     func setPaymentAsset(commerceSessionId: String, assetId: String) async throws
+    func stopWatching()
+    func create(brand: Brand, amount: Decimal, assetId: String, paymentAssetId: String) async throws -> CommerceSession
 }

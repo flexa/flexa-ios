@@ -15,20 +15,27 @@ extension LegacyFlexcodeList {
         @Published var brands: [Brand] = []
 
         init() {
-            refreshMerchants()
+            refreshBrands()
+            loadBrands()
+        }
+
+        func loadBrands() {
             Task { [weak self] in
-                _ = try await self?.brandsRepository.refresh()
-                self?.refreshMerchants()
+                try await self?.brandsRepository.refresh()
+                if let self {
+                    await MainActor.run {
+                        self.refreshBrands()
+                    }
+                }
             }
         }
 
-        func refreshMerchants() {
-            DispatchQueue.main.async {
-                let pinnedMerchantIds = self.brandsRepository.pinnedBrandIds
-                self.brands = pinnedMerchantIds.compactMap { brandId in
-                    self.brandsRepository.legacyFlexcodeBrands.first { $0.id == brandId }
-                } + self.brandsRepository.legacyFlexcodeBrands.filter { !pinnedMerchantIds.contains($0.id) }
-            }
+        func refreshBrands() {
+            let pinnedMerchantIds = self.brandsRepository.pinnedBrandIds
+            self.brands = pinnedMerchantIds.compactMap { brandId in
+                self.brandsRepository.legacyFlexcodeBrands.first { $0.id == brandId }
+            } + self.brandsRepository.legacyFlexcodeBrands.filter { !pinnedMerchantIds.contains($0.id) }
+
         }
     }
 }
