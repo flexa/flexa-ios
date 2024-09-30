@@ -16,6 +16,7 @@ class AppStateManager: AppStateManagerProtocol {
     @Injected(\.accountRepository) var accountsRepository
     @Injected(\.brandsRepository) var brandsRepository
     @Injected(\.assetsRepository) var assetsRepository
+    @Injected(\.exchangeRatesRepository) var exchangeRateRepository
     @Injected(\.authStore) var authStore
     @Injected(\.eventNotifier) var eventNotifier
     @Injected(\.flexaClient) var flexaClient
@@ -69,6 +70,7 @@ class AppStateManager: AppStateManagerProtocol {
 
             if !flexaClient.appAccounts.isEmpty {
                 appAccountsRepository.backgroundRefresh()
+                exchangeRateRepository.backgroundRefresh()
             }
         }
 

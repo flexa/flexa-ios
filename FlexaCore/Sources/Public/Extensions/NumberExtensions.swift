@@ -7,13 +7,13 @@
 
 import Foundation
 
-extension Decimal {
+public extension Decimal {
     var apiFormatted: String {
         Decimal(string: self.description, locale: Locale(identifier: "en_US"))?.description ?? ""
     }
 }
 
-extension NSNumber {
+public extension NSNumber {
     var asCurrency: String {
         let formatter = NumberFormatter()
         formatter.usesGroupingSeparator = true
@@ -25,20 +25,27 @@ extension NSNumber {
     }
 }
 
-extension Double {
+public extension Double {
     var asCurrency: String {
         NSNumber(value: self).asCurrency
     }
 }
 
-extension Float {
+public extension Float {
     var asCurrency: String {
         NSNumber(value: self).asCurrency
     }
 }
 
-extension Decimal {
+public extension Decimal {
     var asCurrency: String {
         (self as NSDecimalNumber).asCurrency
+    }
+
+    func rounded(places: Int) -> Decimal {
+        var decimal = self
+        var rounded: Decimal = 0
+        NSDecimalRound(&rounded, &decimal, places, .down)
+        return rounded
     }
 }

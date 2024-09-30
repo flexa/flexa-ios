@@ -17,12 +17,15 @@ protocol AssetHelperProtocol {
     func color(for asset: AssetWrapper) -> Color?
     func fxAccount(for: AssetWrapper) -> FXAppAccount?
     func fxAsset(_ asset: AssetWrapper) -> FXAvailableAsset?
+    func usdAvailableBalance(_ asset: AssetWrapper) -> Decimal?
+    func exchangeRate(_ asset: AssetWrapper) -> ExchangeRate?
 }
 
 struct AssetHelper: AssetHelperProtocol {
     @Injected(\.flexaClient) var flexaClient
     @Injected(\.appAccountsRepository) var appAccountsRepository
     @Injected(\.assetsRepository) var assetsRepository
+    @Injected(\.exchangeRatesRepository) var exchangeRatesRepository
 
     func assetWithKey(for asset: AssetWrapper) -> AppAccountAsset {
         if asset.asset.assetKey != nil {
@@ -82,5 +85,18 @@ struct AssetHelper: AssetHelperProtocol {
             .findBy(accountId: appAccount.accountId)?
             .availableAssets
             .findBy(assetId: asset.assetId)
+    }
+
+    func exchangeRate(_ asset: AssetWrapper) -> ExchangeRate? {
+        exchangeRatesRepository.find(by: asset.assetId, unitOfAccount: FlexaConstants.usdAssetId)
+    }
+
+    func usdAvailableBalance(_ asset: AssetWrapper) -> Decimal? {
+        guard let availableBalance = fxAsset(asset)?.balanceAvailable,
+              let exchangeRate = exchangeRate(asset) else {
+            return nil
+        }
+
+        return (availableBalance * exchangeRate.decimalPrice).rounded(places: exchangeRate.precision)
     }
 }

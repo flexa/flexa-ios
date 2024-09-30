@@ -91,6 +91,8 @@ internal enum L10n {
     internal static let loading = L10n.tr("Localizable", "common.loading", fallback: "Loading")
     /// Ok
     internal static let ok = L10n.tr("Localizable", "common.ok", fallback: "Ok")
+    /// Updating
+    internal static let updating = L10n.tr("Localizable", "common.updating", fallback: "Updating")
   }
   internal enum ConfirmAccountDeletion {
     internal enum Buttons {
@@ -197,6 +199,10 @@ internal enum L10n {
     }
     internal enum AmountEntry {
       internal enum Buttons {
+        internal enum BalanceUnavailable {
+          /// Balance Not Yet Available
+          internal static let title = L10n.tr("Localizable", "legacy_flexcode.amount_entry.buttons.balance_unavailable.title", fallback: "Balance Not Yet Available")
+        }
         internal enum EnterAmount {
           /// Enter Amount
           internal static let title = L10n.tr("Localizable", "legacy_flexcode.amount_entry.buttons.enter_amount.title", fallback: "Enter Amount")
@@ -327,6 +333,16 @@ internal enum L10n {
         }
       }
     }
+    internal enum Balance {
+      /// %s Balance
+      internal static func title(_ p1: UnsafePointer<CChar>) -> String {
+        return L10n.tr("Localizable", "payment.balance.title", p1, fallback: "%s Balance")
+      }
+    }
+    internal enum BalanceUnavailable {
+      /// Balance Not Yet Available
+      internal static let title = L10n.tr("Localizable", "payment.balance_unavailable.title", fallback: "Balance Not Yet Available")
+    }
     internal enum CurrencyAvaliable {
       /// %s Available
       internal static func title(_ p1: UnsafePointer<CChar>) -> String {
@@ -391,6 +407,14 @@ internal enum L10n {
         return L10n.tr("Localizable", "payment.using_ticker.subtitle", p1, fallback: "Using %s")
       }
     }
+  }
+  internal enum UpdatingBalance {
+    /// Your recent transaction is still mining. You can spend up to **%s** now, or wait for your full balance to become available.
+    internal static func text(_ p1: UnsafePointer<CChar>) -> String {
+      return L10n.tr("Localizable", "updating_balance.text", p1, fallback: "Your recent transaction is still mining. You can spend up to **%s** now, or wait for your full balance to become available.")
+    }
+    /// Balance Updating...
+    internal static let title = L10n.tr("Localizable", "updating_balance.title", fallback: "Balance Updating...")
   }
 }
 // swiftlint:enable explicit_type_interface function_parameter_count identifier_name line_length

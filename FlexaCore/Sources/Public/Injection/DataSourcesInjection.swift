@@ -49,4 +49,8 @@ public extension Container {
     var appNotificationsRepository: Factory<AppNotificationsRepositoryProtocol> {
         self { AppNotificationsRepository() }.singleton
     }
+
+    var exchangeRatesRepository: Factory<ExchangeRatesRepositoryProtocol> {
+        self { ExchangeRatesRepository() }.singleton
+    }
 }

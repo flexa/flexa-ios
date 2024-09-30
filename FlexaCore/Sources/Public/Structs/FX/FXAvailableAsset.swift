@@ -29,10 +29,12 @@ public struct FXAvailableAsset {
 
     /// The decimal balance of the asset in this account, using as many units of precision as it is possible for your app to provide.
     public let balance: Decimal
+    public let balanceAvailable: Decimal?
 
     public init(assetId: String,
                 symbol: String,
                 balance: Decimal,
+                balanceAvailable: Decimal? = nil,
                 icon: UIImage? = nil,
                 displayName: String? = nil,
                 logoImageUrl: URL? = nil,
@@ -41,10 +43,20 @@ public struct FXAvailableAsset {
         self.assetId = assetId
         self.symbol = symbol
         self.balance = balance
+        self.balanceAvailable = balanceAvailable
         self.displayName = nil
         self.icon = icon
         self.accentColor = accentColor
         self.logoImageUrl = logoImageUrl
+    }
+}
+
+public extension FXAvailableAsset {
+    var isUpdatingBalance: Bool {
+        guard let balanceAvailable else {
+            return false
+        }
+        return balanceAvailable < balance
     }
 }
 

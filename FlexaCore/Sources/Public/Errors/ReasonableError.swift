@@ -69,6 +69,7 @@ public extension ReasonableError {
         case cannotSyncAppAccounts(Error?)
         case cannotDeleteAppNotification(Error?)
         case cannotConvertAsset(Error?)
+        case cannotGetExchangeRates(Error?)
         case cannotGetAssets(Error?)
         case cannotGetBrands(Error?)
         case cannotSignTransaction(Error?)

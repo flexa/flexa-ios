@@ -6,8 +6,7 @@ import FlexaCore
 class TransactionAssetDetailsViewModel: ObservableObject {
     typealias Strings = L10n.Payment.Asset.ExchangeRate
 
-    @Injected(\.assetConverterRepository) var assetConverter
-
+    @Injected(\.exchangeRatesRepository) var exchangeRatesRepository
     @Published var title: String
     @Published var logoUrl: URL?
     @Published var logoImage: UIImage?
@@ -22,6 +21,9 @@ class TransactionAssetDetailsViewModel: ObservableObject {
     @Published var displayMode: DisplayMode
     @Published var isLoading: Bool = false
 
+    var showUpdatingBalanceView: Bool = false
+    var availableUSDBalance: Decimal
+
     var showNetworkFee: Bool {
         !networkFee.isEmpty || isLoading
     }
@@ -30,17 +32,11 @@ class TransactionAssetDetailsViewModel: ObservableObject {
         !baseNetworkFee.isEmpty
     }
 
-    var convertedAsset: ConvertedAsset? {
-        didSet {
-            updateExchangeRateLabels()
-        }
-    }
-
     private var decimalAmount: Decimal? {
         mainAmount.digitsAndSeparator?.decimalValue
     }
 
-    private let usdAssetId = "iso4217/USD"
+    private let usdAssetId = FlexaConstants.usdAssetId
 
     init(
         displayMode: DisplayMode,
@@ -59,6 +55,7 @@ class TransactionAssetDetailsViewModel: ObservableObject {
         self.baseNetworkFee = baseNetworkFee
         self.baseNetworkFeeColor = baseNetworkFeeColor
         self.logoImage = asset.logoImage
+        self.availableUSDBalance = asset.availableUSDBalance ?? 0
 
         if let exchange = asset.exchange {
             self.exchangeRate = Strings.value(asset.assetSymbol, exchange.asCurrency)
@@ -76,38 +73,32 @@ class TransactionAssetDetailsViewModel: ObservableObject {
             self.mainAmount = mainAmount
             self.secondaryAmount = ""
             self.networkFee = ""
+            updateExchangeRateLabels(asset)
 
-            let formatter = NumberFormatter()
-            formatter.maximumFractionDigits = 6
-
-            if let exchange = asset.exchange,
-               let decimalAmount,
-               let value = formatter.string(for: decimalAmount / exchange) {
-                self.secondaryAmount = Strings.amount(value, asset.assetSymbol)
-            }
-
-            loadQuote(for: asset, from: usdAssetId, to: asset.assetId)
+            loadExchangeRate(for: asset, from: usdAssetId, to: asset.assetId)
         case .asset:
             self.title = asset.assetSymbol
-            self.mainAmount = asset.valueLabel
-            self.secondaryAmount = asset.label
+            if let balance = asset.usdBalance, asset.isUpdatingBalance {
+                self.mainAmount = L10n.Payment.Balance.title(balance.asCurrency)
+            } else {
+                self.mainAmount = asset.valueLabel
+            }
+            self.secondaryAmount = ""
             self.networkFee = ""
+            updateExchangeRateLabels(asset)
+            self.showUpdatingBalanceView = asset.isUpdatingBalance
+            loadExchangeRate(for: asset, from: usdAssetId, to: asset.assetId)
         }
     }
 
-    func loadQuote(for asset: AssetWrapper, from fromAsset: String, to toAsset: String) {
+    func loadExchangeRate(for asset: AssetWrapper, from fromAsset: String, to toAsset: String) {
         isLoading = true
 
         Task {
             do {
-                let convertedAsset = try await assetConverter.convert(
-                    amount: decimalAmount ?? 0,
-                    from: fromAsset,
-                    to: toAsset
-                )
-
+                try await exchangeRatesRepository.refresh()
                 await MainActor.run {
-                    self.convertedAsset = convertedAsset
+                    updateExchangeRateLabels(asset)
                     isLoading = false
                 }
             } catch let error {
@@ -120,15 +111,17 @@ class TransactionAssetDetailsViewModel: ObservableObject {
         }
     }
 
-    func updateExchangeRateLabels() {
-        guard let convertedAsset else {
-            return
-        }
+    func updateExchangeRateLabels(_ asset: AssetWrapper) {
+        let formatter = NumberFormatter()
+        formatter.maximumFractionDigits = 6
 
-        mainAmount = convertedAsset.label
-        secondaryAmount = convertedAsset.value.label
-        exchangeRate = convertedAsset.value.rate.label
-        networkFee = Strings.networkFee(convertedAsset.fee.equivalent)
+        if let exchange = asset.exchange,
+           let decimalAmount,
+           let value = formatter.string(for: decimalAmount / exchange) {
+            secondaryAmount = Strings.amount(value, asset.assetSymbol)
+            exchangeRate = Strings.value(asset.assetSymbol, asset.exchangeRate?.label ?? exchange.asCurrency)
+            networkFee = Strings.cannotLoadNetworkFee
+        }
     }
 }
 

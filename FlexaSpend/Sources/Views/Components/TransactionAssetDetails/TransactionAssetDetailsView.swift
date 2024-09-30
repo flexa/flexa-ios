@@ -14,6 +14,24 @@ struct TransactionAssetDetailsView: View {
 
     var tintColor: Color
 
+    init(showView: Binding<Bool>,
+         tintColor: Color = .purple,
+         viewModel: TransactionAssetDetailsViewModel) {
+        _showView = showView
+        self.viewModel = viewModel
+        self.tintColor = tintColor
+    }
+
+    var body: some View {
+        detailsView
+        .navigationBarItems(
+            leading: viewModel.displayMode == .transaction ? leftHeaderView : nil,
+            trailing: rightHeaderView
+        )
+    }
+}
+
+private extension TransactionAssetDetailsView {
     @ViewBuilder
     var leftHeaderView: some View {
         FlexaRoundedButton(
@@ -38,6 +56,15 @@ struct TransactionAssetDetailsView: View {
     }
 
     @ViewBuilder
+    var headerView: some View {
+        if viewModel.showUpdatingBalanceView {
+            UpdatingBalanceView(
+                backgroundColor: Color(UIColor.quaternarySystemFill), amount: viewModel.availableUSDBalance
+            )
+        }
+    }
+
+    @ViewBuilder
     var rightHeaderView: some View {
         Button(action: {
             showView = false
@@ -54,20 +81,12 @@ struct TransactionAssetDetailsView: View {
         }).padding(.trailing, 4)
     }
 
-    public init(showView: Binding<Bool>,
-                tintColor: Color = .purple,
-                viewModel: TransactionAssetDetailsViewModel) {
-        _showView = showView
-        self.viewModel = viewModel
-        self.tintColor = tintColor
-    }
-
     @ViewBuilder
     var detailsView: some View {
         List {
             Section(
-                footer:
-                    footerView
+                header: headerView,
+                footer: footerView
             ) {
                 HStack {
                     VStack(alignment: .leading) {
@@ -139,18 +158,11 @@ struct TransactionAssetDetailsView: View {
                 }
             }
         }
+        //.disableScroll()
         .padding(.top, -24)
         .animation(.none)
         .background(backgroundColor)
         .navigationBarTitle(viewModel.title, displayMode: .inline)
-    }
-
-    public var body: some View {
-        detailsView
-        .navigationBarItems(
-            leading: viewModel.displayMode == .transaction ? leftHeaderView : nil,
-            trailing: rightHeaderView
-        )
     }
 }
 

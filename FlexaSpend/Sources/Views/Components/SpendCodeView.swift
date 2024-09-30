@@ -38,11 +38,19 @@ extension SpendCodeView {
         }
 
         var balance: String {
-            asset.valueLabelTitleCase
+            if let balance = asset.usdBalance, asset.isUpdatingBalance {
+                return L10n.Payment.Balance.title(balance.asCurrency)
+            } else {
+                return asset.valueLabelTitleCase
+            }
         }
 
         var isExpired: Bool {
             Date() >= createdDate.addingTimeInterval(timeInterval)
+        }
+
+        var isUpdatingBalance: Bool {
+            asset.isUpdatingBalance
         }
 
         var hasFlexcodes: Bool {
@@ -53,6 +61,10 @@ extension SpendCodeView {
             flexcodes.values.contains {
                 $0.image != nil
             }
+        }
+
+        var availableUSDBalance: Decimal? {
+            asset.availableUSDBalance
         }
 
         init(asset: AssetWrapper) {
@@ -97,7 +109,7 @@ extension SpendCodeView {
         private func updateCode() {
             flexcodes = flexcodeGenerator.flexcodes(for: asset.assetWithKey)
             let code = flexcodes.values.first?.code
-
+            FlexaLogger.debug("\(asset.assetSymbol): \(code ?? "no-code")")
             self.code = code ?? ""
             self.pdf417Image = flexcodes[.pdf417]?.image ?? UIImage()
             self.code128Image = flexcodes[.code128]?.image ?? UIImage()
@@ -154,23 +166,28 @@ struct SpendCodeView: View {
                 .frame(maxWidth: .infinity)
                 .padding(padding)
             }
-            ZStack {
-                Button {
-                    buttonAction()
-                } label: {
-                    HStack {
-                        Text(viewModel.balance)
-                            .font(.body.weight(.light))
-                            .foregroundColor(.secondary)
-                            .frame(height: 34)
-                            .padding(.leading, 16)
-                        Image(systemName: "chevron.right")
-                            .resizable()
-                            .scaledToFit()
-                            .foregroundColor(.secondary)
-                            .frame(width: 14, height: 14, alignment: .center)
-                            .padding(.trailing, 14)
-                    }.modifier(RoundedView(color: .secondary.opacity(0.1)))
+            Button {
+                buttonAction()
+            } label: {
+                HStack {
+                    Text(viewModel.balance)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.secondary)
+                        .frame(height: 34)
+                        .padding(.leading, 16)
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.medium))
+                        .foregroundColor(.secondary)
+                        .padding(.trailing, 14)
+                }
+            }
+            if viewModel.isUpdatingBalance {
+                HStack(spacing: 10) {
+                    ProgressView()
+                    Text(L10n.Common.updating.uppercased())
+                        .foregroundColor(.secondary)
+                        .font(.subheadline.weight(.medium))
+                        .opacity(0.5)
                 }
             }
         }

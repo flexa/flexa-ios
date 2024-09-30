@@ -18,7 +18,7 @@ public extension UserDefaults {
         case brands = "brands"
         case legacyBrands = "legacy_brands"
         case assets = "assets"
-        case quotes = "quotes"
+        case exchangeRates = "exchange_rates"
         case apiHost = "flexa_api_host"
     }
 

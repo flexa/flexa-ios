@@ -87,6 +87,7 @@ struct FXAvailableAsset {
     let accentColor: UIColor?
     let assetId: String
     let balance: Decimal
+    let balanceAvailable: Decimal?
     let displayName: String?
     let icon: UIImage
     let symbol: String?
@@ -136,6 +137,7 @@ struct FXAvailableAsset {
     let accentColor: UIColor?
     let assetId: String
     let balance: Decimal
+    let balanceAvailable: Decimal?
     let displayName: String?
     let icon: UIImage
     let symbol: String?

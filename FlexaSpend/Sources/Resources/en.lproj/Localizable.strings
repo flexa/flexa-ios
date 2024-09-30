@@ -4,6 +4,7 @@
 "common.flexa" = "flexa";
 "common.loading" = "Loading";
 "common.cancel" = "Cancel";
+"common.updating" = "Updating";
 
 // Primary view
 "payment.pay_with_flexa.title" = "Pay with Flexa";
@@ -12,6 +13,7 @@
 "payment.hide_short_balances.title" = "Hide Short Balances";
 "payment.error_login_to_authorize" = "Login to authorize the transaction.";
 "payment.currency_avaliable.title" = "%s Available";
+"payment.balance.title" = "%s Balance";
 
 // No Assets View.
 // The description has different parameters, and different messages for each amount, that is why we are not using pluralization here
@@ -41,6 +43,7 @@
 "payment.not_enough" = "Not enough %s for this payment";
 "payment.pay_merchant" = "Pay %s";
 "payment.using" = "Using";
+"payment.balance_unavailable.title" = "Balance Not Yet Available";
 
 // Flexa Account
 "account.navigation.title" = "Account";
@@ -116,3 +119,8 @@
 "legacy_flexcode.amount_entry.labels.maximum_amount" = "Maximum Amount: %s";
 "legacy_flexcode.amount_entry.buttons.enter_amount.title" = "Enter Amount";
 "legacy_flexcode.amount_entry.buttons.pay_now.title" = "Confirm";
+"legacy_flexcode.amount_entry.buttons.balance_unavailable.title" = "Balance Not Yet Available";
+
+// Updating balance
+"updating_balance.title" = "Balance Updating...";
+"updating_balance.text" = "Your recent transaction is still mining. You can spend up to **%s** now, or wait for your full balance to become available.";

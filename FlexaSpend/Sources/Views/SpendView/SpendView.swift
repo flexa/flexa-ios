@@ -90,7 +90,7 @@ struct SpendView: View {
             .onReceive(viewModel.$isShowingModal, perform: showPaymentModalDidChange)
             .onError(error: $viewModel.error)
             .navigationTitle(Text(L10n.Payment.PayWithFlexa.title))
-            .navigationBarTitleDisplayMode(viewModel.showInvalidAssetMessage ? .inline : .automatic)
+            .navigationBarTitleDisplayMode(viewModel.showInlineNavigationTitle ? .inline : .automatic)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 8) {
@@ -135,12 +135,18 @@ struct SpendView: View {
 
     private var flexcodeCarousel: some View {
         let width = UIScreen.main.bounds.width - 2 * padding
+        var height: CGFloat = 300
+
+        if viewModel.flexCodes.contains(where: { $0.isUpdatingBalance }) {
+            height += 40
+        }
+
         return SpendSnapCarousel(
             items: viewModel.flexCodes,
             selectedIndex: $selectedAssetIndex,
             itemSize: CGSize(
                 width: width,
-                height: 300),
+                height: height),
             spacing: 10,
             horizontalPadding: padding
         ) { code in
@@ -344,6 +350,7 @@ private extension SpendView {
                         asset: selectedAsset,
                         paymentDone: $viewModel.paymentCompleted,
                         payButtonEnabled: $viewModel.paymentButtonEnabled,
+                        assetSwitcherEnabled: $viewModel.assetSwitcherEnabled,
                         merchantLogoUrl: viewModel.merchantLogoUrl,
                         merchantName: viewModel.merchantName,
                         didConfirm: {

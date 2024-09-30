@@ -28,7 +28,11 @@ struct AssetRow: View {
          showInfo: @escaping () -> Void) {
 
         self.title = asset.assetSymbol
-        self.subtitle = asset.valueLabelTitleCase
+        if let balance = asset.usdBalance, asset.isUpdatingBalance {
+            self.subtitle = L10n.Payment.Balance.title(balance.asCurrency).lowercased()
+        } else {
+            self.subtitle = asset.valueLabelTitleCase
+        }
         self.logoUrl = asset.logoImageUrl
         self.logoImage = asset.logoImage
         self.gradientColors = []

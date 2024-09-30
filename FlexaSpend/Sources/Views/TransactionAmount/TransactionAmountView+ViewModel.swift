@@ -35,9 +35,9 @@ extension TransactionAmountView.ViewModel {
 }
 
 extension TransactionAmountView {
-    class ViewModel: ObservableObject {
-        typealias Strings = L10n.LegacyFlexcode.AmountEntry
+    typealias Strings = L10n.LegacyFlexcode.AmountEntry
 
+    class ViewModel: ObservableObject {
         @Published var isLoading = false
         @Published var amountText = "$0"
         @Published var error: Error?
@@ -59,7 +59,7 @@ extension TransactionAmountView {
         @Injected(\.assetConfig) var assetConfig
         private var digitsAdded = false
 
-        let usdAssetId = "iso4217/USD"
+        let usdAssetId = FlexaConstants.usdAssetId
         let locale = Locale(identifier: "en-US")
 
         var commerceSession: CommerceSession?
@@ -151,6 +151,10 @@ extension TransactionAmountView {
                 return Strings.Buttons.EnterAmount.title
             }
 
+            if !isBalanceAvailable && !paymentButtonEnabled {
+                return ""
+            }
+
             return Strings.Buttons.PayNow.title
         }
 
@@ -160,6 +164,10 @@ extension TransactionAmountView {
 
         var isAmountHigherThanMin: Bool {
             (amountText.decimalValue ?? 0) >= minimumAmount
+        }
+
+        var availableUSDBalance: Decimal {
+            selectedAsset?.availableUSDBalance ?? 0
         }
 
        @Published var showMinimumAmountMessage = false {
@@ -185,10 +193,26 @@ extension TransactionAmountView {
             guard !isLoading,
                   hasAmount,
                   let amount = amountText.decimalValue,
-                  let balance = selectedAsset?.asset.assetValue.label.decimalValue else {
+                  let balance =
+                    selectedAsset?.availableUSDBalance ?? selectedAsset?.asset.assetValue.label.decimalValue else {
                 return false
             }
             return balance >= amount && amount >= minimumAmount
+        }
+
+        var showNoBalanceButton: Bool {
+            !isLoading &&
+            !paymentButtonEnabled &&
+            hasAmount &&
+            !isBalanceAvailable &&
+            showConfirmationButtonTitle
+        }
+
+        var isBalanceAvailable: Bool {
+            guard let selectedAsset else {
+                return true
+            }
+            return !selectedAsset.isUpdatingBalance
         }
 
         init(brand: Brand?) {

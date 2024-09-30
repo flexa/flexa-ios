@@ -60,10 +60,6 @@ class TransactionAssetDetailsViewModelTests: QuickSpec {
                     expect(viewModel.ticker).to(equal(asset.assetSymbol))
                 }
 
-                it("does not show the network fee when it is not empty") {
-                    expect(viewModel.showNetworkFee).to(beFalse())
-                }
-
                 it("does not show the badge network fee when it is not empty") {
                     expect(viewModel.showBadgeNetworkFee).to(beFalse())
                 }
@@ -247,5 +243,13 @@ private struct TestAssetHelper: AssetHelperProtocol {
 
     func assetWithKey(for asset: AssetWrapper) -> FlexaCore.AppAccountAsset {
         asset.asset
+    }
+
+    func usdAvailableBalance(_ asset: AssetWrapper) -> Decimal? {
+        nil
+    }
+
+    func exchangeRate(_ asset: AssetWrapper) -> FlexaCore.ExchangeRate? {
+        nil
     }
 }

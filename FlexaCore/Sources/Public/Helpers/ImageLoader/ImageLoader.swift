@@ -64,7 +64,7 @@ public struct CacheImageLoader: ImageLoader {
                 } else {
                     // We may want to throw an error here, or just return nil
                     if let error {
-                        print(error)
+                        FlexaLogger.error(error)
                     }
                     continuation.resume(returning: nil)
                 }

@@ -16,6 +16,7 @@ struct PayNowModal: View {
     @Binding private var isShowing: Bool
     @Binding private var paymentDone: Bool
     @Binding private var payButtonEnabled: Bool
+    @Binding private var assetSwitcherEnabled: Bool
     @State var showTransactionDetails: Bool = false
 
     public var didConfirm: Closure?
@@ -80,6 +81,7 @@ struct PayNowModal: View {
                            contentView:
                             PayNowContentView(paymentDone: $paymentDone,
                                               payButtonEnabled: $payButtonEnabled,
+                                              assetSwitcherEnabled: $assetSwitcherEnabled,
                                               didSelect: didSelect,
                                               value: value,
                                               asset: asset,
@@ -112,6 +114,7 @@ struct PayNowModal: View {
          asset: AssetWrapper,
          paymentDone: Binding<Bool>,
          payButtonEnabled: Binding<Bool>,
+         assetSwitcherEnabled: Binding<Bool>,
          merchantLogoUrl: URL?,
          merchantName: String,
          didConfirm: Closure?,
@@ -120,6 +123,7 @@ struct PayNowModal: View {
         _isShowing = isShowing
         _paymentDone = paymentDone
         _payButtonEnabled = payButtonEnabled
+        _assetSwitcherEnabled = assetSwitcherEnabled
         self.didConfirm = didConfirm
         self.didCancel = didCancel
         self.didSelect = didSelect
@@ -166,6 +170,8 @@ struct PayNowContentView: View {
     public typealias Closure = () -> Void
     @Binding var paymentDone: Bool
     @Binding var payButtonEnabled: Bool
+    @Binding var assetSwitcherEnabled: Bool
+    @State var showUpdatingBalanceAlert: Bool = false
     public var didSelect: Closure?
     var value: String
     var asset: AssetWrapper
@@ -174,6 +180,10 @@ struct PayNowContentView: View {
     var merchantName = ""
     var didConfirm: Closure?
 
+    var showUpdatingBalanceButton: Bool {
+        !payButtonEnabled && asset.isUpdatingBalance && !asset.enoughBalance(for: value.decimalValue ?? 0)
+    }
+
     private let gradientStops: [Gradient.Stop] = [
         Gradient.Stop(color: Color(hex: "#006CFF"), location: 0),
         Gradient.Stop(color: Color(hex: "#2A00FF"), location: 0.51),
@@ -181,11 +191,18 @@ struct PayNowContentView: View {
     ]
 
     private var linearGradient: LinearGradient {
-        LinearGradient(
+        guard !showUpdatingBalanceButton else {
+            return LinearGradient(colors: [Color(UIColor.systemGray3)], startPoint: .leading, endPoint: .trailing)
+        }
+        return LinearGradient(
             gradient: Gradient(stops: gradientStops),
             startPoint: .leading,
             endPoint: .trailing
         )
+    }
+
+    private var payNowButtonForeground: Color {
+        showUpdatingBalanceButton ? .clear : .white
     }
 
     var body: some View {
@@ -243,29 +260,49 @@ struct PayNowContentView: View {
                             didSelect?()
                         }.frame(idealHeight: 44)
                             .padding(.top, 10)
-                            .disabled(!payButtonEnabled)
+                            .disabled(!assetSwitcherEnabled)
 
-                        Button {
-                            didConfirm?()
-                        } label: {
-                            Text(L10n.Payment.payNow)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .font(.body.weight(.semibold))
-                                .foregroundColor(.white)
+                        ZStack {
+                            Button {
+                                didConfirm?()
+                            } label: {
+                                Text(L10n.Payment.payNow)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .font(.body.weight(.semibold))
+                                    .foregroundColor(payNowButtonForeground)
+                            }
+                            .cornerRadius(13)
+                            .disabled(!payButtonEnabled)
+                            .opacity(payButtonEnabled ? 1 : 0.5)
+                            .frame(idealHeight: 51)
+                            .background(linearGradient)
+                            .cornerRadius(13)
+                            .overlay {
+                                if showUpdatingBalanceButton {
+                                    HStack {
+                                        Text(L10n.Payment.BalanceUnavailable.title)
+                                        Image(systemName: "info.circle")
+                                            .renderingMode(.template)
+                                            .onTapGesture {
+                                                showUpdatingBalanceAlert = true
+                                            }
+                                    }.flexaButton(
+                                        background: Color.clear,
+                                        textColor: .secondary
+                                    )
+                                }
+                            }
                         }
-                        .cornerRadius(13)
-                        .disabled(!payButtonEnabled)
-                        .opacity(payButtonEnabled ? 1 : 0.5)
-                        .frame(idealHeight: 51)
-                        .background(linearGradient)
-                        .cornerRadius(13)
                     }
                 }.padding(.top, 20)
             }.background(Color.clear)
                 .listRowBackground(Color.clear)
         }.listStyle(PlainListStyle())
         .padding(.top, 16)
+        .alert(isPresented: $showUpdatingBalanceAlert) {
+            UpdatingBalanceView.alert(asset.availableUSDBalance ?? 0)
+        }
     }
 
     mutating func updateAsset() {

@@ -19,6 +19,7 @@ struct TransactionAmountView: View {
     @State private var showAssetsModal = false
     @State private var shakeAmount: Int = 0
     @State private var animateShaking = true
+    @State private var showPopover = false
     @StateObject var viewModel: ViewModel
     @StateObject private var viewModelAsset: AssetSelectionViewModel
 
@@ -64,12 +65,12 @@ struct TransactionAmountView: View {
             .padding(.top, .topPadding)
             closeButton
         }
-        .errorAlert(error: $viewModel.error)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.thinMaterial)
         .dragIndicator(true)
         transactionDetailsSheet
         assetSwitcher
+        alerts
     }
 
     var brandLogo: some View {
@@ -177,7 +178,7 @@ struct TransactionAmountView: View {
                     if viewModel.isLoading {
                         ProgressView().tint(.white)
                     } else {
-                        if viewModel.showConfirmationButtonTitle {
+                        if viewModel.showConfirmationButtonTitle && !viewModel.showNoBalanceButton {
                             Image(systemName: "faceid")
                                 .renderingMode(.template)
                                 .foregroundColor(.white.opacity(0.5))
@@ -195,8 +196,23 @@ struct TransactionAmountView: View {
                 Button {
                     performShake()
                 } label: {
-                    Text("")
-                        .flexaButton(background: Color.clear)
+                    if viewModel.showNoBalanceButton {
+                        HStack {
+                            Text(Strings.Buttons.BalanceUnavailable.title)
+                            Image(systemName: "info.circle")
+                                .renderingMode(.template)
+                                .onTapGesture {
+                                    showPopover = true
+                                }
+                                .updatingBalancePopover($showPopover, balanceAvailable: viewModel.availableUSDBalance)
+                        }.flexaButton(
+                            background: Color.clear,
+                            textColor: gradientColors.first?.opacity(0.4) ?? .white
+                        )
+                    } else {
+                        Text("")
+                            .flexaButton(background: Color.clear)
+                    }
                 }
             }
         }
@@ -240,6 +256,25 @@ struct TransactionAmountView: View {
                 )
             }
         }
+    }
+
+    @ViewBuilder
+    var alerts: some View {
+        blankView()
+            .errorAlert(error: $viewModel.error)
+        if #unavailable(iOS 16.4) {
+            blankView()
+                .alert(isPresented: $showPopover) {
+                    UpdatingBalanceView.alert(viewModel.availableUSDBalance)
+                }
+        }
+    }
+
+    private func blankView() -> some View {
+        Text("")
+            .frame(width: 0, height: 0)
+            .hidden()
+            .alertTintColor(.purple)
     }
 
     private func numpadRow(keys: [String]) -> some View {
@@ -298,7 +333,6 @@ struct TransactionAmountView: View {
 
 // MARK: Asset Switcher
 private extension TransactionAmountView {
-
     @ViewBuilder
     var assetSwitcher: some View {
         if #available(iOS 16, *) {
@@ -333,6 +367,22 @@ private extension TransactionAmountView {
                             updateAsset: { _ in
             showAssetsModal = false
         }).zIndex(2)
+    }
+}
+
+private extension View {
+
+    @ViewBuilder
+    func updatingBalancePopover(_ showPopover: Binding<Bool>, balanceAvailable: Decimal) -> some View {
+        if #available(iOS 16.4, *) {
+            popover(isPresented: showPopover, arrowEdge: .bottom) {
+                UpdatingBalanceView(backgroundColor: Color(UIColor.tertiarySystemBackground), amount: balanceAvailable)
+                    .frame(minHeight: 120)
+                    .presentationCompactAdaptation((.popover))
+            }
+        } else {
+            self
+        }
     }
 }
 

@@ -249,14 +249,6 @@ struct PersonalInformationView: View {
 }
 
 private extension View {
-    @ViewBuilder
-    func disableScroll() -> some View {
-        if #available(iOS 16.0, *) {
-            self.scrollDisabled(true)
-        } else {
-            self
-        }
-    }
 
     @ViewBuilder
     func pickerDetents(_ height: CGFloat) -> some View {

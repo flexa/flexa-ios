@@ -67,7 +67,15 @@ struct AssetWrapper: Identifiable {
         assetsHelper.assetWithKey(for: self)
     }
 
+    var exchangeRate: ExchangeRate? {
+        assetsHelper.exchangeRate(self)
+    }
+
     var exchange: Decimal? {
+        if let exchangeRate = assetsHelper.exchangeRate(self) {
+            return exchangeRate.decimalPrice
+        }
+
         guard let decimal = asset.assetValue.label.digitsAndSeparator?.decimalValue else {
             return  nil
         }
@@ -80,6 +88,18 @@ struct AssetWrapper: Identifiable {
 
     var assetColor: Color? {
         assetsHelper.color(for: self)
+    }
+
+    var isUpdatingBalance: Bool {
+        assetsHelper.fxAsset(self)?.isUpdatingBalance ?? false
+    }
+
+    var usdBalance: Decimal? {
+        asset.assetValue.label.digitsAndSeparator?.decimalValue
+    }
+
+    var availableUSDBalance: Decimal? {
+        assetsHelper.usdAvailableBalance(self)
     }
 
     init(appAccount: AppAccount, asset: AppAccountAsset) {
@@ -97,6 +117,10 @@ struct AssetWrapper: Identifiable {
 
         self.appAccount = account
         self.asset = asset
+    }
+
+    func enoughBalance(for usdAmount: Decimal) -> Bool {
+        availableUSDBalance ?? usdBalance ?? 0 >= usdAmount
     }
 }
 
