@@ -9,7 +9,7 @@ import Factory
 import SwiftUI
 
 protocol AssetHelperProtocol {
-    func assetWithKey(for asset: AssetWrapper) -> AppAccountAsset
+    func oneTimeKey(for asset: AssetWrapper) -> OneTimeKey?
     func symbol(for: AssetWrapper) -> String
     func displayName(for: AssetWrapper) -> String
     func logoImageUrl(for: AssetWrapper) -> URL?
@@ -17,34 +17,20 @@ protocol AssetHelperProtocol {
     func color(for asset: AssetWrapper) -> Color?
     func fxAccount(for: AssetWrapper) -> FXAppAccount?
     func fxAsset(_ asset: AssetWrapper) -> FXAvailableAsset?
-    func usdAvailableBalance(_ asset: AssetWrapper) -> Decimal?
+    func balanceInLocalCurrency(_ asset: AssetWrapper) -> Decimal
+    func availableBalanceInLocalCurrency(_ asset: AssetWrapper) -> Decimal?
     func exchangeRate(_ asset: AssetWrapper) -> ExchangeRate?
 }
 
 struct AssetHelper: AssetHelperProtocol {
     @Injected(\.flexaClient) var flexaClient
-    @Injected(\.appAccountsRepository) var appAccountsRepository
     @Injected(\.assetsRepository) var assetsRepository
     @Injected(\.exchangeRatesRepository) var exchangeRatesRepository
+    @Injected(\.oneTimeKeysRepository) var oneTimeKeysRepository
 
-    func assetWithKey(for asset: AssetWrapper) -> AppAccountAsset {
-        if asset.asset.assetKey != nil {
-            return asset.asset
-        }
-
+    func oneTimeKey(for asset: AssetWrapper) -> OneTimeKey? {
         let isLivemode = assetsRepository.assets.findBy(id: asset.assetId)?.livemode ?? false
-
-        let matchingAssetIds = assetsRepository
-            .assets
-            .filter { $0.livemode == isLivemode }
-            .map { $0.id }
-
-        let assetWithKey = appAccountsRepository.appAccounts
-            .compactMap { $0.accountAssets }
-            .joined()
-            .first { $0.assetKey != nil && matchingAssetIds.contains($0.assetId) }
-
-        return assetWithKey ?? asset.asset
+        return oneTimeKeysRepository.find(by: asset.assetId, orLivemode: isLivemode)
     }
 
     func logoImage(for asset: AssetWrapper) -> UIImage? {
@@ -76,27 +62,42 @@ struct AssetHelper: AssetHelperProtocol {
     }
 
     func fxAsset(_ asset: AssetWrapper) -> FXAvailableAsset? {
-        fxAsset(for: asset.asset, in: asset.appAccount)
+        fxAsset(assetId: asset.assetId, appAccountId: asset.accountId)
     }
 
-    func fxAsset(for asset: AppAccountAsset, in appAccount: any AppAccount) -> FXAvailableAsset? {
+    func fxAsset(assetId: String, appAccountId: String) -> FXAvailableAsset? {
         flexaClient
             .appAccounts
-            .findBy(accountId: appAccount.accountId)?
+            .findBy(accountId: appAccountId)?
             .availableAssets
-            .findBy(assetId: asset.assetId)
+            .findBy(assetId: assetId)
     }
 
     func exchangeRate(_ asset: AssetWrapper) -> ExchangeRate? {
         exchangeRatesRepository.find(by: asset.assetId, unitOfAccount: FlexaConstants.usdAssetId)
     }
 
-    func usdAvailableBalance(_ asset: AssetWrapper) -> Decimal? {
-        guard let availableBalance = fxAsset(asset)?.balanceAvailable,
-              let exchangeRate = exchangeRate(asset) else {
+    func balanceInLocalCurrency(_ asset: AssetWrapper) -> Decimal {
+        guard let availableBalance = fxAsset(asset)?.balance else {
+            return 0
+        }
+
+        return amountInLocalCurrency(availableBalance, asset: asset) ?? 0
+    }
+
+    func availableBalanceInLocalCurrency(_ asset: AssetWrapper) -> Decimal? {
+        guard let availableBalance = fxAsset(asset)?.balanceAvailable else {
             return nil
         }
 
-        return (availableBalance * exchangeRate.decimalPrice).rounded(places: exchangeRate.precision)
+        return amountInLocalCurrency(availableBalance, asset: asset)
+    }
+
+    func amountInLocalCurrency(_ amount: Decimal, asset: AssetWrapper) -> Decimal? {
+        guard let exchangeRate = exchangeRate(asset) else {
+            return nil
+        }
+
+        return (amount * exchangeRate.decimalPrice).rounded(places: exchangeRate.precision)
     }
 }

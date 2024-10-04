@@ -57,7 +57,7 @@ struct TransactionDetailsView: View {
             List {
                 Section(
                     footer:
-                        Text(L10n.Payment.TransactionDetails.footer)
+                        Text(.init(L10n.Payment.TransactionDetails.footer))
                 ) {
                     HStack {
                         VStack(alignment: .leading) {

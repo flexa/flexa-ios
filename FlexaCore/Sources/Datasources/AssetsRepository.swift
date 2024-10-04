@@ -13,6 +13,23 @@ class AssetsRepository: AssetsRepositoryProtocol {
     @Injected(\.flexaNetworkClient) private var networkClient
     @Injected(\.imageLoader) private var imageLoader
     @Injected(\.userDefaults) private var userDefaults
+    @Injected(\.flexaClient) private var flexaClient
+
+    private var lastSyncedAt: TimeInterval?
+    private let minSyncInterval: TimeInterval = 5 * 60
+    @Synchronized private var refreshAsyncTask: Task<[Asset], Error>?
+
+    private var shouldSync: Bool {
+        guard refreshAsyncTask == nil else {
+            return false
+        }
+
+        guard let lastSyncedAt else {
+            return true
+        }
+
+        return lastSyncedAt + minSyncInterval <= Date.now.timeIntervalSince1970
+    }
 
     private(set) var assets: [Asset] {
         get {
@@ -31,7 +48,51 @@ class AssetsRepository: AssetsRepositoryProtocol {
         }
     }
 
+    var availableClientAssets: [Asset] {
+        let clientAssetIds = flexaClient.appAccounts
+        var ids = flexaClient.appAccounts
+            .flatMap { $0.availableAssets }
+            .map { $0.assetId }
+
+        return assets.filter { ids.contains($0.id) }
+    }
+
     func refresh() async throws -> [Asset] {
+        if refreshAsyncTask == nil {
+            do {
+                let result = try await refreshTask()
+                refreshAsyncTask = nil
+                return result
+            } catch let error {
+                refreshAsyncTask = nil
+                throw error
+            }
+        }
+        return try await refreshAsyncTask?.value ?? self.assets
+    }
+
+    func backgroundRefresh() {
+        guard shouldSync else {
+            return
+        }
+        Task {
+            do {
+                let assets = try await refresh()
+                imageLoader.loadImages(fromUrls: assets.compactMap { $0.iconUrl })
+            } catch let error {
+                FlexaLogger.error(error)
+            }
+        }
+    }
+
+    private func refreshTask() async throws -> [Asset] {
+        refreshAsyncTask = Task { () -> [Asset] in
+            try await getAssets()
+        }
+        return try await refreshAsyncTask?.value ?? self.assets
+    }
+
+    private func getAssets() async throws -> [Asset] {
         var output = PaginatedOutput<Models.Asset>()
         var assets: [Models.Asset] = []
 
@@ -44,20 +105,9 @@ class AssetsRepository: AssetsRepositoryProtocol {
                 assets.append(contentsOf: data)
             }
         }
-
+        self.lastSyncedAt = Date.now.timeIntervalSince1970
         self.assets = assets
         return assets
-    }
-
-    func backgroundRefresh() {
-        Task {
-            do {
-                let assets = try await refresh()
-                imageLoader.loadImages(fromUrls: assets.compactMap { $0.iconUrl })
-            } catch let error {
-                FlexaLogger.error(error)
-            }
-        }
     }
 }
 

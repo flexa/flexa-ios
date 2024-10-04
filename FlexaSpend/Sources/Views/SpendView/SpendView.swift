@@ -278,7 +278,7 @@ private extension SpendView {
                                          viewModelAsset: _viewModelAsset) { selectedAsset in
                         viewModel.updateSelectAsset()
                         viewModel.updateAsset(selectedAsset)
-                        selectedAssetIndex = viewModel.flexCodes.firstIndex { $0.asset.assetId == selectedAsset.asset.assetId } ?? 0
+                        selectedAssetIndex = viewModel.flexCodes.firstIndex { $0.asset.assetId == selectedAsset.assetId } ?? 0
                         viewModel.showAssetsModal = false
                     }
                 }
@@ -311,7 +311,7 @@ private extension SpendView {
                     viewModel.clearIfAuthorizationIsPending()
                     viewModel.updateSelectedAsset()
 
-                    if let selectedAssetId = viewModel.selectedAsset?.asset.assetId {
+                    if let selectedAssetId = viewModel.selectedAsset?.assetId {
                         let index = viewModel.flexCodes.firstIndex { $0.asset.assetId == selectedAssetId } ?? 0
                         selectedAssetIndex = index
                     }

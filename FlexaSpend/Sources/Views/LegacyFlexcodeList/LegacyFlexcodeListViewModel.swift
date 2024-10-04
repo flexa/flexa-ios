@@ -21,7 +21,7 @@ extension LegacyFlexcodeList {
 
         func loadBrands() {
             Task { [weak self] in
-                try await self?.brandsRepository.refresh()
+                try await self?.brandsRepository.refreshLegacyFlexcodeBrands()
                 if let self {
                     await MainActor.run {
                         self.refreshBrands()

@@ -11,11 +11,11 @@ import KeychainAccess
 
 enum KeychainKey: String, CaseIterable {
     case authToken = "auth-token-data"
-    case appAccounts = "accounts-data"
     case flexaAccount = "flexa-account"
-    case lastAppAccountsSyncOffset = "accounts-data-sync-date-offset"
     case deletedAppNotifications = "deleted-app-notifications"
     case currentCommerceSession = "current-commerce-session"
+    case oneTimeKeys = "one-time-keys"
+    case lastOneTimeKeysSyncOffset = "last-one-keys-sync-date-offset"
 }
 
 protocol KeychainHelperProtocol {

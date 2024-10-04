@@ -21,6 +21,8 @@ class TransactionAssetDetailsViewModel: ObservableObject {
     @Published var displayMode: DisplayMode
     @Published var isLoading: Bool = false
 
+    var asset: AssetWrapper
+
     var showUpdatingBalanceView: Bool = false
     var availableUSDBalance: Decimal
 
@@ -55,7 +57,8 @@ class TransactionAssetDetailsViewModel: ObservableObject {
         self.baseNetworkFee = baseNetworkFee
         self.baseNetworkFeeColor = baseNetworkFeeColor
         self.logoImage = asset.logoImage
-        self.availableUSDBalance = asset.availableUSDBalance ?? 0
+        self.availableUSDBalance = asset.availableBalanceInLocalCurrency ?? 0
+        self.asset = asset
 
         if let exchange = asset.exchange {
             self.exchangeRate = Strings.value(asset.assetSymbol, exchange.asCurrency)
@@ -74,29 +77,31 @@ class TransactionAssetDetailsViewModel: ObservableObject {
             self.secondaryAmount = ""
             self.networkFee = ""
             updateExchangeRateLabels(asset)
-
-            loadExchangeRate(for: asset, from: usdAssetId, to: asset.assetId)
         case .asset:
             self.title = asset.assetSymbol
-            if let balance = asset.usdBalance, asset.isUpdatingBalance {
-                self.mainAmount = L10n.Payment.Balance.title(balance.asCurrency)
+            if let balance = asset.balanceInLocalCurrency?.asCurrency {
+                if asset.isUpdatingBalance {
+                    self.mainAmount = L10n.Payment.Balance.title(balance).lowercased()
+                } else {
+                    self.mainAmount = L10n.Payment.CurrencyAvaliable.title(balance)
+                        .lowercased()
+                }
             } else {
-                self.mainAmount = asset.valueLabel
+                self.mainAmount = ""
             }
             self.secondaryAmount = ""
             self.networkFee = ""
             updateExchangeRateLabels(asset)
             self.showUpdatingBalanceView = asset.isUpdatingBalance
-            loadExchangeRate(for: asset, from: usdAssetId, to: asset.assetId)
         }
     }
 
-    func loadExchangeRate(for asset: AssetWrapper, from fromAsset: String, to toAsset: String) {
+    func loadExchangeRate() {
         isLoading = true
 
         Task {
             do {
-                try await exchangeRatesRepository.refresh()
+                try await exchangeRatesRepository.get(asset: asset.assetId, unitOfAccount: usdAssetId)
                 await MainActor.run {
                     updateExchangeRateLabels(asset)
                     isLoading = false
@@ -112,12 +117,10 @@ class TransactionAssetDetailsViewModel: ObservableObject {
     }
 
     func updateExchangeRateLabels(_ asset: AssetWrapper) {
-        let formatter = NumberFormatter()
-        formatter.maximumFractionDigits = 6
-
+        let maximumFractionDigits = asset.exchangeRate?.precision ?? 6
         if let exchange = asset.exchange,
-           let decimalAmount,
-           let value = formatter.string(for: decimalAmount / exchange) {
+           let decimalAmount {
+            let value = (decimalAmount / exchange).formatted(maximumFractionDigits: maximumFractionDigits)
             secondaryAmount = Strings.amount(value, asset.assetSymbol)
             exchangeRate = Strings.value(asset.assetSymbol, asset.exchangeRate?.label ?? exchange.asCurrency)
             networkFee = Strings.cannotLoadNetworkFee

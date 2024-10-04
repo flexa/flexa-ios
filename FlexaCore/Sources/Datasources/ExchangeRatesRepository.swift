@@ -13,23 +13,30 @@ class ExchangeRatesRepository: ExchangeRatesRepositoryProtocol {
     @Injected(\.flexaNetworkClient) private var networkClient
     @Injected(\.userDefaults) private var userDefaults
     @Injected(\.flexaClient) private var flexaClient
+    @Injected(\.assetsRepository) private var assetsRepository
 
+    private var lastSyncedAt: TimeInterval?
     private let maxAssetIds = 20
+    private let minSyncInterval: TimeInterval = 20
+    @Synchronized private var getAsyncTask: Task<[ExchangeRate], Error>?
 
     private var assetIdsToRefresh: [String] {
         assetIds()
     }
 
-    var isExpired: Bool {
-        Date().timeIntervalSince1970 >= expireAt
+    private var shouldBackgroundSync: Bool {
+        guard getAsyncTask == nil else {
+            return false
+        }
+        return shouldSync
     }
 
-    var expireAt: Double {
-        Double(
-            exchangeRates
-                .map { $0.expiresAt }
-                .min() ?? 0
-        )
+    private var shouldSync: Bool {
+        guard let lastSyncedAt else {
+            return true
+        }
+
+        return lastSyncedAt + minSyncInterval <= Date.now.timeIntervalSince1970
     }
 
     private(set) var exchangeRates: [ExchangeRate] {
@@ -51,6 +58,49 @@ class ExchangeRatesRepository: ExchangeRatesRepositoryProtocol {
 
     @discardableResult
     func get(assets: [String], unitOfAccount: String) async throws -> [ExchangeRate] {
+        if getAsyncTask == nil {
+            do {
+                let result = try await getTask(assets: assets, unitOfAccount: unitOfAccount)
+                getAsyncTask = nil
+                return result
+            } catch let error {
+                getAsyncTask = nil
+                throw error
+            }
+        }
+        return try await getAsyncTask?.value ?? self.exchangeRates
+    }
+
+    func get(asset: String, unitOfAccount: String) async throws -> ExchangeRate? {
+        if let exchangeRate = find(by: asset, unitOfAccount: unitOfAccount), !exchangeRate.isExpired, !shouldSync {
+            return exchangeRate
+        }
+
+        try await get(assets: assetIds(asset: asset), unitOfAccount: unitOfAccount)
+
+        return find(by: asset, unitOfAccount: unitOfAccount)
+    }
+
+    func refresh() async throws -> [ExchangeRate] {
+        try await get(assets: assetIds(), unitOfAccount: FlexaConstants.usdAssetId)
+    }
+
+    private func getTask(assets: [String], unitOfAccount: String) async throws -> [ExchangeRate] {
+        getAsyncTask = Task { () -> [ExchangeRate] in
+            try await getExchangeRates(assets: assets, unitOfAccount: unitOfAccount)
+        }
+        return try await getAsyncTask?.value ?? self.exchangeRates
+    }
+
+    private func getExchangeRates(assets: [String], unitOfAccount: String) async throws -> [ExchangeRate] {
+        let currentExchangeRates = exchangeRates
+            .filter { !$0.isExpired }
+            .map { $0.asset }
+
+        if !shouldSync && assets.allSatisfy({ currentExchangeRates.contains($0) }) {
+            return exchangeRates
+        }
+
         var output = PaginatedOutput<Models.ExchangeRate>()
         var exchangeRates: [Models.ExchangeRate] = []
         let assetIds = assetIds(assets: assets)
@@ -59,6 +109,12 @@ class ExchangeRatesRepository: ExchangeRatesRepositoryProtocol {
             .map { Array(assetIds[$0..<min($0 + maxAssetIds, assetIds.count)]) }
 
         for assetIds in pagedAssetIds {
+            let resource = ExchangeRatesResource.get(
+                assets: assetIds,
+                unitOfAccount: unitOfAccount,
+                limit: nil,
+                startingAfter: nil
+            )
             output = try await networkClient.sendRequest(
                 resource: ExchangeRatesResource.get(
                     assets: assetIds,
@@ -72,25 +128,15 @@ class ExchangeRatesRepository: ExchangeRatesRepositoryProtocol {
             }
         }
 
+        self.lastSyncedAt = Date.now.timeIntervalSince1970
         self.exchangeRates = exchangeRates
         return exchangeRates
     }
 
-    func get(asset: String, unitOfAccount: String) async throws -> ExchangeRate? {
-        if let exchangeRate = find(by: asset, unitOfAccount: unitOfAccount), !exchangeRate.isExpired {
-            return exchangeRate
-        }
-
-        try await get(assets: assetIds(asset: asset), unitOfAccount: unitOfAccount)
-
-        return find(by: asset, unitOfAccount: unitOfAccount)
-    }
-
-    func refresh() async throws -> [ExchangeRate] {
-        try await get(assets: assetIds(), unitOfAccount: FlexaConstants.usdAssetId)
-    }
-
     func backgroundRefresh() {
+        guard shouldBackgroundSync else {
+            return
+        }
         Task {
             do {
                 try await get(assets: assetIdsToRefresh, unitOfAccount: FlexaConstants.usdAssetId)
@@ -101,11 +147,10 @@ class ExchangeRatesRepository: ExchangeRatesRepositoryProtocol {
     }
 
     private func assetIds(assets: [String]? = nil, asset: String? = nil) -> [String] {
-        var ids = assets ?? flexaClient.appAccounts
-            .flatMap { $0.availableAssets }
-            .map { $0.assetId }
+        let availableAssetIds = assetsRepository.availableClientAssets.map { $0.id }
+        var ids = assets?.filter({ availableAssetIds.contains($0) }) ?? availableAssetIds
 
-        if let asset {
+        if let asset, availableAssetIds.contains(asset) {
             ids.append(asset)
         }
 

@@ -27,21 +27,29 @@ final class FlexaInternal: Flexa {
         sections.contains(.scan) ? Flexa.buildScan() : nil
     }()
 
+    lazy var spend: FlexaSpend? = {
+        spendBuilder?.build()
+    }()
+
+    lazy var scan: FlexaScan? = {
+        scanBuilder?.build()
+    }()
+
     private var spendContent: (() -> AnyView)? {
-        guard let spendBuilder else {
+        guard let spend else {
             return nil
         }
         return {
-            AnyView(spendBuilder.createView())
+            AnyView(spend.createView())
         }
     }
 
     private var scanContent: (() -> AnyView)? {
-        guard let scanBuilder else {
+        guard let scan else {
             return nil
         }
         return {
-            AnyView(scanBuilder.createView())
+            AnyView(scan.createView())
         }
     }
 

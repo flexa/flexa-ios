@@ -28,12 +28,12 @@ struct AssetSelectionView: View {
         ZStack {
             backgroundColor.ignoresSafeArea()
             List {
-                ForEach($viewModel.appAccounts, id: \.accountId) { appAccount in
-                    ForEach(appAccount.accountAssets, id: \.assetId) { asset in
+                ForEach($viewModel.appAccounts, id: \.id) { appAccount in
+                    ForEach(appAccount.assets, id: \.id) { asset in
                         if !viewModel.enoughAmount(for: asset.wrappedValue) && viewModel.hideShortBalances {
                             EmptyView()
                         } else {
-                            assetRow(AssetWrapper(appAccount: appAccount.wrappedValue, asset: asset.wrappedValue))
+                            assetRow(asset.wrappedValue)
                                 .listRowSeparator(.hidden, edges: hidingSeparatorEdges(for: asset.wrappedValue))
                                 .listRowSeparatorTint(tableTheme.separator.color)
                         }
@@ -124,7 +124,7 @@ private extension AssetSelectionView {
         tableTheme.margin
     }
 
-    func cornerRadius(for asset: AppAccountAsset) -> CGFloat {
+    func cornerRadius(for asset: AssetWrapper) -> CGFloat {
         cellsTheme.borderRadius > 0 ? cellsTheme.borderRadius : tableTheme.borderRadius
     }
 
@@ -148,7 +148,7 @@ private extension AssetSelectionView {
         return []
     }
 
-    func hidingSeparatorEdges(for asset: AppAccountAsset) -> VerticalEdge.Set {
+    func hidingSeparatorEdges(for asset: AssetWrapper) -> VerticalEdge.Set {
         if viewModel.firstAsset?.assetId == viewModel.lastAsset?.assetId {
             return .all
         }

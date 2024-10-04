@@ -167,7 +167,7 @@ extension TransactionAmountView {
         }
 
         var availableUSDBalance: Decimal {
-            selectedAsset?.availableUSDBalance ?? 0
+            selectedAsset?.availableBalanceInLocalCurrency ?? 0
         }
 
        @Published var showMinimumAmountMessage = false {
@@ -194,7 +194,7 @@ extension TransactionAmountView {
                   hasAmount,
                   let amount = amountText.decimalValue,
                   let balance =
-                    selectedAsset?.availableUSDBalance ?? selectedAsset?.asset.assetValue.label.decimalValue else {
+                    selectedAsset?.availableBalanceInLocalCurrency ?? selectedAsset?.balanceInLocalCurrency else {
                 return false
             }
             return balance >= amount && amount >= minimumAmount

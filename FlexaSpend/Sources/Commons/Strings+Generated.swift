@@ -317,10 +317,6 @@ internal enum L10n {
         }
         /// Network fee cannot be loaded
         internal static let cannotLoadNetworkFee = L10n.tr("Localizable", "payment.asset.exchange_rate.cannot_load_network_fee", fallback: "Network fee cannot be loaded")
-        /// Flexa automatically selects the best exchange rate and network fee for your payments.
-        internal static let info = L10n.tr("Localizable", "payment.asset.exchange_rate.info", fallback: "Flexa automatically selects the best exchange rate and network fee for your payments.")
-        /// Learn more...
-        internal static let learnMore = L10n.tr("Localizable", "payment.asset.exchange_rate.learn_more", fallback: "Learn more...")
         /// %s network fee
         internal static func networkFee(_ p1: UnsafePointer<CChar>) -> String {
           return L10n.tr("Localizable", "payment.asset.exchange_rate.network_fee", p1, fallback: "%s network fee")
@@ -396,8 +392,8 @@ internal enum L10n {
       }
     }
     internal enum TransactionDetails {
-      /// Flexa always selects the best available exchange rate for your payment.
-      internal static let footer = L10n.tr("Localizable", "payment.transaction_details.footer", fallback: "Flexa always selects the best available exchange rate for your payment.")
+      /// Flexa automatically selects the best exchange rate and network fee for your payments. [Learn more...](https://flexa.co)
+      internal static let footer = L10n.tr("Localizable", "payment.transaction_details.footer", fallback: "Flexa automatically selects the best exchange rate and network fee for your payments. [Learn more...](https://flexa.co)")
       /// Details
       internal static let title = L10n.tr("Localizable", "payment.transaction_details.title", fallback: "Details")
     }

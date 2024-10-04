@@ -24,6 +24,9 @@ struct TransactionAssetDetailsView: View {
 
     var body: some View {
         detailsView
+            .onAppear {
+                viewModel.loadExchangeRate()
+            }
         .navigationBarItems(
             leading: viewModel.displayMode == .transaction ? leftHeaderView : nil,
             trailing: rightHeaderView
@@ -42,17 +45,8 @@ private extension TransactionAssetDetailsView {
 
     @ViewBuilder
     var footerView: some View {
-        switch viewModel.displayMode {
-        case .asset:
-            Text(L10n.Payment.TransactionDetails.footer)
-        case .transaction, .dynamicTransaction:
-            HStack {
-                Text(L10n.Payment.Asset.ExchangeRate.info) +
-                Text(L10n.Payment.Asset.ExchangeRate.learnMore).foregroundColor(self.tintColor)
-            }.onTapGesture {
-                print("onTapGesture: Learn more")
-            }
-        }
+        Text(.init(L10n.Payment.TransactionDetails.footer))
+            .tint(.purple)
     }
 
     @ViewBuilder

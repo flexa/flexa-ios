@@ -102,3 +102,6 @@ extension StringProtocol {
         String(self[index(startIndex, offsetBy: offset)])
     }
 }
+
+extension String: FlexaModelProtocol {
+}

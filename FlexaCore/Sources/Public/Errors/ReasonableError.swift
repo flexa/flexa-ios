@@ -66,7 +66,6 @@ public extension ReasonableError {
         case cannotCreateAccount(Error?)
         case cannotGetAccount(Error?)
         case cannotDeleteAccount(Error?)
-        case cannotSyncAppAccounts(Error?)
         case cannotDeleteAppNotification(Error?)
         case cannotConvertAsset(Error?)
         case cannotGetExchangeRates(Error?)
@@ -82,6 +81,7 @@ public extension ReasonableError {
         case cannotVerifyToken(Error?)
         case cannotRefreshToken(Error?)
         case cannotDeleteToken(Error?)
+        case cannotSyncOneTimeKeys(Error?)
 
         var title: String? {
             switch self {

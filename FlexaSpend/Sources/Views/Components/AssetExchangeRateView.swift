@@ -42,10 +42,8 @@ public struct AssetExchangeRateView: View {
             List {
                 Section(
                     footer: HStack {
-                        Text(L10n.Payment.Asset.ExchangeRate.info) +
-                        Text(L10n.Payment.Asset.ExchangeRate.learnMore).foregroundColor(.purple)
-                    }.onTapGesture {
-                        print("onTapGesture: Learn more")
+                        Text(.init(L10n.Payment.TransactionDetails.footer))
+                            .tint(.purple)
                     }
                 ) {
                     HStack {

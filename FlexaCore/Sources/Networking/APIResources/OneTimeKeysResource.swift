@@ -1,8 +1,8 @@
 //
-//  AppAccountsResource.swift
+//  OneTimeKeysResource.swift
 //  FlexaCore
 //
-//  Created by Rodrigo Ordeix on 5/7/24.
+//  Created by Rodrigo Ordeix on 10/2/24.
 //  Copyright © 2024 Flexa. All rights reserved.
 //
 
@@ -10,25 +10,25 @@ import FlexaNetworking
 import Factory
 import Foundation
 
-enum AppAccountsResource: FlexaAPIResource, JWTAuthenticable {
-    case refresh(_ appAccounts: RefreshAppAccountsInput)
+enum OneTimeKeysResource: FlexaAPIResource, JWTAuthenticable {
+    case sync(_ assets: SyncOneTimeKeysInput)
 
     var method: RequestMethod {
         .put
     }
 
     var path: String {
-        "/accounts/me/app_accounts"
+        "/accounts/me/one_time_keys"
     }
 
     var bodyParams: [String: Any]? {
         switch self {
-        case .refresh(let input):
+        case .sync(let input):
             input.dictionary
         }
     }
 
     func wrappingError(_ error: Error?, traceId: String?) -> Error? {
-       ReasonableError.withReason(.cannotSyncAppAccounts(error))
+       ReasonableError.withReason(.cannotSyncOneTimeKeys(error))
     }
 }

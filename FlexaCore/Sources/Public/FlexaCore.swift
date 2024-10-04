@@ -19,7 +19,7 @@ open class Flexa {
     @Injected(\.flexaClient) private static var flexaClient
     @Injected(\.assetConfig) private static var assetConfig
     @Injected(\.appStateManager) private static var appStateManager
-    @Injected(\.appAccountsRepository) private static var appAccountsRepository
+    @Injected(\.oneTimeKeysRepository) private static var oneTimeKeysRepository
     private static var isInitialized = false
 
     /// Initializes Flexa SDK with the specified settings.
@@ -44,7 +44,7 @@ open class Flexa {
     /// - parameter appAccounts: A set of assets and their respective balances for each of the wallet accounts from which your user can sign transactions using your app
     public static func updateAppAccounts(_ appAccounts: [FXAppAccount]) {
         flexaClient.appAccounts = appAccounts
-        appAccountsRepository.backgroundRefresh()
+        oneTimeKeysRepository.backgroundRefresh()
     }
 
     /// Selects the app account and asset to be used by default on future transactions
@@ -53,7 +53,7 @@ open class Flexa {
     public static func selectedAsset(_ appAccountId: String, _ assetId: String) {
         assetConfig.selectedAppAccountId = appAccountId
         assetConfig.selectedAssetId = assetId
-        appAccountsRepository.sanitizeSelectedAsset()
+        flexaClient.sanitizeSelectedAsset()
     }
 
     /// Updates the theme Flexa uses to configure the user interface

@@ -9,5 +9,5 @@
 import Foundation
 
 public extension Flexa {
-    static let version = "1.0.3"
+    static let version = "1.0.4"
 }

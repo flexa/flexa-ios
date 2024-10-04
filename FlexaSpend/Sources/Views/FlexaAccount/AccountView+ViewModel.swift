@@ -71,7 +71,9 @@ extension AccountView {
         }
 
         func loadAccount() {
-            account = accountRepository.account
+            DispatchQueue.main.async { [self] in
+                account = accountRepository.account
+            }
             Task {
                 do {
                     let account = try await accountRepository.getAccount()

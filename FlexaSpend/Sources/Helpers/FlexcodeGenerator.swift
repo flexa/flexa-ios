@@ -23,13 +23,13 @@ struct Flexcode {
 }
 
 protocol FlexcodeGeneratorProtocol {
-    func flexcodes(for: AppAccountAsset, types: [FlexcodeSymbology], scale: CGFloat) -> [FlexcodeSymbology: Flexcode]
+    func flexcodes(for: OneTimeKey?, types: [FlexcodeSymbology], scale: CGFloat) -> [FlexcodeSymbology: Flexcode]
     func flexcodes(forCode: String, types: [FlexcodeSymbology], scale: CGFloat) -> [FlexcodeSymbology: Flexcode]
 }
 
 extension FlexcodeGeneratorProtocol {
-    func flexcodes(for asset: AppAccountAsset) -> [FlexcodeSymbology: Flexcode] {
-        flexcodes(for: asset, types: [.pdf417, .code128], scale: 5)
+    func flexcodes(for key: OneTimeKey?) -> [FlexcodeSymbology: Flexcode] {
+        flexcodes(for: key, types: [.pdf417, .code128], scale: 5)
     }
 
     func flexcodes(forCode code: String) -> [FlexcodeSymbology: Flexcode] {
@@ -38,8 +38,8 @@ extension FlexcodeGeneratorProtocol {
 }
 
 struct FlexcodeGenerator: FlexcodeGeneratorProtocol {
-    func flexcode(for asset: AppAccountAsset, type: FlexcodeSymbology, scale: CGFloat) -> Flexcode? {
-        guard let key = asset.assetKey else {
+    func flexcode(for key: OneTimeKey?, type: FlexcodeSymbology, scale: CGFloat) -> Flexcode? {
+        guard let key else {
             FlexaLogger.error("Missing key")
             return nil
         }
@@ -64,12 +64,12 @@ struct FlexcodeGenerator: FlexcodeGeneratorProtocol {
     }
 
     func flexcodes(
-        for asset: AppAccountAsset,
+        for key: OneTimeKey?,
         types: [FlexcodeSymbology],
         scale: CGFloat
     ) -> [FlexcodeSymbology: Flexcode] {
         types.reduce([FlexcodeSymbology: Flexcode]()) { partialResult, type in
-            guard let flexcode = flexcode(for: asset, type: type, scale: scale) else {
+            guard let flexcode = flexcode(for: key, type: type, scale: scale) else {
                 return partialResult
             }
             var dictionary = partialResult

@@ -11,8 +11,8 @@ public extension Notification.Name {
     private static let prefix = "co.flexa.sdk"
     static let flexaAuthorizationError: Notification.Name =
         .nameWithPrefix("authorizationError")
-    static let appAccountsDidUpdate: Notification.Name =
-        .nameWithPrefix("appAccountsDidUpdate")
+    static let oneTimeKeysDidUpdate: Notification.Name =
+        .nameWithPrefix("oneTimeKeysDidUpdate")
 
     private static func nameWithPrefix(_ name: String) -> Notification.Name {
         .init(rawValue: "\(prefix).\(name)")

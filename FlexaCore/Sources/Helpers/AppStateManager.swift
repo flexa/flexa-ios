@@ -11,7 +11,7 @@ import Factory
 import UIKit
 
 class AppStateManager: AppStateManagerProtocol {
-    @Injected(\.appAccountsRepository) var appAccountsRepository
+    @Injected(\.oneTimeKeysRepository) var oneTimeKeysRepository
     @Injected(\.transactionsRespository) var transactionsRepository
     @Injected(\.accountRepository) var accountsRepository
     @Injected(\.brandsRepository) var brandsRepository
@@ -69,7 +69,7 @@ class AppStateManager: AppStateManagerProtocol {
             brandsRepository.backgroundRefresh()
 
             if !flexaClient.appAccounts.isEmpty {
-                appAccountsRepository.backgroundRefresh()
+                oneTimeKeysRepository.backgroundRefresh()
                 exchangeRateRepository.backgroundRefresh()
             }
         }
@@ -88,7 +88,8 @@ class AppStateManager: AppStateManagerProtocol {
             try await brandsRepository.refreshLegacyFlexcodeBrands()
 
             if !flexaClient.appAccounts.isEmpty {
-                try await appAccountsRepository.refresh()
+                try await oneTimeKeysRepository.refresh()
+                try await exchangeRateRepository.refresh()
             }
         } catch let error {
             FlexaLogger.error(error)

@@ -18,10 +18,6 @@ public extension Container {
         self { .init() }.singleton
     }
 
-    var appAccountsRepository: Factory<AppAccountsRepositoryProtocol> {
-        self { AppAccountsRepository() }.singleton
-    }
-
     var brandsRepository: Factory<BrandsRepositoryProtocol> {
         self { BrandsRepository() }.singleton
     }
@@ -38,10 +34,6 @@ public extension Container {
         self { TransactionsRepository() }.singleton
     }
 
-    var assetConverterRepository: Factory<AssetConverterRepositoryProtocol> {
-        self { AssetConverterRepository() }.singleton
-    }
-
     var accountRepository: Factory<AccountsRepositoryProtocol> {
         self { AccountsRepository() }.singleton
     }
@@ -52,5 +44,9 @@ public extension Container {
 
     var exchangeRatesRepository: Factory<ExchangeRatesRepositoryProtocol> {
         self { ExchangeRatesRepository() }.singleton
+    }
+
+    var oneTimeKeysRepository: Factory<OneTimeKeysRepositoryProtocol> {
+        self { OneTimeKeysRepository() }.singleton
     }
 }

@@ -10,12 +10,12 @@ class AssetSelectionViewModel: ObservableObject, Identifiable {
     @Published var selectedAsset: AssetWrapper?
     @Injected(\.flexaClient) var flexaClient
 
-    var firstAsset: AppAccountAsset? {
-        appAccounts.first?.accountAssets.first
+    var firstAsset: AssetWrapper? {
+        appAccounts.first?.assets.first
     }
 
-    var lastAsset: AppAccountAsset? {
-        appAccounts.last?.accountAssets.last
+    var lastAsset: AssetWrapper? {
+        appAccounts.last?.assets.last
     }
 
     var showSelectedAssetDetail: Bool = false
@@ -31,11 +31,11 @@ class AssetSelectionViewModel: ObservableObject, Identifiable {
     }
 
     func enoughAmount(_ asset: AssetWrapper) -> Bool {
-        asset.decimalBalance >= amount
+        asset.balance >= amount
     }
 
-    func enoughAmount(for asset: AppAccountAsset) -> Bool {
-        asset.decimalBalance >= amount
+    func enoughAmount(for asset: AssetWrapper) -> Bool {
+        asset.balance >= amount
     }
 
     func isAssetSelected(_ asset: AssetWrapper) -> Bool {

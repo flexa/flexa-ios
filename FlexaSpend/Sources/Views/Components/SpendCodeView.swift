@@ -38,10 +38,12 @@ extension SpendCodeView {
         }
 
         var balance: String {
-            if let balance = asset.usdBalance, asset.isUpdatingBalance {
-                return L10n.Payment.Balance.title(balance.asCurrency)
+            let balance = (asset.balanceInLocalCurrency ?? 0).asCurrency
+
+            if asset.isUpdatingBalance {
+                return L10n.Payment.Balance.title(balance)
             } else {
-                return asset.valueLabelTitleCase
+                return L10n.Payment.CurrencyAvaliable.title(balance)
             }
         }
 
@@ -64,7 +66,7 @@ extension SpendCodeView {
         }
 
         var availableUSDBalance: Decimal? {
-            asset.availableUSDBalance
+            asset.availableBalanceInLocalCurrency
         }
 
         init(asset: AssetWrapper) {
@@ -107,9 +109,8 @@ extension SpendCodeView {
         }
 
         private func updateCode() {
-            flexcodes = flexcodeGenerator.flexcodes(for: asset.assetWithKey)
+            flexcodes = flexcodeGenerator.flexcodes(for: asset.oneTimekey)
             let code = flexcodes.values.first?.code
-            FlexaLogger.debug("\(asset.assetSymbol): \(code ?? "no-code")")
             self.code = code ?? ""
             self.pdf417Image = flexcodes[.pdf417]?.image ?? UIImage()
             self.code128Image = flexcodes[.code128]?.image ?? UIImage()

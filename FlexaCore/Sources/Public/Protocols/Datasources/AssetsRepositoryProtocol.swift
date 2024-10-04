@@ -12,6 +12,7 @@ import SwiftUI
 
 public protocol AssetsRepositoryProtocol {
     var assets: [Asset] { get }
+    var availableClientAssets: [Asset] { get }
 
     @discardableResult
     func refresh() async throws -> [Asset]

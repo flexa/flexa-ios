@@ -28,10 +28,14 @@ struct AssetRow: View {
          showInfo: @escaping () -> Void) {
 
         self.title = asset.assetSymbol
-        if let balance = asset.usdBalance, asset.isUpdatingBalance {
-            self.subtitle = L10n.Payment.Balance.title(balance.asCurrency).lowercased()
+        if let balance = asset.balanceInLocalCurrency?.asCurrency {
+            if asset.isUpdatingBalance {
+                self.subtitle = L10n.Payment.Balance.title(balance)
+            } else {
+                self.subtitle = L10n.Payment.CurrencyAvaliable.title(balance)
+            }
         } else {
-            self.subtitle = asset.valueLabelTitleCase
+            self.subtitle = ""
         }
         self.logoUrl = asset.logoImageUrl
         self.logoImage = asset.logoImage

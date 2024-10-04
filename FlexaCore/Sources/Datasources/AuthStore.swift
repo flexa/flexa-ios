@@ -105,9 +105,14 @@ final class AuthStore: AuthStoreProtocol {
 
     func refreshToken() async throws -> AuthStoreState {
         if refreshTokenAsyncTask == nil {
-            let result = try await refreshTokenTask()
-            refreshTokenAsyncTask = nil
-            return result ?? self.state
+            do {
+                let result = try await refreshTokenTask()
+                refreshTokenAsyncTask = nil
+                return result ?? self.state
+            } catch let error {
+                refreshTokenAsyncTask = nil
+                throw error
+            }
         }
         return try await refreshTokenAsyncTask?.value ?? self.state
     }

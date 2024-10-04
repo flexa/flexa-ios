@@ -160,7 +160,7 @@ struct PayNowModal: View {
     }
 
     mutating func updateAsset() {
-        amount = asset.valueLabel
+        amount = asset.balanceInLocalCurrency?.asCurrency ?? ""
     }
 }
 
@@ -301,11 +301,11 @@ struct PayNowContentView: View {
         }.listStyle(PlainListStyle())
         .padding(.top, 16)
         .alert(isPresented: $showUpdatingBalanceAlert) {
-            UpdatingBalanceView.alert(asset.availableUSDBalance ?? 0)
+            UpdatingBalanceView.alert(asset.availableBalanceInLocalCurrency ?? 0)
         }
     }
 
     mutating func updateAsset() {
-        amount = asset.valueLabel
+        amount = asset.balanceInLocalCurrency?.asCurrency ?? ""
     }
 }

@@ -97,7 +97,6 @@ public extension FlexaSpend {
     final class Builder {
         @Injected(\.assetConfig) private var assetConfig
         @Injected(\.flexaClient) private var flexaClient
-        @Injected(\.appAccountsRepository) private var appAccountsRepository
         @Injected(\.assetsRepository) private var assetsRepository
 
         private var spend: FlexaSpend?

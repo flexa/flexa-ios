@@ -40,7 +40,7 @@ public class FlexaLogger {
         line: Int = #line) {
 
             os_log(
-                "[%{public}@/%{public}@:%{public}@] %{public}@",
+                "[Flexa][%{public}@/%{public}@:%{public}@] %{public}@",
                 log: oslog,
                 type: type.logType,
                 (file as NSString).lastPathComponent,

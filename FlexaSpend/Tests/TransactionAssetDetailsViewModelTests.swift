@@ -39,7 +39,8 @@ class TransactionAssetDetailsViewModelTests: QuickSpec {
                 }
 
                 it("sets the amount to the assets value's label") {
-                    expect(viewModel.mainAmount).to(equal(asset.valueLabel))
+                    expect(viewModel.mainAmount).to(equal(
+                    "\(try XCTUnwrap(asset.balanceInLocalCurrency).asCurrency) available"))
                 }
 
                 it("correctly sets the exchange rate") {
@@ -136,68 +137,8 @@ class TransactionAssetDetailsViewModelTests: QuickSpec {
     }
 
     static func createAssetWrapper() -> AssetWrapper {
-        let availableAsset = TestAvailableAsset(
-            assetId: "SOL",
-            balance: "0.38691",
-            value: TestAvailableAssetValue(
-                asset: "iso4217/usd",
-                label: "$66.95 available",
-                labelTitleCase: "$66.95 Available"
-            ),
-            label: "0.38691 SOL"
-        )
-
-        let appAccount = TestAvailableAppAccount(
-            accountId: "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
-            assets: [availableAsset])
-        return AssetWrapper(appAccount: appAccount, asset: availableAsset)
+        AssetWrapper(appAccountId: "wallet", assetId: "SOL")
     }
-}
-
-private struct TestAvailableAppAccount: AppAccount {
-    var accountId: String
-    var assets: [TestAvailableAsset]
-    var accountAssets: [FlexaCore.AppAccountAsset] {
-        get {
-            assets
-        }
-        set {
-
-        }
-    }
-
-}
-
-private struct TestAvailableAsset: AppAccountAsset {
-    var assetId: String
-    var balance: String
-    var label: String
-    var value: TestAvailableAssetValue
-
-    var assetValue: FlexaCore.AppAccountAssetValue {
-        value
-    }
-
-    var assetKey: FlexaCore.AppAccountAssetKey? {
-        nil
-    }
-
-    init(assetId: String,
-         balance: String,
-         value: TestAvailableAssetValue,
-         label: String
-    ) {
-        self.assetId = assetId
-        self.balance = balance
-        self.value = value
-        self.label = label
-    }
-}
-
-private struct TestAvailableAssetValue: AppAccountAssetValue {
-    var asset: String
-    var label: String
-    var labelTitleCase: String
 }
 
 private struct TestAssetHelper: AssetHelperProtocol {
@@ -205,6 +146,10 @@ private struct TestAssetHelper: AssetHelperProtocol {
     var displayName: String
     var logoImageUrl: URL?
     var logoImage: UIImage?
+
+    static let balance: Decimal = 0.398691
+    static let exchangeRate: Decimal = 2
+    static let balanceInLocalCurrency: Decimal = balance * exchangeRate
 
     init(symbol: String, displayName: String, logoImageUrl: URL? = nil, logoImage: UIImage? = nil) {
         self.symbol = symbol
@@ -238,18 +183,22 @@ private struct TestAssetHelper: AssetHelperProtocol {
     }
 
     func fxAsset(_ asset: AssetWrapper) -> FXAvailableAsset? {
-        nil
-    }
-
-    func assetWithKey(for asset: AssetWrapper) -> FlexaCore.AppAccountAsset {
-        asset.asset
-    }
-
-    func usdAvailableBalance(_ asset: AssetWrapper) -> Decimal? {
-        nil
+        FXAvailableAsset(assetId: "SOL", symbol: "SOL", balance: Self.balance)
     }
 
     func exchangeRate(_ asset: AssetWrapper) -> FlexaCore.ExchangeRate? {
+        nil
+    }
+
+    func oneTimeKey(for asset: AssetWrapper) -> (any FlexaCore.OneTimeKey)? {
+        nil
+    }
+
+    func balanceInLocalCurrency(_ asset: AssetWrapper) -> Decimal {
+        Self.balanceInLocalCurrency
+    }
+
+    func availableBalanceInLocalCurrency(_ asset: AssetWrapper) -> Decimal? {
         nil
     }
 }

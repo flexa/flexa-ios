@@ -118,8 +118,6 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
         }
 
         sseClient.onComplete = { _, shouldRetry, _ in
-            FlexaLogger.info("SSE client disconnected")
-
             guard shouldRetry == true else {
                 return
             }

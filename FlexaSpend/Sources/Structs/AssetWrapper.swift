@@ -15,16 +15,8 @@ struct AssetWrapper: Identifiable {
     @Injected(\.assetsHelper) var assetsHelper
 
     let id = UUID()
-    var appAccount: AppAccount
-    var asset: AppAccountAsset
-
-    var accountId: String {
-        appAccount.accountId
-    }
-
-    var assetId: String {
-        asset.assetId
-    }
+    var accountId: String
+    var assetId: String
 
     var assetDisplayName: String {
         let displayName = assetsHelper.displayName(for: self)
@@ -43,32 +35,20 @@ struct AssetWrapper: Identifiable {
         assetsHelper.logoImageUrl(for: self)
     }
 
-    var label: String {
-        asset.label
-    }
-
-    var valueLabel: String {
-        asset.assetValue.label
-    }
-
-    var valueLabelTitleCase: String {
-        asset.assetValue.labelTitleCase
-    }
-
     var assetLogoUrl: URL? {
         assetsHelper.logoImageUrl(for: self)
     }
 
-    var decimalBalance: Decimal {
-        asset.decimalBalance
-    }
-
-    var assetWithKey: AppAccountAsset {
-        assetsHelper.assetWithKey(for: self)
+    var balance: Decimal {
+        assetsHelper.fxAsset(self)?.balance ?? 0
     }
 
     var exchangeRate: ExchangeRate? {
         assetsHelper.exchangeRate(self)
+    }
+
+    var oneTimekey: OneTimeKey? {
+        assetsHelper.oneTimeKey(for: self)
     }
 
     var exchange: Decimal? {
@@ -76,10 +56,10 @@ struct AssetWrapper: Identifiable {
             return exchangeRate.decimalPrice
         }
 
-        guard let decimal = asset.assetValue.label.digitsAndSeparator?.decimalValue else {
+        guard let balance = assetsHelper.fxAsset(self)?.balance else {
             return  nil
         }
-        return decimal / decimalBalance
+        return balance / self.balance
     }
 
     var gradientColors: [Color] {
@@ -94,39 +74,31 @@ struct AssetWrapper: Identifiable {
         assetsHelper.fxAsset(self)?.isUpdatingBalance ?? false
     }
 
-    var usdBalance: Decimal? {
-        asset.assetValue.label.digitsAndSeparator?.decimalValue
+    var balanceInLocalCurrency: Decimal? {
+        assetsHelper.balanceInLocalCurrency(self)
     }
 
-    var availableUSDBalance: Decimal? {
-        assetsHelper.usdAvailableBalance(self)
+    var availableBalanceInLocalCurrency: Decimal? {
+        assetsHelper.availableBalanceInLocalCurrency(self)
     }
 
-    init(appAccount: AppAccount, asset: AppAccountAsset) {
-        self.appAccount = appAccount
-        self.asset = asset
-    }
-
-    init?(appAccountId: String, assetId: String) {
-        let appAccountsRepository = Container.shared.appAccountsRepository()
-
-        guard let account = appAccountsRepository.appAccounts.first(where: { $0.accountId == appAccountId }),
-              let asset = account.accountAssets.first(where: { $0.assetId == assetId }) else {
-            return nil
-        }
-
-        self.appAccount = account
-        self.asset = asset
+    init(appAccountId: String, assetId: String) {
+        self.accountId = appAccountId
+        self.assetId = assetId
     }
 
     func enoughBalance(for usdAmount: Decimal) -> Bool {
-        availableUSDBalance ?? usdBalance ?? 0 >= usdAmount
+        availableBalanceInLocalCurrency ?? balanceInLocalCurrency ?? 0 >= usdAmount
     }
 }
 
-extension AssetWrapper: Equatable {
+extension AssetWrapper: Hashable {
     static func == (lhs: AssetWrapper, rhs: AssetWrapper) -> Bool {
-        lhs.appAccount.accountId == rhs.appAccount.accountId &&
-        lhs.asset.assetId == rhs.asset.assetId
+        lhs.accountId == rhs.accountId &&
+        lhs.assetId == rhs.assetId
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }
