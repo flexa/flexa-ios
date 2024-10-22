@@ -49,4 +49,8 @@ public extension Container {
     var oneTimeKeysRepository: Factory<OneTimeKeysRepositoryProtocol> {
         self { OneTimeKeysRepository() }.singleton
     }
+
+    var transactionFeesRepository: Factory<TransactionFeesRepositoryProtocol> {
+        self { TransactionFeesRepository() }.singleton
+    }
 }

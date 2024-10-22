@@ -28,8 +28,8 @@ struct AssetSelectionView: View {
         ZStack {
             backgroundColor.ignoresSafeArea()
             List {
-                ForEach($viewModel.appAccounts, id: \.id) { appAccount in
-                    ForEach(appAccount.assets, id: \.id) { asset in
+                ForEach($viewModel.assetAccounts, id: \.id) { account in
+                    ForEach(account.assets, id: \.id) { asset in
                         if !viewModel.enoughAmount(for: asset.wrappedValue) && viewModel.hideShortBalances {
                             EmptyView()
                         } else {
@@ -71,8 +71,9 @@ struct AssetSelectionView: View {
             showView: $showAssetsModal,
             viewModel: TransactionAssetDetailsViewModel(
                 displayMode: .asset,
-                asset: asset,
-                networkFee: L10n.Payment.Asset.ExchangeRate.noNetworkFee))
+                asset: asset
+            )
+        )
 
         if viewModel.showSelectedAssetDetail {
             var transaction = Transaction()

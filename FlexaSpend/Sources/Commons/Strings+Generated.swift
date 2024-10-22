@@ -159,8 +159,8 @@ internal enum L10n {
       internal enum Header {
         /// Account Email
         internal static let accountEmail = L10n.tr("Localizable", "data_and_privacy.sections.header.account_email", fallback: "Account Email")
-        /// Flexa is carefully designed to use only the data that’s directly necessary to process your payments. [Learn more…](https://flexa.network/privacy/)
-        internal static let description = L10n.tr("Localizable", "data_and_privacy.sections.header.description", fallback: "Flexa is carefully designed to use only the data that’s directly necessary to process your payments. [Learn more…](https://flexa.network/privacy/)")
+        /// Flexa is carefully designed to use only the data that’s directly necessary to process your payments. [Learn more…](https://flexa.co/legal/privacy)
+        internal static let description = L10n.tr("Localizable", "data_and_privacy.sections.header.description", fallback: "Flexa is carefully designed to use only the data that’s directly necessary to process your payments. [Learn more…](https://flexa.co/legal/privacy)")
         /// Your Data & Privacy
         internal static let title = L10n.tr("Localizable", "data_and_privacy.sections.header.title", fallback: "Your Data & Privacy")
       }
@@ -186,6 +186,12 @@ internal enum L10n {
       internal static let subtitle = L10n.tr("Localizable", "delete_account.header.subtitle", fallback: "Deleting your Flexa Account will permanently erase your account and associated data from all Flexa systems and apps where you are signed in.\n\nAfter your account is deleted, you will no longer be able to receive refunds back to your wallet, and any active subscriptions will be canceled.\n\nDepending on where you live, we may not be permitted to delete all of your account data right away. We will, however, delete all of your account data as quickly as permitted by law.")
       /// Delete Your Flexa Account
       internal static let title = L10n.tr("Localizable", "delete_account.header.title", fallback: "Delete Your Flexa Account")
+    }
+  }
+  internal enum Errors {
+    internal enum RestrictedRegion {
+      /// Flexa is running on a restricted region and spends are disabled. Please check Flexa.canSpend
+      internal static let message = L10n.tr("Localizable", "errors.restricted_region.message", fallback: "Flexa is running on a restricted region and spends are disabled. Please check Flexa.canSpend")
     }
   }
   internal enum LegacyFlexcode {
@@ -220,6 +226,14 @@ internal enum L10n {
         /// Minimum Amount: %s
         internal static func minimumAmount(_ p1: UnsafePointer<CChar>) -> String {
           return L10n.tr("Localizable", "legacy_flexcode.amount_entry.labels.minimum_amount", p1, fallback: "Minimum Amount: %s")
+        }
+      }
+    }
+    internal enum Promotions {
+      internal enum Labels {
+        /// Saving %s
+        internal static func saving(_ p1: UnsafePointer<CChar>) -> String {
+          return L10n.tr("Localizable", "legacy_flexcode.promotions.labels.saving", p1, fallback: "Saving %s")
         }
       }
     }
@@ -317,6 +331,8 @@ internal enum L10n {
         }
         /// Network fee cannot be loaded
         internal static let cannotLoadNetworkFee = L10n.tr("Localizable", "payment.asset.exchange_rate.cannot_load_network_fee", fallback: "Network fee cannot be loaded")
+        /// Free
+        internal static let free = L10n.tr("Localizable", "payment.asset.exchange_rate.free", fallback: "Free")
         /// %s network fee
         internal static func networkFee(_ p1: UnsafePointer<CChar>) -> String {
           return L10n.tr("Localizable", "payment.asset.exchange_rate.network_fee", p1, fallback: "%s network fee")

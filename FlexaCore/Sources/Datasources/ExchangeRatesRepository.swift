@@ -14,25 +14,38 @@ class ExchangeRatesRepository: ExchangeRatesRepositoryProtocol {
     @Injected(\.userDefaults) private var userDefaults
     @Injected(\.flexaClient) private var flexaClient
     @Injected(\.assetsRepository) private var assetsRepository
+    @Injected(\.transactionFeesRepository) private var transactionFeesRepository
 
     private var lastSyncedAt: TimeInterval?
     private let maxAssetIds = 20
-    private let minSyncInterval: TimeInterval = 20
+    private let minSyncInterval: TimeInterval = 4 * 60
     @Synchronized private var getAsyncTask: Task<[ExchangeRate], Error>?
 
     private var assetIdsToRefresh: [String] {
         assetIds()
     }
 
-    private var shouldBackgroundSync: Bool {
+    private var cachedAssetIds: Set<String> {
+        Set(exchangeRates.map { $0.asset })
+    }
+
+    var shouldBackgroundSync: Bool {
         guard getAsyncTask == nil else {
             return false
         }
         return shouldSync
     }
 
-    private var shouldSync: Bool {
+    var shouldSync: Bool {
         guard let lastSyncedAt else {
+            return true
+        }
+
+        guard !exchangeRates.contains(where: { $0.isExpired }) else {
+            return true
+        }
+
+        guard Set(assetIdsToRefresh).isSubset(of: cachedAssetIds) else {
             return true
         }
 
@@ -109,12 +122,6 @@ class ExchangeRatesRepository: ExchangeRatesRepositoryProtocol {
             .map { Array(assetIds[$0..<min($0 + maxAssetIds, assetIds.count)]) }
 
         for assetIds in pagedAssetIds {
-            let resource = ExchangeRatesResource.get(
-                assets: assetIds,
-                unitOfAccount: unitOfAccount,
-                limit: nil,
-                startingAfter: nil
-            )
             output = try await networkClient.sendRequest(
                 resource: ExchangeRatesResource.get(
                     assets: assetIds,
@@ -147,12 +154,21 @@ class ExchangeRatesRepository: ExchangeRatesRepositoryProtocol {
     }
 
     private func assetIds(assets: [String]? = nil, asset: String? = nil) -> [String] {
-        let availableAssetIds = assetsRepository.availableClientAssets.map { $0.id }
-        var ids = assets?.filter({ availableAssetIds.contains($0) }) ?? availableAssetIds
+        var availableAssets = assetsRepository.availableClientAssets
 
-        if let asset, availableAssetIds.contains(asset) {
-            ids.append(asset)
+        if var assets {
+            if let asset {
+                assets.append(asset)
+            }
+            availableAssets = availableAssets.filter { availableAsset in
+                assets.contains(availableAsset.id)
+            }
         }
+
+        let ids = availableAssets
+            .map { [$0.id, $0.chain?.nativeAsset].compactMap { $0 } }
+            .flatMap { $0 }
+            .filter { !$0.isEmpty }
 
         return Array(Set(ids))
     }

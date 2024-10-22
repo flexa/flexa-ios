@@ -16,7 +16,6 @@ extension LegacyFlexcodeList {
 
         init() {
             refreshBrands()
-            loadBrands()
         }
 
         func loadBrands() {

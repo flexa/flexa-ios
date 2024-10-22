@@ -1,5 +1,5 @@
 //
-//  AppAccountsResource.swift
+//  CommerceSessionResource.swift
 //  FlexaCore
 //
 //  Created by Rodrigo Ordeix on 5/7/24.

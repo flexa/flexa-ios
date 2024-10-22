@@ -49,8 +49,7 @@ class AssetsRepository: AssetsRepositoryProtocol {
     }
 
     var availableClientAssets: [Asset] {
-        let clientAssetIds = flexaClient.appAccounts
-        var ids = flexaClient.appAccounts
+        let ids = flexaClient.assetAccounts
             .flatMap { $0.availableAssets }
             .map { $0.assetId }
 

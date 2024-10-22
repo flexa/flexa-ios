@@ -16,6 +16,7 @@ extension Models {
             case colorString = "color"
             case iconUrl = "icon_url"
             case displayName = "display_name"
+            case assetChain = "chain"
         }
 
         var id: String
@@ -24,6 +25,7 @@ extension Models {
         var iconUrl: URL?
         var displayName: String
         var livemode: Bool
+        var assetChain: Models.Chain?
 
         var color: Color? {
             guard let colorString else {
@@ -35,4 +37,7 @@ extension Models {
 }
 
 extension Models.Asset: Asset {
+    var chain: (any Chain)? {
+        assetChain
+    }
 }

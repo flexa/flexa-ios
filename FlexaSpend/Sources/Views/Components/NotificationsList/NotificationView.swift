@@ -13,6 +13,7 @@ import Factory
 
 struct NotificationView: View {
     @Environment(\.theme.containers.notifications) var theme
+    @State var showWebView = false
 
     var notification: AppNotification
     var closeAction: () -> Void
@@ -62,12 +63,12 @@ struct NotificationView: View {
                         .foregroundColor(.purple)
                         .padding([.trailing, .bottom], 16)
                         .padding(.top, 12)
+
                 }.padding(0)
             }
         }
         .frame(maxWidth: .infinity)
         .modifier(RoundedView(color: backgroundColor, cornerRadius: cornerRadius))
-
     }
 
     @ViewBuilder

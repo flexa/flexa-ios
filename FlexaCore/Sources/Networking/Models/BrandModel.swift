@@ -16,6 +16,7 @@ extension Models {
             case colorString = "color"
             case logoUrl = "logo_url"
             case brandLegacyFlexcodes = "legacy_flexcodes"
+            case brandPromotions = "promotions"
         }
 
         var id: String
@@ -24,6 +25,7 @@ extension Models {
         var name: String
         var slug: String
         var brandLegacyFlexcodes: [LegacyFlexcode]?
+        var brandPromotions: [Models.Promotion]?
 
         var color: Color? {
             guard let colorString else {
@@ -57,6 +59,10 @@ extension Models {
                 [Models.Brand.LegacyFlexcode].self,
                 forKey: .brandLegacyFlexcodes
             )
+            self.brandPromotions = try container.decodeIfPresent(
+                [Models.Promotion].self,
+                forKey: .brandPromotions
+            )
         }
     }
 }
@@ -64,6 +70,10 @@ extension Models {
 extension Models.Brand: Brand {
     var legacyFlexcodes: [BrandLegacyFlexcode]? {
         brandLegacyFlexcodes
+    }
+
+    var promotions: [Promotion] {
+        brandPromotions ?? []
     }
 }
 

@@ -93,8 +93,8 @@ struct FXAvailableAsset {
     let symbol: String?
 }
 
- struct FXAppAccount {
-    let accountId: String
+ struct FXAssetAccount {
+    let assetAccountHash: String
     let displayName: String
     let icon: UIImage?
     let availableAssets: [FXAvailableAsset]
@@ -110,7 +110,7 @@ struct YourApp: App {
         Flexa.initialize(
             FXClient(
                 publishableKey: "{YOUR_PUBLISHABLE_KEY}",
-                appAccounts: [FXAppAccount],
+                assetAccounts: [FXAssetAccount],
                 theme: .default
             )
         )
@@ -143,8 +143,8 @@ struct FXAvailableAsset {
     let symbol: String?
 }
 
- struct FXAppAccount {
-    let accountId: String
+ struct FXAssetAccount {
+    let assetAccountHash: String
     let displayName: String
     let icon: UIImage?
     let availableAssets: [FXAvailableAsset]
@@ -156,10 +156,13 @@ struct FXAvailableAsset {
 ```swift
 Flexa.initialize(FXClient(
     publishableKey: "{YOUR_PUBLISHABLE_KEY}",
-    appAccounts: [FXAppAccount],
+    assetAccounts: [FXAssetAccount],
     theme: .default)
 )
 ```
+
+### Unsupported regions
+Flexa works on many regions, but a few are unsupported. After the SDK is initialized developers can query the boolean `Flexa.canSpend`, if it's `false` it means the current region where the app is running is unsupported. In the case `Flexa.canSpend` is `false` the SDK won't open when calling the `open()` method.
 
 ### Universal Links
 Currently Flexa allows to use universal links to speed up the sign in/sign up process
@@ -220,8 +223,8 @@ struct SPMApp: App {
 ```swift
 // Open Flexa
 Flexa.sections([.spend])
-    .appAccounts(appAccounts) // Optional
-    .selectedAsset(selectedAccountId, selectedAssetId) // Optional
+    .assetAccounts(assetAccounts) // Optional
+    .selectedAsset(selectedAssetAccountHash, selectedAssetId) // Optional
     .onTransactionRequest(onTransactionRequest)
     .open()
 
@@ -250,9 +253,9 @@ public struct FXTransaction {
     public let commerceSessionId: String
     /// Amount of the transaction
     public let amount: String
-    /// The appAccountId the funds will be taken from
-    public let appAccountId: String
-    /// The appAccounts's asset that must be used
+    /// The assetAccountHash the funds will be taken from
+    public let assetAccountHash: String
+    /// The asset that must be used
     public let assetId: String
     /// Destination address of the transaction
     public let destinationAddress: String
@@ -274,7 +277,7 @@ public struct FXTransaction {
 A builder pattern is used to configure and open Flexa:
 
 - `sections`: allows you to specify the different Components to be displayed.
-- `appAccounts`: sets the user's app accounts
+- `assetAccounts`: sets the user's asset accounts
 - `selectedAsset`: selects a default app account's asset to be used on future transactions
 - `onTransactionRequest`: is called when Flexa has all the information about a transaction and needs the parent application to send it. In this callback parent applications should do any validation and send the transaction. Once the transaction is sent the parent application can pass the transaction's signature to Flexa through `Flexa.transactionSent`.
 - `open`: opens Flexa's main screen

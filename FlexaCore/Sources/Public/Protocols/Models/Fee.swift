@@ -8,8 +8,10 @@
 
 import Foundation
 
-public protocol Fee: Value {
+public protocol Fee {
+    var amount: String { get }
     var asset: String { get }
-    var equivalent: String { get }
-    var price: Price { get }
+    var price: Price? { get }
+    var zone: String? { get }
+    var transactionAsset: String? { get }
 }

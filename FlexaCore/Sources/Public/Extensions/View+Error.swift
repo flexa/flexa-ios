@@ -16,8 +16,12 @@ public extension View {
     func onError(error: Binding<Error?>, buttonTitle: String? = nil) -> some View {
         if let networkError = error.wrappedValue as? FlexaNetworking.NetworkError,
            networkError.isUnauthorized,
-           case NetworkError.invalidStatus(_, let resource, _) = networkError,
+           case NetworkError.invalidStatus(_, let resource, _, _) = networkError,
            resource is JWTAuthenticable {
+            self.task {
+                Container.shared.eventNotifier().post(name: .flexaAuthorizationError)
+            }
+        } else if error.wrappedValue?.isRestrictedRegion == true {
             self.task {
                 Container.shared.eventNotifier().post(name: .flexaAuthorizationError)
             }

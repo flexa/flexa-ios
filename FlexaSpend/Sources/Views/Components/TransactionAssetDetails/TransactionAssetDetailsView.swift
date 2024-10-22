@@ -67,7 +67,7 @@ private extension TransactionAssetDetailsView {
             case .asset:
                 Text(L10n.Payment.done)
                     .font(.body.weight(.semibold))
-            case .transaction, .dynamicTransaction:
+            case .transaction:
                 Text(L10n.Payment.done)
                     .font(.body.weight(.semibold))
                     .foregroundColor(tintColor)
@@ -84,8 +84,14 @@ private extension TransactionAssetDetailsView {
             ) {
                 HStack {
                     VStack(alignment: .leading) {
-                        Text(viewModel.mainAmount)
-                            .multilineTextAlignment(.leading)
+                        HStack {
+                            if viewModel.hasDiscount {
+                                Text(viewModel.mainAmount)
+                                    .foregroundColor(.secondary)
+                                    .strikethrough(color: .secondary)
+                            }
+                            Text(viewModel.hasDiscount ? viewModel.amountWithDiscount : viewModel.mainAmount)
+                        }.multilineTextAlignment(.leading)
                             .font(.title2.weight(.bold))
                             .foregroundColor(.primary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -130,7 +136,7 @@ private extension TransactionAssetDetailsView {
                                 .scaledToFit()
                                 .foregroundColor(.secondary)
                                 .frame(width: .imageWidth, height: .imageHeight, alignment: .center)
-                            if viewModel.isLoading {
+                            if viewModel.isLoading && !viewModel.hasTransactionFee {
                                 ProgressView()
                             } else {
                                 Text(viewModel.networkFee)
@@ -152,7 +158,6 @@ private extension TransactionAssetDetailsView {
                 }
             }
         }
-        //.disableScroll()
         .padding(.top, -24)
         .animation(.none)
         .background(backgroundColor)

@@ -46,7 +46,8 @@ extension FlexaAPIResource {
             "Accept": "application/vnd.flexa+json",
             "Flexa-App": Bundle.applicationDisplayName,
             "User-Agent": userAgent,
-            "Client-Trace-Id": UUID().uuidString
+            "Client-Trace-Id": UUID().uuidString,
+            "Flexa-Version": Flexa.apiVersion
         ]
     }
 

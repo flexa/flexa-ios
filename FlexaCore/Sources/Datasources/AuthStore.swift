@@ -78,9 +78,12 @@ final class AuthStore: AuthStoreProtocol {
         let verifier = try pkceHelper.generateVerifier()
         let challenge = try pkceHelper.generateChallenge(for: verifier)
 
+        var tokenData = TokenData()
         tokenData.token = try await tokensRepository.create(email: email, challenge: challenge)
         tokenData.verifier = verifier
         tokenData.email = email
+
+        self.tokenData = tokenData
         saveTokenData()
         self.state = .verifying
         return state
@@ -90,6 +93,7 @@ final class AuthStore: AuthStoreProtocol {
         let verifier = try pkceHelper.generateVerifier()
         let challenge = try pkceHelper.generateChallenge(for: verifier)
 
+        var tokenData = self.tokenData ?? TokenData()
         tokenData.token = try await tokensRepository.verify(
             tokenId: tokenData.token?.id ?? "",
             verifier: tokenData.verifier,
@@ -98,6 +102,8 @@ final class AuthStore: AuthStoreProtocol {
             link: link
         )
         tokenData.verifier = verifier
+
+        self.tokenData = tokenData
         saveTokenData()
         state = .loggedIn
         return state
@@ -158,13 +164,15 @@ final class AuthStore: AuthStoreProtocol {
             let verifier = try pkceHelper.generateVerifier()
             let challenge = try pkceHelper.generateChallenge(for: verifier)
 
+            var tokenData = self.tokenData ?? TokenData()
             tokenData.token = try await tokensRepository.refresh(
                 tokenId: tokenData.token?.id ?? "",
                 verifier: tokenData.verifier,
                 challenge: challenge
             )
-
             tokenData.verifier = verifier
+
+            self.tokenData = tokenData
             saveTokenData()
             state = .loggedIn
             return state

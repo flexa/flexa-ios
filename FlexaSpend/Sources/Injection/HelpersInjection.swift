@@ -23,4 +23,8 @@ extension Container {
     var assetsHelper: Factory<AssetHelperProtocol> {
         self { AssetHelper() }.singleton
     }
+
+    var urlRouter: Factory<URLRouterProtocol> {
+        self { URLRouter() }
+    }
 }

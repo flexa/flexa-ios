@@ -82,8 +82,8 @@ struct AssetWrapper: Identifiable {
         assetsHelper.availableBalanceInLocalCurrency(self)
     }
 
-    init(appAccountId: String, assetId: String) {
-        self.accountId = appAccountId
+    init(accountHash: String, assetId: String) {
+        self.accountId = accountHash
         self.assetId = assetId
     }
 

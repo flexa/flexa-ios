@@ -686,7 +686,7 @@ extension NetworkError: Equatable {
         switch (lhs, rhs) {
         case (.unknown, .unknown):
             return true
-        case(.invalidStatus(let lhsStatus, _, _), .invalidStatus(let rhsStatus, _, _)):
+        case(.invalidStatus(let lhsStatus, _, _, _), .invalidStatus(let rhsStatus, _, _, _)):
             return lhsStatus == rhsStatus
         case(.decode(let lhsError), .decode(let rhsError)):
             return lhsError?.localizedDescription == rhsError?.localizedDescription

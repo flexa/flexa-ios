@@ -12,7 +12,7 @@ extension Models {
     struct Price: FlexaModelProtocol {
         var amount: String
         var label: String
-        var priority: String
+        var priority: String?
 
         init(amount: String, label: String, priority: String) {
             self.amount = amount

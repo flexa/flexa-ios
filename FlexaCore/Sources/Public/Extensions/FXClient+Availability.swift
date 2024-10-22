@@ -10,54 +10,54 @@ import Foundation
 import Factory
 
 public extension FXClient {
-    var availableFXAppAccounts: [FXAppAccount] {
+    var availableFXAssetAccounts: [FXAssetAccount] {
         let assetsRepository = Container.shared.assetsRepository()
         if assetsRepository.assets.isEmpty {
-            return appAccounts
+            return assetAccounts
         }
 
-        var fxAppAccounts: [FXAppAccount] = []
+        var FXAssetAccounts: [FXAssetAccount] = []
         let assetsIds = assetsRepository.assets.map { $0.id }
 
-        for appAccount in appAccounts {
-            let fxAssets = appAccount.availableAssets.filter { assetsIds.contains($0.assetId) && $0.balance > 0 }
+        for account in assetAccounts {
+            let fxAssets = account.availableAssets.filter { assetsIds.contains($0.assetId) && $0.balance > 0 }
 
             if fxAssets.isEmpty {
                 continue
             }
 
-            fxAppAccounts.append(
-                FXAppAccount(
-                    accountId: appAccount.accountId,
-                    displayName: appAccount.displayName,
-                    custodyModel: appAccount.custodyModel,
+            FXAssetAccounts.append(
+                FXAssetAccount(
+                    assetAccountHash: account.assetAccountHash,
+                    displayName: account.displayName,
+                    custodyModel: account.custodyModel,
                     availableAssets: fxAssets
                 )
             )
         }
 
-        return fxAppAccounts
+        return FXAssetAccounts
     }
 
     func sanitizeSelectedAsset() {
         let assetConfig = Container.shared.assetConfig()
-        guard !availableFXAppAccounts.contains(assetConfig: assetConfig) else {
+        guard !availableFXAssetAccounts.contains(assetConfig: assetConfig) else {
             return
         }
 
-        if let appAccount = availableFXAppAccounts.first,
-           let asset = appAccount.availableAssets.first {
+        if let account = availableFXAssetAccounts.first,
+           let asset = account.availableAssets.first {
             assetConfig.selectedAssetId = asset.assetId
-            assetConfig.selectedAppAccountId = appAccount.accountId
+            assetConfig.selectedAssetAccountHash = account.assetAccountHash
         }
     }
 }
 
-extension Array where Element == FXAppAccount {
+extension Array where Element == FXAssetAccount {
     func contains(assetConfig: FXAssetConfig) -> Bool {
-        contains(where: { appAccount in
-            appAccount.accountId == assetConfig.selectedAppAccountId &&
-            appAccount.availableAssets.contains(where: { $0.assetId == assetConfig.selectedAssetId })
+        contains(where: { account in
+            account.assetAccountHash == assetConfig.selectedAssetAccountHash &&
+            account.availableAssets.contains(where: { $0.assetId == assetConfig.selectedAssetId })
         })
     }
 }

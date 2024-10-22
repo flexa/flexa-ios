@@ -48,7 +48,7 @@
 "auth.personal_info.header.title" = "Create your
 Flexa Account";
 "auth.personal_info.header.subtitle" = "Please provide a few details to start making payments with Flexa.";
-"auth.personal_info.sections.terms_of_service" = "The information you provide is used only to comply with local financial regulations, and will never be shared with %s or any of the businesses you pay. By creating an account, you agree to Flexa’s [Terms of Service](https://flexa.network/legal/terms).";
+"auth.personal_info.sections.terms_of_service" = "The information you provide is used only to comply with local financial regulations, and will never be shared with %s or any of the businesses you pay. By creating an account, you agree to Flexa’s [Terms of Service](https://flexa.co/legal/terms).";
 "auth.personal_info.buttons.about.title" = "About Flexa & Privacy...";
 "auth.personal_info.buttons.next.title" = "Get Started";
 "auth.personal_info.textfields.full_name.placeholder" = "Your Name";
@@ -64,3 +64,7 @@ Flexa Account";
 "auth.magic_code.alerts.no_code.message" = "The 6-digit verification code is displayed after you approve the sign-in request that was sent to your email address. If you don’t remember seeing a code, try opening your verification email again on this device.";
 "auth.magic_code.alerts.signed_in.title" = "Success!";
 "auth.magic_code.alerts.signed_in.message" = "You are signed in.";
+
+// Web View
+"webview.errors.load.title" = "Cannot load page";
+"webview.buttons.retry.title" = "Retry";

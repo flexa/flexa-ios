@@ -11,6 +11,7 @@ import FlexaUICore
 import LocalAuthentication
 import FlexaCore
 import Factory
+import Combine
 
 struct SpendView: View {
     @Injected(\.flexaClient) var flexaClient
@@ -25,9 +26,11 @@ struct SpendView: View {
 
     @State private var showNotification = true
     @State private var showBrandDirectory = false
-    @State private var userData: UserData?
     @State private var selectedAssetIndex: Int
     @State private var selectedBrand: Brand?
+    @State private var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+
+    var url: URL?
 
     // MARK: - Initialization
     init(viewModel: ViewModel) {
@@ -52,7 +55,7 @@ struct SpendView: View {
                             Divider()
                             NoAssetsView(Container.shared.noAssetsViewModel(viewModel.invalidUserAssets))
                                 .padding(.horizontal, padding)
-                        } else if viewModel.missingAppAccounts {
+                        } else if viewModel.missingAccounts {
                             ZStack {
                                 RoundedRectangle(cornerRadius: containerBorderRadius)
                                     .foregroundColor(.white)
@@ -109,17 +112,21 @@ struct SpendView: View {
             largeTitleLeftMargin: largeNavigationTitleLeftMargin
         )
         .onAppear {
-            viewModel.loadAppAccounts()
+            viewModel.loadAccounts()
             viewModel.startWatching()
-
-            FlexaIdentity
-                .getUserData { result in
-                    userData = result
-                }
+            timer.upstream.connect().cancel()
+            timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
         }
         .onDisappear {
             viewModel.clear()
             viewModel.stopWatching()
+            timer.upstream.connect().cancel()
+        }.environment(\.openURL, OpenURLAction { url in
+            viewModel.handleUrl(url: url) ? .handled : .systemAction(viewModel.url ?? url)
+        }).sheet(isPresented: $viewModel.isShowingWebView) {
+            FlexaWebView(url: viewModel.url)
+        }.onReceive(timer) { _ in
+            viewModel.refreshFlexcodes()
         }
 
         if #available(iOS 16, *) {
@@ -276,7 +283,6 @@ private extension SpendView {
                 VStack {
                     AssetsNavigationView(showAssetsModal: $viewModel.showAssetsModal,
                                          viewModelAsset: _viewModelAsset) { selectedAsset in
-                        viewModel.updateSelectAsset()
                         viewModel.updateAsset(selectedAsset)
                         selectedAssetIndex = viewModel.flexCodes.firstIndex { $0.asset.assetId == selectedAsset.assetId } ?? 0
                         viewModel.showAssetsModal = false
@@ -302,8 +308,10 @@ private extension SpendView {
     @ViewBuilder
     var legacyFlexcodeInputAmountSheet: some View {
         ZStack {}
-            .onChange(of: transactionAmountViewModel.commerceSessionCreated) { _ in
-                self.viewModel.signAndSendLegacy(commerceSession: transactionAmountViewModel.commerceSession)
+            .onChange(of: transactionAmountViewModel.commerceSessionCreated) { created in
+                if created {
+                    self.viewModel.signAndSendLegacy(commerceSession: transactionAmountViewModel.commerceSession)
+                }
             }
             .sheet(
                 isPresented: $viewModel.showInputAmountView,
@@ -344,8 +352,6 @@ private extension SpendView {
             PayNowModal(isShowing: $viewModel.showPaymentModal,
                         value: viewModel.amountLabel,
                         baseAmount: viewModel.baseAmountLabel,
-                        networkFee: viewModel.networkFee,
-                        baseNetworkFee: "",
                         wallet: "\(viewModel.assetConfig.selectedAssetId)",
                         asset: selectedAsset,
                         paymentDone: $viewModel.paymentCompleted,
@@ -353,6 +359,7 @@ private extension SpendView {
                         assetSwitcherEnabled: $viewModel.assetSwitcherEnabled,
                         merchantLogoUrl: viewModel.merchantLogoUrl,
                         merchantName: viewModel.merchantName,
+                        fee: viewModel.fee,
                         didConfirm: {
                 viewModel.signAndSend()
             }, didCancel: {

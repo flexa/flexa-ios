@@ -16,6 +16,7 @@ public protocol Brand {
     var name: String { get }
     var slug: String { get }
     var legacyFlexcodes: [BrandLegacyFlexcode]? { get }
+    var promotions: [Promotion] { get }
 }
 
 public protocol BrandLegacyFlexcode {

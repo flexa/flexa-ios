@@ -22,21 +22,21 @@ public extension Flexa {
         }
 
         ///  Sets the list of assets with their balances for each user's wallet.
-        /// - parameter appAccounts: A set of assets and their respective balances for each of the wallet accounts from which your user can sign transactions using your app
+        /// - parameter assetAccounts: A set of assets and their respective balances for each of the wallet accounts from which your user can sign transactions using your app
         /// - returns self instance in order to chain other methods
         @discardableResult
-        public func appAccounts(_ appAccounts: [FXAppAccount]) -> Self {
-            flexa.spendBuilder?.appAccounts(appAccounts)
+        public func assetAccounts(_ assetAccounts: [FXAssetAccount]) -> Self {
+            flexa.spendBuilder?.assetAccounts(assetAccounts)
             return self
         }
 
         /// Selects the app account and assets to be used by default on future transactions
-        /// - parameter accountId: The app account identifier
+        /// - parameter assetAccountHash: The account hash
         /// - parameter assetId: The CAIP-19 ID for the asset.
         /// - returns self instance in order to chain other methods
         @discardableResult
-        public func selectedAsset(_ accountId: String, _ caipAssetId: String) -> Self {
-            flexa.spendBuilder?.selectedAsset(accountId, caipAssetId)
+        public func selectedAsset(_ assetAccountHash: String, _ caipAssetId: String) -> Self {
+            flexa.spendBuilder?.selectedAsset(assetAccountHash, caipAssetId)
             return self
         }
 

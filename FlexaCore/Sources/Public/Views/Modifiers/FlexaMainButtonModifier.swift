@@ -13,13 +13,15 @@ public extension View {
         background: some View = Color.purple,
         textColor: Color = .white,
         disabledTextColor: Color? = nil,
-        cornerRadius: CGFloat = 10) -> some View {
+        cornerRadius: CGFloat = 10,
+        disabledOpacity: CGFloat = 0.2) -> some View {
             modifier(
                 FlexaMainButtonModifier(
                     color: background,
                     textColor: textColor,
                     disabledTextColor: disabledTextColor ?? textColor,
-                    cornerRadius: cornerRadius
+                    cornerRadius: cornerRadius,
+                    disabledOpacity: disabledOpacity
                 )
             )
         }
@@ -30,6 +32,7 @@ struct FlexaMainButtonModifier: ViewModifier {
     var textColor: Color
     var disabledTextColor: Color
     var cornerRadius: CGFloat
+    var disabledOpacity: CGFloat
 
     @Environment(\.isEnabled) var isEnabled
 
@@ -39,7 +42,7 @@ struct FlexaMainButtonModifier: ViewModifier {
             .foregroundColor(isEnabled ? textColor : disabledTextColor)
             .padding()
             .frame(maxWidth: .infinity)
-            .background(AnyView(color).opacity(isEnabled ? 1 : 0.2))
+            .background(AnyView(color).opacity(isEnabled ? 1 : disabledOpacity))
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
             .contentShape(RoundedRectangle(cornerRadius: cornerRadius))
     }

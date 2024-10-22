@@ -11,6 +11,7 @@ import Factory
 
 public protocol ExchangeRatesRepositoryProtocol {
     var exchangeRates: [ExchangeRate] { get }
+    var shouldSync: Bool { get }
 
     @discardableResult
     func refresh() async throws -> [ExchangeRate]

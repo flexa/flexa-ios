@@ -40,6 +40,10 @@ public final class FlexaSpend {
     /// If the user is already signed in then it will open the payment screen.
     /// If the user is not signed in the it will open the sign in/sign up screens.
     public func open() {
+        guard Flexa.canSpend else {
+            FlexaLogger.error(L10n.Errors.RestrictedRegion.message)
+            return
+        }
         auth.collect { result in
             self.showPaymentOrAuth(result: result)
         }
@@ -49,19 +53,25 @@ public final class FlexaSpend {
     ///
     /// The returned view could be embedded inside other views.
     public func createView() -> some View {
-        ZStack(alignment: .center) {
-            MainViewWrapper(spend: self) {
-                SpendView(viewModel: self.viewModel)
-            }
+        guard Flexa.canSpend else {
+            FlexaLogger.error(L10n.Errors.RestrictedRegion.message)
+            return AnyView(EmptyView())
         }
-        .ignoresSafeArea()
-        .navigationBarHidden(true)
-        .frame(
-            minWidth: 0,
-            maxWidth: .infinity,
-            minHeight: 0,
-            maxHeight: .infinity,
-            alignment: .center
+        return AnyView(
+            ZStack(alignment: .center) {
+                MainViewWrapper(spend: self) {
+                    SpendView(viewModel: self.viewModel)
+                }
+            }
+                .ignoresSafeArea()
+                .navigationBarHidden(true)
+                .frame(
+                    minWidth: 0,
+                    maxWidth: .infinity,
+                    minHeight: 0,
+                    maxHeight: .infinity,
+                    alignment: .center
+                )
         )
     }
 
@@ -81,6 +91,10 @@ public final class FlexaSpend {
     /// If `result` is `connected` then FlexaSpend opens the main screen
     /// if `result` is `notConnected` then FlexaSpend starts the auth flow
     private func showPaymentOrAuth(result: ConnectResult, allowSignIn: Bool = true) {
+        guard Flexa.canSpend else {
+            FlexaLogger.error(L10n.Errors.RestrictedRegion.message)
+            return
+        }
         DispatchQueue.main.async {
             switch result {
                 case .connected:
@@ -100,7 +114,7 @@ public extension FlexaSpend {
         @Injected(\.assetsRepository) private var assetsRepository
 
         private var spend: FlexaSpend?
-        private var appAccounts: [FXAppAccount] = []
+        private var assetAccounts: [FXAssetAccount] = []
 
         private var safeSpend: FlexaSpend {
             if let spend {
@@ -115,23 +129,23 @@ public extension FlexaSpend {
         }
 
         /// Selects the app account and assets to be used by default on future transactions
-        /// - parameter appAccountId: The app account identifier
+        /// - parameter assetAccountHash: The account hash
         /// - parameter assetId: The CAIP-19 ID for the asset.
         /// - returns self instance in order to chain other methods
         @discardableResult
-        public func selectedAsset(_ appAccountId: String, _ assetId: String) -> Self {
-            assetConfig.selectedAppAccountId = appAccountId
+        public func selectedAsset(_ assetAccountHash: String, _ assetId: String) -> Self {
+            assetConfig.selectedAssetAccountHash = assetAccountHash
             assetConfig.selectedAssetId = assetId
             return self
         }
 
         ///  Sets the list of assets with their balances for each user's wallet.
-        /// - parameter appAccounts: A set of assets and their respective balances for each of the wallet accounts from which your user can sign transactions using your app
+        /// - parameter assetAccounts: A set of assets and their respective balances for each of the wallet accounts from which your user can sign transactions using your app
         /// - returns self instance in order to chain other methods
         @discardableResult
-        public func appAccounts(_ appAccounts: [FXAppAccount]) -> Self {
-            self.appAccounts = appAccounts
-            flexaClient.appAccounts = appAccounts
+        public func assetAccounts(_ assetAccounts: [FXAssetAccount]) -> Self {
+            self.assetAccounts = assetAccounts
+            flexaClient.assetAccounts = assetAccounts
             return self
         }
 
@@ -148,8 +162,8 @@ public extension FlexaSpend {
         public func build() -> FlexaSpend {
             assetsRepository.backgroundRefresh()
 
-            if !appAccounts.isEmpty {
-                Flexa.updateAppAccounts(appAccounts)
+            if !assetAccounts.isEmpty {
+                Flexa.updateAssetAccounts(assetAccounts)
             }
 
             let payment = self.safeSpend

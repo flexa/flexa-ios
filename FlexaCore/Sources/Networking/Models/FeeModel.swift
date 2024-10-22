@@ -11,20 +11,21 @@ import Foundation
 extension Models {
     struct Fee: FlexaModelProtocol {
         enum CodingKeys: String, CodingKey {
-            case asset, label, amount, equivalent
+            case asset, amount
             case feePrice = "price"
+            case transactionAsset = "transaction_asset"
         }
 
         var amount: String
         var asset: String
-        var equivalent: String
-        var label: String
-        var feePrice: Models.Price
+        var feePrice: Models.Price?
+        var zone: String?
+        var transactionAsset: String?
     }
 }
 
 extension Models.Fee: Fee {
-    var price: Price {
+    var price: Price? {
         feePrice
     }
 }

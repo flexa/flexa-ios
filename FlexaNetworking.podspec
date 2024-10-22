@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FlexaNetworking"
-  s.version      = "1.0.4"
+  s.version      = "1.0.5"
   s.summary      = "Spend Networking"
   s.description  = "Spend Networking module by Flexa"
   s.homepage     = "https://github.com/flexa/flexa-ios"

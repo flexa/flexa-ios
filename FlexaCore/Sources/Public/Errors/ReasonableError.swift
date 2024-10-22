@@ -188,4 +188,19 @@ extension Error {
 
         return false
     }
+
+    public var isRestrictedRegion: Bool {
+        if let networkError = self as? FlexaNetworking.NetworkError,
+           let apiError = networkError.apiError {
+            return apiError.isRestrictedRegion
+        }
+
+        if let reasonableError = self as? ReasonableError,
+           case .custom(let error) = reasonableError.reason,
+           let networkError = error as? FlexaNetworking.NetworkError,
+           let apiError = networkError.apiError {
+            return apiError.isRestrictedRegion
+        }
+        return false
+    }
 }

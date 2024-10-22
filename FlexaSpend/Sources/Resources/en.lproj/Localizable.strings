@@ -6,6 +6,9 @@
 "common.cancel" = "Cancel";
 "common.updating" = "Updating";
 
+// Errors
+"errors.restricted_region.message" = "Flexa is running on a restricted region and spends are disabled. Please check Flexa.canSpend";
+
 // Primary view
 "payment.pay_with_flexa.title" = "Pay with Flexa";
 "payment.using_ticker.subtitle" = "Using %s";
@@ -59,7 +62,7 @@
 // Data and Privacy
 "data_and_privacy.navigation.title" = "Data & Privacy";
 "data_and_privacy.sections.header.title" = "Your Data & Privacy";
-"data_and_privacy.sections.header.description" = "Flexa is carefully designed to use only the data that’s directly necessary to process your payments. [Learn more…](https://flexa.network/privacy/)";
+"data_and_privacy.sections.header.description" = "Flexa is carefully designed to use only the data that’s directly necessary to process your payments. [Learn more…](https://flexa.co/legal/privacy)";
 "data_and_privacy.sections.header.account_email" = "Account Email";
 "data_and_privacy.sections.delete_account.cells.delete_account" = "Delete Your Flexa Account";
 "data_and_privacy.sections.delete_account.cells.deletion_pending.title" = "Account Deletion Pending";
@@ -94,6 +97,7 @@
 "payment.asset.exchange_rate.avaliable" = "%s avaliable";
 "payment.asset.exchange_rate.value" = "1 %s = %s";
 "payment.asset.exchange_rate.amount" = "%s %s";
+"payment.asset.exchange_rate.free" = "Free";
 
 // Transaction Details
 "payment.transaction_details.footer" = "Flexa automatically selects the best exchange rate and network fee for your payments. [Learn more...](https://flexa.co)";
@@ -118,6 +122,7 @@
 "legacy_flexcode.amount_entry.buttons.enter_amount.title" = "Enter Amount";
 "legacy_flexcode.amount_entry.buttons.pay_now.title" = "Confirm";
 "legacy_flexcode.amount_entry.buttons.balance_unavailable.title" = "Balance Not Yet Available";
+"legacy_flexcode.promotions.labels.saving" = "Saving %s";
 
 // Updating balance
 "updating_balance.title" = "Balance Updating...";

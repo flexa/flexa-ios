@@ -1,5 +1,5 @@
 //
-//  AppAccountsRepository.swift
+//  AppNotificationsRepositoryProtocol.swift
 //  FlexaCore
 //
 //  Created by Rodrigo Ordeix on 3/7/24.

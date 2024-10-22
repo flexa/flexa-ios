@@ -10,11 +10,11 @@ import Foundation
 
 public class FXAssetConfig: ObservableObject {
     @Published public var selectedAssetId: String
-    @Published public var selectedAppAccountId: String
+    @Published public var selectedAssetAccountHash: String
 
     public init(selectedAssetId: String = "",
-                selectedAccountId: String = "") {
+                selectedAssetAccountHash: String = "") {
         self.selectedAssetId = selectedAssetId
-        self.selectedAppAccountId = selectedAccountId
+        self.selectedAssetAccountHash = selectedAssetAccountHash
     }
 }

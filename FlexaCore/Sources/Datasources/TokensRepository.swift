@@ -70,6 +70,9 @@ class TokensRepository: TokensRepositoryProtocol {
         do {
             try await networkClient.sendRequest(resource: resource)
         } catch let error {
+            if error.isRestrictedRegion {
+                throw error
+            }
             throw resource.wrappingError(error) ?? error
         }
     }
@@ -78,6 +81,9 @@ class TokensRepository: TokensRepositoryProtocol {
         do {
             return try await networkClient.sendRequest(resource: resource)
         } catch let error {
+            if error.isRestrictedRegion {
+                throw error
+            }
             throw resource.wrappingError(error) ?? error
         }
     }

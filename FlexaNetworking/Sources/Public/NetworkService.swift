@@ -63,7 +63,8 @@ public final class NetworkService: Networkable {
             let error = NetworkError.invalidStatus(
                 status: response.statusCode,
                 resource: resource,
-                request: request
+                request: request,
+                data: data
             )
             return (nil, response, error)
         }

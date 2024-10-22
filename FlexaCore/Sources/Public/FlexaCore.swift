@@ -20,7 +20,16 @@ open class Flexa {
     @Injected(\.assetConfig) private static var assetConfig
     @Injected(\.appStateManager) private static var appStateManager
     @Injected(\.oneTimeKeysRepository) private static var oneTimeKeysRepository
+    @Injected(\.eventNotifier) private static var eventNotifier
     private static var isInitialized = false
+
+    @Synchronized public static internal(set) var canSpend = false {
+        didSet {
+            if !canSpend {
+                eventNotifier.post(name: .flexaAuthorizationError)
+            }
+        }
+    }
 
     /// Initializes Flexa SDK with the specified settings.
     ///
@@ -31,7 +40,7 @@ open class Flexa {
     /// - parameter settings: The FXClient used to configure Flexa SDK.
     public static func initialize(_ client: FXClient) {
         flexaClient.publishableKey = client.publishableKey
-        flexaClient.appAccounts = client.appAccounts
+        flexaClient.assetAccounts = client.assetAccounts
         flexaClient.theme = client.theme
 
         if !isInitialized {
@@ -41,17 +50,17 @@ open class Flexa {
     }
 
     ///  Updates the list of assets with their balances for each user's wallet.
-    /// - parameter appAccounts: A set of assets and their respective balances for each of the wallet accounts from which your user can sign transactions using your app
-    public static func updateAppAccounts(_ appAccounts: [FXAppAccount]) {
-        flexaClient.appAccounts = appAccounts
+    /// - parameter assetAccounts: A set of assets and their respective balances for each of the wallet accounts from which your user can sign transactions using your app
+    public static func updateAssetAccounts(_ assetAccounts: [FXAssetAccount]) {
+        flexaClient.assetAccounts = assetAccounts
         oneTimeKeysRepository.backgroundRefresh()
     }
 
-    /// Selects the app account and asset to be used by default on future transactions
-    /// - parameter appAccountId: The app account identifier
+    /// Selects the account and asset to be used by default on future transactions
+    /// - parameter assetAccountHash: The asset account hash
     /// - parameter assetId: The CAIP-19 ID for the asset.
-    public static func selectedAsset(_ appAccountId: String, _ assetId: String) {
-        assetConfig.selectedAppAccountId = appAccountId
+    public static func selectedAsset(_ assetAccountHash: String, _ assetId: String) {
+        assetConfig.selectedAssetAccountHash = assetAccountHash
         assetConfig.selectedAssetId = assetId
         flexaClient.sanitizeSelectedAsset()
     }

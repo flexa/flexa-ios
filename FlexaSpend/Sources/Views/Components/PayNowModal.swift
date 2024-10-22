@@ -29,8 +29,7 @@ struct PayNowModal: View {
     private var merchantLogoUrl: URL?
     private var merchantName = ""
     private var baseAmount: String
-    private var networkFee: String
-    private var baseNetworkFee: String
+    private var fee: Fee?
     var amount: String = ""
 
     var backgroundColor: Color {
@@ -97,10 +96,11 @@ struct PayNowModal: View {
             TransactionAssetDetailsView(
                 showView: $showTransactionDetails,
                 viewModel: TransactionAssetDetailsViewModel(
-                displayMode: .dynamicTransaction,
-                asset: asset,
-                mainAmount: value,
-                baseNetworkFeeColor: Color(hex: "#F7931A"))
+                    displayMode: .transaction,
+                    asset: asset,
+                    mainAmount: value,
+                    fee: fee
+                )
             )
         }
     }
@@ -108,8 +108,6 @@ struct PayNowModal: View {
     init(isShowing: Binding<Bool>,
          value: String,
          baseAmount: String,
-         networkFee: String,
-         baseNetworkFee: String,
          wallet: String,
          asset: AssetWrapper,
          paymentDone: Binding<Bool>,
@@ -117,6 +115,7 @@ struct PayNowModal: View {
          assetSwitcherEnabled: Binding<Bool>,
          merchantLogoUrl: URL?,
          merchantName: String,
+         fee: Fee?,
          didConfirm: Closure?,
          didCancel: Closure?,
          didSelect: Closure?) {
@@ -132,9 +131,8 @@ struct PayNowModal: View {
         self.asset = asset
         self.merchantLogoUrl = merchantLogoUrl
         self.merchantName = merchantName
-        self.networkFee = networkFee
-        self.baseNetworkFee = baseNetworkFee
         self.baseAmount = baseAmount
+        self.fee = fee
         self.updateAsset()
     }
 

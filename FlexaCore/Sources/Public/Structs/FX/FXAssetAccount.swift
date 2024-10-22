@@ -1,5 +1,5 @@
 //
-//  FXAppAccount.swift
+//  FXAssetAccount.swift
 //  Flexa
 //
 //  Created by Rodrigo Ordeix on 12/12/22.
@@ -9,9 +9,9 @@
 import Foundation
 import UIKit
 
-public struct FXAppAccount {
-    /// A unique identifier (e.g., SHA-256 hash or UUIDv4) that you generate in order to identify this app account to Flexa SDK. When Flexa calls back to your app to sign a transaction, this accountId will be provided in order to identify the wallet account from which to spend. By reusing this ID across sessions, Flexa will avoid garbage-collecting account numbers and can ensure that offline payments will work for longer periods of time.
-    public let accountId: String
+public struct FXAssetAccount {
+    /// A unique identifier (e.g., SHA-256 hash or UUIDv4) that you generate in order to identify this asset account to Flexa SDK. When Flexa calls back to your app to sign a transaction, this assetAccountHash will be provided in order to identify the wallet account from which to spend.
+    public let assetAccountHash: String
     /// The human-friendly name of the account, however it is represented throughout the rest of your app.
     public let displayName: String
     /// The icon that is used to uniquely identify this account throughout the app (optional). Must be masked according to how you want the icon represented within the Flexa user interface.
@@ -21,12 +21,12 @@ public struct FXAppAccount {
     /// local or managed
     public let custodyModel: CustodyModel
 
-    public init(accountId: String,
+    public init(assetAccountHash: String,
                 displayName: String,
                 custodyModel: CustodyModel,
                 availableAssets: [FXAvailableAsset],
                 icon: UIImage? = nil) {
-        self.accountId = accountId
+        self.assetAccountHash = assetAccountHash
         self.displayName = displayName
         self.availableAssets = availableAssets
         self.icon = icon
@@ -34,13 +34,13 @@ public struct FXAppAccount {
     }
 }
 
-public extension Array where Element == FXAppAccount {
-    func findBy(accountId: String) -> FXAppAccount? {
-        first { $0.accountId.caseInsensitiveCompare(accountId) == .orderedSame }
+public extension Array where Element == FXAssetAccount {
+    func findBy(assetAccountHash hash: String) -> FXAssetAccount? {
+        first { $0.assetAccountHash.caseInsensitiveCompare(hash) == .orderedSame }
     }
 }
 
-public extension FXAppAccount {
+public extension FXAssetAccount {
     enum CustodyModel: String {
         case local, managed
     }

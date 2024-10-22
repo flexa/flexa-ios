@@ -16,7 +16,7 @@ extension SpendView {
     class ViewModel: ObservableObject, Identifiable {
         enum State: Equatable {
             case loading
-            case appAccountsLoaded
+            case accountsLoaded
             case commerceSessionCreated
             case commerceSessionUpdated
             case transactionSent
@@ -26,7 +26,7 @@ extension SpendView {
             public static func == (lhs: State, rhs: State) -> Bool {
                 switch (lhs, rhs) {
                 case (.loading, .loading),
-                    (.appAccountsLoaded, .appAccountsLoaded),
+                    (.accountsLoaded, .accountsLoaded),
                     (.commerceSessionCreated, .commerceSessionCreated),
                     (.commerceSessionUpdated, .commerceSessionUpdated),
                     (.transactionSent, .transactionSent),
@@ -58,21 +58,24 @@ extension SpendView {
         @Injected(\.exchangeRatesRepository) var exchangeRatesRepository
         @Injected(\.oneTimeKeysRepository) var oneTimeKeysRepository
         @Injected(\.assetsRepository) var assetsRepository
+        @Injected(\.transactionFeesRepository) var transactionFeesRepository
+        @Injected(\.urlRouter) var urlRouter
 
         @Published var activeSheet: ActiveSheet?
         @Published var paymentCompleted = false
         @Published var paymentButtonEnabled = true
         @Published var assetSwitcherEnabled = true
-        @Published var appAccounts: [AppAccount] = []
+        @Published var accounts: [AssetAccount] = []
         @Published var invalidUserAssets: [FXAvailableAsset] = []
-        @Published var walletsWithSufficientBalance: [AppAccount] = []
+        @Published var walletsWithSufficientBalance: [AssetAccount] = []
         @Published var error: Error?
         @Published var flexCodes: [SpendCodeView.ViewModel] = []
         @Published var isShowingModal = false
+        @Published var isShowingWebView = false
 
         @Published var hideShortBalances: Bool = false {
             didSet {
-                updateAppAccounts()
+                updateAccounts()
             }
         }
 
@@ -93,7 +96,6 @@ extension SpendView {
         }
 
         @Published var showManageFlexaAccountSheet = false
-
         @Published var showLegacyFlexcode = false {
             didSet {
                 updateModalState()
@@ -109,6 +111,8 @@ extension SpendView {
         @Published var state = State.loading
         @Published var commerceSession: CommerceSession?
 
+        @Synchronized var isUpdatingPaymentAsset = false
+
         var signTransaction: Flexa.TransactionRequestCallback?
         var selectedAsset: AssetWrapper?
         var sendTransactionWhenAvailable = false
@@ -116,13 +120,14 @@ extension SpendView {
         var legacyCommerceSessionIds: [String] = []
         var viewModelAsset: AssetSelectionViewModel!
         var transactionAmountViewModel: TransactionAmountView.ViewModel!
+        var url: URL?
 
         var selectedAssetSymbol: String {
             selectedAsset?.assetSymbol ?? ""
         }
 
-        var networkFee: String {
-            ""
+        var fee: Fee? {
+            commerceSession?.requestedTransaction?.fee
         }
 
         var amount: Decimal {
@@ -149,19 +154,19 @@ extension SpendView {
             if state == .loading {
                 return false
             }
-            return missingAppAccounts
+            return missingAccounts
         }
 
         var showInlineNavigationTitle: Bool {
-            state == .loading || missingAppAccounts
+            state == .loading || missingAccounts
         }
 
         var showLegacyFlexcodeList: Bool {
             state != .loading && !showInvalidAssetMessage
         }
 
-        var missingAppAccounts: Bool {
-            appAccounts.isEmpty || appAccounts.allSatisfy { $0.assets.isEmpty }
+        var missingAccounts: Bool {
+            accounts.isEmpty || accounts.allSatisfy { $0.assets.isEmpty }
         }
 
         var hasTransaction: Bool {
@@ -178,8 +183,7 @@ extension SpendView {
                 selectedAsset)
 
             transactionAmountViewModel = TransactionAmountView.ViewModel(brand: nil)
-            setAppAccounts()
-            loadAppAccounts()
+            setAccounts()
         }
     }
 }
@@ -194,13 +198,13 @@ extension SpendView.ViewModel {
     }
 
     private func updateInvalidAssets() {
-        let validAssetIds = appAccounts
+        let validAssetIds = accounts
             .map { $0.assets }
             .joined()
             .filter { $0.balance > 0 && $0.oneTimekey != nil }
             .map { $0.assetId }
 
-        invalidUserAssets = flexaClient.appAccounts
+        invalidUserAssets = flexaClient.assetAccounts
             .map { $0.availableAssets }
             .joined()
             .filter { !validAssetIds.contains($0.assetId) && $0.balance > 0 }
@@ -211,28 +215,28 @@ extension SpendView.ViewModel {
             }
     }
 
-    private func updateAppAccounts() {
-        setAppAccounts()
+    private func updateAccounts() {
+        setAccounts()
         updateSelectAsset()
 
         if state == .loading {
-            state = .appAccountsLoaded
+            state = .accountsLoaded
         }
 
         if hideShortBalances {
-            self.walletsWithSufficientBalance = appAccounts.filter { enoughWalletAmount($0) }
+            self.walletsWithSufficientBalance = accounts.filter { enoughWalletAmount($0) }
         } else {
-            self.walletsWithSufficientBalance = appAccounts
+            self.walletsWithSufficientBalance = accounts
         }
 
-        flexCodes = appAccounts.reduce(into: [SpendCodeView.ViewModel]()) { partialResult, appAccount in
+        flexCodes = accounts.reduce(into: [SpendCodeView.ViewModel]()) { partialResult, account in
             partialResult.append(
-                contentsOf: appAccount
+                contentsOf: account
                     .assets
                     .map { SpendCodeView.ViewModel(asset: $0) }
             )
         }
-        viewModelAsset.appAccounts = self.walletsWithSufficientBalance
+        viewModelAsset.assetAccounts = self.walletsWithSufficientBalance
         updateInvalidAssets()
         updateSelectedAsset()
     }
@@ -293,13 +297,13 @@ extension SpendView.ViewModel {
                     FXTransaction(
                         commerceSessionId: commerceSession.id,
                         amount: transaction.amount ?? "",
-                        appAccountId: assetConfig.selectedAppAccountId,
+                        assetAccountHash: assetConfig.selectedAssetAccountHash,
                         assetId: assetConfig.selectedAssetId,
                         destinationAddress: transaction.destination?.address ?? "",
                         feeAmount: transaction.fee?.amount ?? "",
                         feeAssetId: transaction.fee?.asset ?? "",
-                        feePrice: transaction.fee?.price.amount ?? "",
-                        feePriorityPrice: transaction.fee?.price.priority,
+                        feePrice: transaction.fee?.price?.amount ?? "",
+                        feePriorityPrice: transaction.fee?.price?.priority ?? "",
                         size: transaction.size,
                         brandLogo: commerceSession.brand?.logoUrl?.absoluteString,
                         brandName: commerceSession.brand?.name,
@@ -313,36 +317,37 @@ extension SpendView.ViewModel {
     func updateSelectedAsset() {
         flexaClient.sanitizeSelectedAsset()
 
-        guard let appAccount = appAccounts.first(where: { $0.id == assetConfig.selectedAppAccountId }),
-              let asset = appAccount.assets.first(where: { $0.assetId == assetConfig.selectedAssetId }) else {
+        guard let account = accounts.first(where: { $0.id == assetConfig.selectedAssetAccountHash }),
+              let asset = account.assets.first(where: { $0.assetId == assetConfig.selectedAssetId }) else {
             return
         }
 
-        selectedAsset = AssetWrapper(appAccountId: appAccount.id, assetId: asset.assetId)
+        selectedAsset = AssetWrapper(accountHash: account.id, assetId: asset.assetId)
         viewModelAsset.selectedAsset = selectedAsset
 
-        if !transactionAmountViewModel.isLoading {
+        if !transactionAmountViewModel.isLoading, transactionAmountViewModel.selectedAsset != selectedAsset {
             transactionAmountViewModel.selectedAsset = selectedAsset
         }
     }
 
     func updateSelectAsset() {
-        guard let selectedAsset = selectedAsset else {
-            return
-        }
+        let selectedAsset = AssetWrapper(
+            accountHash: assetConfig.selectedAssetAccountHash,
+            assetId: assetConfig.selectedAssetId
+        )
         updateAsset(selectedAsset)
     }
 
     func updateAsset(_ selectedAsset: AssetWrapper) {
         self.selectedAsset = selectedAsset
-        assetConfig.selectedAppAccountId = selectedAsset.accountId
+        assetConfig.selectedAssetAccountHash = selectedAsset.accountId
         assetConfig.selectedAssetId = selectedAsset.assetId
         paymentButtonEnabled = state != .transactionSent && selectedAsset.enoughBalance(for: amount)
         updateCommerceSessionAsset()
     }
 
-    func enoughWalletAmount(_ appAccount: AppAccount) -> Bool {
-        appAccount.assets.contains { enoughAmount($0) }
+    func enoughWalletAmount(_ account: AssetAccount) -> Bool {
+        account.assets.contains { enoughAmount($0) }
     }
 
     func enoughAmount(_ asset: AssetWrapper) -> Bool {
@@ -355,7 +360,8 @@ extension SpendView.ViewModel {
         paymentCompleted = false
         showLegacyFlexcode = false
         showPaymentModal = false
-        state = .appAccountsLoaded
+        isUpdatingPaymentAsset = false
+        state = .accountsLoaded
     }
 
     func clearIfAuthorizationIsPending() {
@@ -365,14 +371,14 @@ extension SpendView.ViewModel {
         clear()
     }
 
-    func setAppAccounts() {
-        self.appAccounts = flexaClient.availableAppAccounts
+    func setAccounts() {
+        self.accounts = flexaClient.availableAssetAccounts
     }
 
-    func loadAppAccounts() {
-        setAppAccounts()
-        if !appAccounts.isEmpty {
-            updateAppAccounts()
+    func loadAccounts() {
+        setAccounts()
+        if !accounts.isEmpty {
+            updateAccounts()
         }
         Task {
             do {
@@ -380,7 +386,7 @@ extension SpendView.ViewModel {
             } catch let error {
                 FlexaLogger.error(error)
             }
-            handleAppAccountsDidUpdate()
+            handleAccountsDidUpdate()
         }
     }
 
@@ -399,7 +405,7 @@ extension SpendView.ViewModel {
                 commerceSessionRepository.clearCurrent()
             }
 
-            eventNotifier.addObserver(self, selector: #selector(handleAppAccountsDidUpdate), name: .oneTimeKeysDidUpdate)
+            eventNotifier.addObserver(self, selector: #selector(handleAccountsDidUpdate), name: .oneTimeKeysDidUpdate)
             commerceSessionRepository.watch(currentOnly: true) { [weak self] result in
                 DispatchQueue.main.async { [weak self] in
                     switch result {
@@ -415,7 +421,31 @@ extension SpendView.ViewModel {
     }
 
     func stopWatching() {
+        eventNotifier.removeObserver(self)
         commerceSessionRepository.stopWatching()
+    }
+
+    func handleUrl(url: URL) -> Bool {
+        let link = urlRouter.getLink(from: url)
+        switch link {
+        case .account:
+            showManageFlexaAccountSheet = true
+            return true
+        case .webView(let url):
+            self.url = url
+            isShowingWebView = true
+            return true
+        case .systemBrowser(let url):
+            self.url = url
+            return false
+        default:
+            self.url = url
+            return false
+        }
+    }
+
+    func refreshFlexcodes() {
+        flexCodes.forEach { $0.updateIfNeeded() }
     }
 }
 
@@ -440,15 +470,15 @@ private extension SpendView.ViewModel {
 
         // If the transaction was already sent, then we should display the CommerceSession's transaction
         if wasTransactionSent {
-            let appAccount = flexaClient.appAccounts
+            let account = flexaClient.assetAccounts
                 .first(where:
                         { $0.availableAssets.contains(where: { $0.assetId == commerceSession.preferences.paymentAsset })
                 })
 
-            if let appAccount {
-                assetConfig.selectedAppAccountId = appAccount.accountId
+            if let account {
+                assetConfig.selectedAssetAccountHash = account.assetAccountHash
                 assetConfig.selectedAssetId = commerceSession.preferences.paymentAsset
-                selectedAsset = AssetWrapper(appAccountId: appAccount.accountId, assetId: commerceSession.preferences.paymentAsset)
+                selectedAsset = AssetWrapper(accountHash: account.assetAccountHash, assetId: commerceSession.preferences.paymentAsset)
                 viewModelAsset.selectedAsset = selectedAsset
             }
         }
@@ -465,7 +495,7 @@ private extension SpendView.ViewModel {
         }
     }
 
-    @objc func handleAppAccountsDidUpdate() {
+    @objc func handleAccountsDidUpdate() {
         Task {
             do {
                 try await exchangeRatesRepository.refresh()
@@ -473,7 +503,7 @@ private extension SpendView.ViewModel {
                 FlexaLogger.error(error)
             }
             await MainActor.run {
-                updateAppAccounts()
+                updateAccounts()
             }
         }
     }
@@ -487,24 +517,27 @@ private extension SpendView.ViewModel {
               !legacyMode else {
             return
         }
+
+        self.isUpdatingPaymentAsset = true
         self.paymentButtonEnabled = false
 
         Task {
             do {
                 try await commerceSessionRepository.setPaymentAsset(commerceSessionId: id, assetId: assetId)
                 await MainActor.run {
+                    isUpdatingPaymentAsset = false
                     paymentButtonEnabled = true
                     assetSwitcherEnabled = true
                 }
             } catch let error {
                 await MainActor.run {
                     FlexaLogger.error(error)
-                    let newAppAccount = walletsWithSufficientBalance.first { appAccount in
-                        appAccount.assets.contains(where: { $0.assetId == paymentAssetId })
+                    let newAccount = walletsWithSufficientBalance.first { account in
+                        account.assets.contains(where: { $0.assetId == paymentAssetId })
                     }
-                    let newAsset = newAppAccount?.assets.first { $0.assetId == paymentAssetId }
-                    if let newAppAccount, let newAsset {
-                        updateAsset(AssetWrapper(appAccountId: newAppAccount.id, assetId: newAsset.assetId))
+                    let newAsset = newAccount?.assets.first { $0.assetId == paymentAssetId }
+                    if let newAccount, let newAsset {
+                        updateAsset(AssetWrapper(accountHash: newAccount.id, assetId: newAsset.assetId))
                     }
 
                     paymentButtonEnabled = true
@@ -555,7 +588,7 @@ private extension SpendView.ViewModel {
             self.commerceSession = commerceSession
             showPaymentModal = true
 
-            if !paymentButtonEnabled, hasTransaction, state != .transactionSent {
+            if !paymentButtonEnabled, !isUpdatingPaymentAsset, hasTransaction, state != .transactionSent {
                 signAndSend()
             }
         case .completed(let commerceSession):

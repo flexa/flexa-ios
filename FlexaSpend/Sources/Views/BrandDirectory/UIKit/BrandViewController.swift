@@ -67,7 +67,7 @@ class BrandViewController: UIViewController {
     }
 
     private var userAgent: String {
-        "\(webView.userAgent) FlexaSpend/0.0.1"
+        "\(webView.userAgent) FlexaSpend/\(Flexa.version)"
     }
 
     private lazy var defaultURL: URL? = {
@@ -442,24 +442,6 @@ extension BrandViewController: UIScrollViewDelegate {
 extension BrandViewController: UIAdaptivePresentationControllerDelegate {
     func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
         showGrabber()
-    }
-}
-
-// MARK: URL Utils
-private extension URL {
-    var components: URLComponents? {
-        URLComponents(url: self, resolvingAgainstBaseURL: false)
-    }
-
-    var queryItems: [URLQueryItem] {
-        components?.queryItems ?? []
-    }
-}
-
-// MARK: URLQueryItem Utils
-private extension Array where Iterator.Element == URLQueryItem {
-    subscript(_ key: String) -> String? {
-        return first(where: { $0.name == key })?.value
     }
 }
 

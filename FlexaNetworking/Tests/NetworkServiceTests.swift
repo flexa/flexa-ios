@@ -67,7 +67,7 @@ final class NetworkServiceTests: AsyncSpec {
                 it("throws invalidStatus error") {
                     await expect {
                         try await service.sendRequest(resource: resource) as TestAPIModel
-                    }.to(throwError(NetworkError.invalidStatus(status: 300, resource: resource, request: nil)))
+                    }.to(throwError(NetworkError.invalidStatus(status: 300, resource: resource, request: nil, data: nil)))
                 }
             }
 

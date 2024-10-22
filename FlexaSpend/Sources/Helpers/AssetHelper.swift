@@ -15,7 +15,7 @@ protocol AssetHelperProtocol {
     func logoImageUrl(for: AssetWrapper) -> URL?
     func logoImage(for: AssetWrapper) -> UIImage?
     func color(for asset: AssetWrapper) -> Color?
-    func fxAccount(for: AssetWrapper) -> FXAppAccount?
+    func fxAccount(for: AssetWrapper) -> FXAssetAccount?
     func fxAsset(_ asset: AssetWrapper) -> FXAvailableAsset?
     func balanceInLocalCurrency(_ asset: AssetWrapper) -> Decimal
     func availableBalanceInLocalCurrency(_ asset: AssetWrapper) -> Decimal?
@@ -57,18 +57,18 @@ struct AssetHelper: AssetHelperProtocol {
         assetsRepository.assets.findBy(id: asset.assetId)?.color
     }
 
-    func fxAccount(for asset: AssetWrapper) -> FlexaCore.FXAppAccount? {
-        flexaClient.appAccounts.findBy(accountId: asset.accountId)
+    func fxAccount(for asset: AssetWrapper) -> FlexaCore.FXAssetAccount? {
+        flexaClient.assetAccounts.findBy(assetAccountHash: asset.accountId)
     }
 
     func fxAsset(_ asset: AssetWrapper) -> FXAvailableAsset? {
-        fxAsset(assetId: asset.assetId, appAccountId: asset.accountId)
+        fxAsset(assetId: asset.assetId, accountId: asset.accountId)
     }
 
-    func fxAsset(assetId: String, appAccountId: String) -> FXAvailableAsset? {
+    func fxAsset(assetId: String, accountId: String) -> FXAvailableAsset? {
         flexaClient
-            .appAccounts
-            .findBy(accountId: appAccountId)?
+            .assetAccounts
+            .findBy(assetAccountHash: accountId)?
             .availableAssets
             .findBy(assetId: assetId)
     }

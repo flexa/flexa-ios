@@ -15,7 +15,7 @@ public enum NetworkError: Error {
     case invalidRequest
     case invalidResponse(URLRequest?)
     case missingData(URLRequest?)
-    case invalidStatus(status: Int, resource: APIResource, request: URLRequest?)
+    case invalidStatus(status: Int, resource: APIResource, request: URLRequest?, data: Data?)
     case unknown(URLRequest?)
 
     static let unauthorizedStatusCode = 401
@@ -35,11 +35,11 @@ public enum NetworkError: Error {
     }
 
     public static func unauthorizedError(for resource: APIResource) -> NetworkError {
-        .invalidStatus(status: unauthorizedStatusCode, resource: resource, request: nil)
+        .invalidStatus(status: unauthorizedStatusCode, resource: resource, request: nil, data: nil)
     }
 
     private func isStatusCode(_ statusCode: Int) -> Bool {
-        if case .invalidStatus(let status, _, _) = self, status == statusCode {
+        if case .invalidStatus(let status, _, _, _) = self, status == statusCode {
             return true
         }
         return false

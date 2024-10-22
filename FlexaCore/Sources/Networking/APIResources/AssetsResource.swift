@@ -10,11 +10,15 @@ import FlexaNetworking
 import Factory
 import Foundation
 
-enum AssetsResource: FlexaAPIResource, JWTAuthenticable {
+enum AssetsResource: FlexaAPIResource, Authenticable {
     case listAll(limit: Int?, startingAfter: String?)
 
     var path: String {
         "/assets"
+    }
+
+    var authToken: String? {
+        DefaultJWTAuthenticable().authToken ?? DefaultPublishableKeyAuthenticable().authToken
     }
 
     var queryParams: [String: String]? {

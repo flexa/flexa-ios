@@ -11,6 +11,7 @@ import Factory
 class FlexaNetworkService: Networkable {
     @Injected(\.networkClient) var networkClient
     @Injected(\.authStore) var authStore
+    @Injected(\.eventNotifier) var eventNotifier
 
     typealias ResponseTuple<T> = (T?, HTTPURLResponse?, Error?) where T: Decodable
 
@@ -18,7 +19,7 @@ class FlexaNetworkService: Networkable {
         let (_, _, error) = await sendRequest(resource: resource) as (Data?, HTTPURLResponse?, Error?)
 
         if let error {
-            throw wrapError(error, resource: resource) ?? error
+            throw error
         }
     }
 
@@ -29,7 +30,7 @@ class FlexaNetworkService: Networkable {
         (object, _, error) = await sendRequest(resource: resource)
 
         if let error {
-            throw wrapError(error, resource: resource) ?? error
+            throw error
         }
 
         guard let object else {
@@ -58,9 +59,16 @@ class FlexaNetworkService: Networkable {
         (object, response, error) = await networkClient.sendRequest(resource: resource)
 
         guard let error else {
+            Flexa.canSpend = true
             return (object, response, error)
         }
 
+        guard !error.isRestrictedRegion else {
+            Flexa.canSpend = false
+            return (nil, nil, error)
+        }
+
+        Flexa.canSpend = true
         guard refreshTokenOnFailure else {
             return (nil, nil, wrapError(error, resource: resource))
         }
@@ -98,12 +106,18 @@ class FlexaNetworkService: Networkable {
 
         if authStore.isSignedIn {
             return await sendRequest(resource: resource, refreshTokenOnFailure: false)
+        } else if error.isRestrictedRegion {
+            return (nil, nil, error)
         } else {
             return (nil, nil, NetworkError.unauthorizedError(for: resource))
         }
     }
 
     private func wrapError(_ error: Error?, resource: APIResource) -> Error? {
+        if let networkError = error as? NetworkError, networkError.isRestrictedRegion || networkError.isUnauthorized {
+                return ReasonableError.custom(error: networkError)
+        }
+
         guard let flexaResource = resource as? FlexaAPIResource else {
             return error
         }
@@ -116,7 +130,7 @@ private extension Error {
         guard let error = self as? NetworkError else {
             return false
         }
-        return error.isForbidden || error.isUnauthorized || error.isNotFound
+        return (error.isForbidden && !error.isRestrictedRegion) || error.isUnauthorized || error.isNotFound
     }
 }
 
@@ -126,7 +140,7 @@ private extension NetworkError {
         case .custom(_, let request),
                 .invalidResponse(let request),
                 .missingData(let request),
-                .invalidStatus(_, _, let request),
+                .invalidStatus(_, _, let request, _),
                 .unknown(let request):
             return request?.value(forHTTPHeaderField: "Client-Trace-Id")
         default:

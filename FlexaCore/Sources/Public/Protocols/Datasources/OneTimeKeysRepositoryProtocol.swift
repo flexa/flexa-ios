@@ -16,6 +16,7 @@ public protocol OneTimeKeysRepositoryProtocol {
     @discardableResult
     func refresh() async throws -> [String: OneTimeKey]
     func backgroundRefresh()
+    func purgeAll()
 }
 
 public extension OneTimeKeysRepositoryProtocol {

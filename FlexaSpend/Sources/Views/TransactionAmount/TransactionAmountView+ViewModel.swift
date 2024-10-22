@@ -50,7 +50,7 @@ extension TransactionAmountView {
                 guard let selectedAsset else {
                     return
                 }
-                assetConfig.selectedAppAccountId = selectedAsset.accountId
+                assetConfig.selectedAssetAccountHash = selectedAsset.accountId
                 assetConfig.selectedAssetId = selectedAsset.assetId
             }
         }
@@ -65,6 +65,10 @@ extension TransactionAmountView {
         var commerceSession: CommerceSession?
         var brand: Brand?
 
+        var fee: Fee? {
+            commerceSession?.requestedTransaction?.fee
+        }
+
         var brandLogoUrl: URL? {
             brand?.logoUrl
         }
@@ -77,16 +81,20 @@ extension TransactionAmountView {
             locale.decimalSeparator?.first ?? "."
         }
 
-        var amount: BrandLegacyFlexcodeAmount? {
+        var amountRestrictions: BrandLegacyFlexcodeAmount? {
             brand?.legacyFlexcodes?.first(where: { $0.asset == usdAssetId })?.amount
         }
 
+        var decimalAmount: Decimal {
+            amountText.decimalValue ?? 0
+        }
+
         var minimumAmount: Decimal {
-            amount?.min?.decimalValue ?? Decimal.leastFiniteMagnitude
+            amountRestrictions?.min?.decimalValue ?? Decimal.leastFiniteMagnitude
         }
 
         var maximumAmount: Decimal {
-            amount?.max?.decimalValue ?? Decimal.greatestFiniteMagnitude
+            amountRestrictions?.max?.decimalValue ?? Decimal.greatestFiniteMagnitude
         }
 
         var leftAmountText: String {
@@ -152,25 +160,25 @@ extension TransactionAmountView {
             }
 
             if !isBalanceAvailable && !paymentButtonEnabled {
-                return ""
+                return " "
             }
 
             return Strings.Buttons.PayNow.title
         }
 
         var hasAmount: Bool {
-            amountText.decimalValue ?? 0 > 0
+            decimalAmount > 0
         }
 
         var isAmountHigherThanMin: Bool {
-            (amountText.decimalValue ?? 0) >= minimumAmount
+            decimalAmount >= minimumAmount
         }
 
         var availableUSDBalance: Decimal {
             selectedAsset?.availableBalanceInLocalCurrency ?? 0
         }
 
-       @Published var showMinimumAmountMessage = false {
+        @Published var showMinimumAmountMessage = false {
             didSet {
                 showAmountMessage = showMinimumAmountMessage || showMaximumAmountMessage
             }
@@ -182,11 +190,11 @@ extension TransactionAmountView {
         }
 
         var minimumAmountMessage: String {
-            Strings.Labels.minimumAmount(amount?.min?.digitsAndSeparator?.asCurrency ?? "")
+            Strings.Labels.minimumAmount(amountRestrictions?.min?.digitsAndSeparator?.asCurrency ?? "")
         }
 
         var maximumAmountMessage: String {
-            Strings.Labels.maximumAmount(amount?.max?.digitsAndSeparator?.asCurrency ?? "")
+            Strings.Labels.maximumAmount(amountRestrictions?.max?.digitsAndSeparator?.asCurrency ?? "")
         }
 
         var paymentButtonEnabled: Bool {
@@ -215,6 +223,47 @@ extension TransactionAmountView {
             return !selectedAsset.isUpdatingBalance
         }
 
+        var promotion: Promotion? {
+            applyingPromotion ?? brand?.promotions.first
+        }
+
+        var hasPromotion: Bool {
+            promotion != nil
+        }
+
+        var promotionText: String {
+            guard let promotion else {
+                return ""
+            }
+
+            var label = promotion.label
+            if promotionApplies {
+                label = L10n.LegacyFlexcode.Promotions.Labels.saving( promotionDiscount.asCurrency)
+            }
+
+            guard let url = promotion.url else {
+                return label
+            }
+
+            return "[\(label)](\(url))"
+        }
+
+        var promotionDiscount: Decimal {
+            applyingPromotion?.discount(for: decimalAmount) ?? 0
+        }
+
+        var promotionApplies: Bool {
+            applyingPromotion != nil
+        }
+
+        var applyingPromotion: Promotion? {
+            guard decimalAmount >= minimumAmount else {
+                return nil
+            }
+
+            return brand?.promotions.applyingTo(amount: decimalAmount).first
+        }
+
         init(brand: Brand?) {
             self.brand = brand
         }
@@ -227,7 +276,7 @@ extension TransactionAmountView {
             showMaximumAmountMessage = false
             showMinimumAmountMessage = false
             selectedAsset = AssetWrapper(
-                appAccountId: assetConfig.selectedAppAccountId,
+                accountHash: assetConfig.selectedAssetAccountHash,
                 assetId: assetConfig.selectedAssetId)
         }
 

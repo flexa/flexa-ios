@@ -87,4 +87,9 @@ class OneTimeKeysRepository: OneTimeKeysRepositoryProtocol {
             syncDateOffset = nil
         }
     }
+
+    func purgeAll() {
+        storedKeys = [:]
+        syncDateOffset = nil
+    }
 }

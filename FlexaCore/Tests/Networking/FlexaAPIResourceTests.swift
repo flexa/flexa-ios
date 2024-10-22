@@ -17,7 +17,7 @@ final class FlexaAPIResourceTests: QuickSpec {
     private static let publishableKey = "publishable_test_\(UUID().uuidString)"
     private static let authToken = Data((":" + publishableKey).utf8).base64EncodedString()
     private static let authHeader = "Basic \(authToken)"
-    private static let flexaClient = FXClient(publishableKey: publishableKey, appAccounts: [], theme: .default)
+    private static let flexaClient = FXClient(publishableKey: publishableKey, assetAccounts: [], theme: .default)
 
     override class func setUp() {
         Container.shared.flexaClient.register { flexaClient }

@@ -102,9 +102,9 @@ internal enum CoreStrings {
         internal static let title = CoreStrings.tr("Localizable", "auth.personal_info.header.title", fallback: "Create your\nFlexa Account")
       }
       internal enum Sections {
-        /// The information you provide is used only to comply with local financial regulations, and will never be shared with %s or any of the businesses you pay. By creating an account, you agree to Flexa’s [Terms of Service](https://flexa.network/legal/terms).
+        /// The information you provide is used only to comply with local financial regulations, and will never be shared with %s or any of the businesses you pay. By creating an account, you agree to Flexa’s [Terms of Service](https://flexa.co/legal/terms).
         internal static func termsOfService(_ p1: UnsafePointer<CChar>) -> String {
-          return CoreStrings.tr("Localizable", "auth.personal_info.sections.terms_of_service", p1, fallback: "The information you provide is used only to comply with local financial regulations, and will never be shared with %s or any of the businesses you pay. By creating an account, you agree to Flexa’s [Terms of Service](https://flexa.network/legal/terms).")
+          return CoreStrings.tr("Localizable", "auth.personal_info.sections.terms_of_service", p1, fallback: "The information you provide is used only to comply with local financial regulations, and will never be shared with %s or any of the businesses you pay. By creating an account, you agree to Flexa’s [Terms of Service](https://flexa.co/legal/terms).")
         }
       }
       internal enum Textfields {
@@ -219,6 +219,20 @@ internal enum CoreStrings {
     internal enum Hidden {
       /// [hidden value]
       internal static let text = CoreStrings.tr("Localizable", "log.hidden.text", fallback: "[hidden value]")
+    }
+  }
+  internal enum Webview {
+    internal enum Buttons {
+      internal enum Retry {
+        /// Retry
+        internal static let title = CoreStrings.tr("Localizable", "webview.buttons.retry.title", fallback: "Retry")
+      }
+    }
+    internal enum Errors {
+      internal enum Load {
+        /// Cannot load page
+        internal static let title = CoreStrings.tr("Localizable", "webview.errors.load.title", fallback: "Cannot load page")
+      }
     }
   }
 }

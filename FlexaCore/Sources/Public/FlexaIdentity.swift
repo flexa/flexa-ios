@@ -14,7 +14,7 @@ import SwiftUI
 /// The entry point of the FlexaIdentity module.
 public final class FlexaIdentity {
     private static var linkData: UniversalLinkData = UniversalLinkData()
-    private static let universalLinkDomain = "flexa.link"
+    private static let universalLinkDomain = FlexaConstants.Routing.flexaLinkDomain
     private var onResultCallback: ((ConnectResult) -> Void)?
     private var delayCallbacks = true
     private let authStore: AuthStoreProtocol?
@@ -72,6 +72,7 @@ public final class FlexaIdentity {
         Container.shared.authStore().signOut()
         Container.shared.keychainHelper().purgeAll()
         Container.shared.userDefaults().purgeAll()
+        Container.shared.oneTimeKeysRepository().purgeAll()
         Container.shared.accountRepository.reset()
         Container.shared.appNotificationsRepository.reset()
     }

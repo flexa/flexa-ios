@@ -16,4 +16,5 @@ public protocol Asset {
     var iconUrl: URL? { get }
     var displayName: String { get }
     var livemode: Bool { get }
+    var chain: Chain? { get }
 }

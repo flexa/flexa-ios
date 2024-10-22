@@ -57,6 +57,10 @@ final class FlexaInternal: Flexa {
     ///
     /// If the user is already signed in then it will open the screens specified by the ``Flexa/sections`` method. If the user is not signed in the it will open the sign in/sign up screens.
     public func openMain() {
+        guard Flexa.canSpend else {
+            FlexaLogger.error("Flexa is running on a restricted region and spends are disabled. Please check Flexa.canSpend")
+            return
+        }
         Flexa
             .buildIdentity()
             .build()
@@ -78,6 +82,10 @@ final class FlexaInternal: Flexa {
     /// If `result` is `connected` then Flexa SDK opens the main screen
     /// if `result` is `notConnected` then Flexa SDK starts the auth flow
     private func showMainOrAuth(result: ConnectResult, allowSignIn: Bool = true) {
+        guard Flexa.canSpend else {
+            FlexaLogger.error("Flexa is running on a restricted region and spends are disabled. Please check Flexa.canSpend")
+            return
+        }
         DispatchQueue.main.async { [self] in
             switch result {
             case .connected:

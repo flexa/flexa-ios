@@ -8,6 +8,7 @@
 
 import SwiftUI
 import FlexaUICore
+import FlexaCore
 import Factory
 
 struct TransactionAmountView: View {
@@ -20,17 +21,47 @@ struct TransactionAmountView: View {
     @State private var shakeAmount: Int = 0
     @State private var animateShaking = true
     @State private var showPopover = false
-    @StateObject var viewModel: ViewModel
+    @State private var showWebView = false
+    @StateObject private var viewModel: ViewModel
     @StateObject private var viewModelAsset: AssetSelectionViewModel
 
-    let grayColor = Color(UIColor.systemGray3)
+    let grayColor = Color(
+        UIColor { trait in
+            trait.userInterfaceStyle == .dark ? .secondaryLabel : .systemGray3
+        }
+    )
 
     var gradientColors: [Color] {
-        [
+        if viewModel.hasPromotion {
+            return [viewModel.brandColor]
+        }
+        return [
             viewModel.brandColor.shiftingHue(by: -10),
             viewModel.brandColor,
             viewModel.brandColor.shiftingHue(by: 10)
         ]
+    }
+
+    var disabledTextColor: Color {
+        var color = Color.white
+        if colorScheme == .light {
+            color = viewModel.brandColor.shiftingHue(by: -10)
+        }
+        return color.opacity(0.4)
+    }
+
+    var amountLabelTopPadding: CGFloat {
+        guard viewModel.hasPromotion else {
+            return .amountLabelTopPadding
+        }
+        return .amountLabelTopPadding - .promotionHeight - .promotionTopPadding
+    }
+
+    var promotionViewBackgroundColor: Color {
+        if viewModel.promotionApplies {
+                return viewModel.brandColor.opacity(0.1)
+        }
+        return Color(hex: "D8D8D8").opacity(0.4)
     }
 
     init(viewModel: ViewModel, viewModelAsset: AssetSelectionViewModel) {
@@ -52,8 +83,13 @@ struct TransactionAmountView: View {
             }
             VStack(alignment: .center, spacing: 0) {
                 brandLogo
+                if viewModel.hasPromotion {
+                    promotionView
+                        .padding(.top, .promotionTopPadding)
+                        .frame(height: .promotionHeight)
+                }
                 amountLabel
-                    .padding(.top, .amountLabelTopPadding)
+                    .padding(.top, amountLabelTopPadding)
                     .shake(shakeAmount)
                 assetSwitcherButton
                     .padding(.top, .assetSwitcherTopPadding)
@@ -68,6 +104,10 @@ struct TransactionAmountView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(.thinMaterial)
         .dragIndicator(true)
+        .sheet(isPresented: $showWebView) {
+            FlexaWebView(url: viewModel.promotion?.url)
+        }
+
         transactionDetailsSheet
         assetSwitcher
         alerts
@@ -89,6 +129,45 @@ struct TransactionAmountView: View {
                     .frame(width: .brandLogoSize, height: .brandLogoSize)
             }
         )
+    }
+
+    var promotionView: some View {
+        ZStack {
+            Label {
+                if viewModel.promotionApplies {
+                    Text(.init(viewModel.promotionText))
+                        .font(Font.system(size: 15, weight: .medium))
+                        .foregroundColor(viewModel.brandColor)
+                        .tint(viewModel.brandColor)
+
+                } else {
+                    Image(systemName: "chevron.right")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundColor(.primary.opacity(0.20))
+                }
+            } icon: {
+                if viewModel.promotionApplies {
+                    Image(systemName: "checkmark")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundColor(viewModel.brandColor)
+                } else {
+                    Text(.init(viewModel.promotionText))
+                        .foregroundColor(.primary.opacity(0.5))
+                        .font(Font.system(size: 14, weight: .medium))
+                        .tint(.primary.opacity(0.5))
+                }
+            }
+            .environment(\.openURL, OpenURLAction { _ in
+                self.showWebView = viewModel.promotion?.url != nil
+                return .handled
+            })
+            .padding(.horizontal, 12)
+            .padding(.vertical, 5)
+
+        }.background(
+            RoundedRectangle(cornerRadius: 17)
+                .foregroundColor(promotionViewBackgroundColor)
+        ).animation(.linear, value: viewModel.promotionApplies)
     }
 
     var amountLabel: some View {
@@ -187,9 +266,10 @@ struct TransactionAmountView: View {
                     }
                 }.flexaButton(
                     background: linearGradient,
-                    disabledTextColor: gradientColors.first?.opacity(0.4) ?? .white
+                    disabledTextColor: disabledTextColor,
+                    disabledOpacity: colorScheme == .dark ? 0.5 : 0.2
                 )
-                    .animation(.default, value: viewModel.showConfirmationButtonTitle)
+                .animation(.default, value: viewModel.showConfirmationButtonTitle)
             }.disabled(!viewModel.paymentButtonEnabled)
 
             if !viewModel.paymentButtonEnabled {
@@ -207,7 +287,7 @@ struct TransactionAmountView: View {
                                 .updatingBalancePopover($showPopover, balanceAvailable: viewModel.availableUSDBalance)
                         }.flexaButton(
                             background: Color.clear,
-                            textColor: gradientColors.first?.opacity(0.4) ?? .white
+                            textColor: disabledTextColor
                         )
                     } else {
                         Text("")
@@ -247,12 +327,14 @@ struct TransactionAmountView: View {
             NavigationView {
                 TransactionAssetDetailsView(
                     showView: $showTransactionDetails,
-                    tintColor: gradientColors.first ?? .purple,
+                    tintColor: viewModel.brandColor,
                     viewModel: TransactionAssetDetailsViewModel(
-                        displayMode: .dynamicTransaction,
+                        displayMode: .transaction,
                         asset: asset,
                         mainAmount: viewModel.amountText.digitsAndSeparator?.decimalValue?.asCurrency ?? "0",
-                        baseNetworkFeeColor: Color(hex: "#F7931A"))
+                        discount: viewModel.promotionApplies ? viewModel.promotionDiscount : nil,
+                        fee: viewModel.fee
+                    )
                 )
             }
         }
@@ -392,6 +474,8 @@ private extension CGFloat {
     static let topPadding: CGFloat = 32
     static let brandLogoSize: CGFloat = 44
     static let brandLogoCornerRadius: CGFloat = 6
+    static let promotionTopPadding: CGFloat = 17
+    static let promotionHeight: CGFloat = 32
     static let amountLabelTopPadding: CGFloat = 88
     static let assetSwitcherTopPadding: CGFloat = 22
 }

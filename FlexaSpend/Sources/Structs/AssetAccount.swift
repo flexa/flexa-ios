@@ -1,5 +1,5 @@
 //
-//  AppAccount.swift
+//  AssetAccount.swift
 //  FlexaSpend
 //
 //  Created by Rodrigo Ordeix on 10/3/24.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct AppAccount: Identifiable {
+struct AssetAccount: Identifiable {
     let id: String
     var assets: [AssetWrapper]
 
@@ -17,10 +17,10 @@ struct AppAccount: Identifiable {
         self.assets = assets
     }
 
-    init(_ appAccount: FXAppAccount) {
-        self.id = appAccount.accountId
-        self.assets = appAccount.availableAssets.map {
-            AssetWrapper(appAccountId: appAccount.accountId, assetId: $0.assetId)
+    init(_ assetAccount: FXAssetAccount) {
+        self.id = assetAccount.assetAccountHash
+        self.assets = assetAccount.availableAssets.map {
+            AssetWrapper(accountHash: assetAccount.assetAccountHash, assetId: $0.assetId)
         }
     }
 }

@@ -9,5 +9,7 @@
 import Foundation
 
 public protocol Price: Value {
-    var priority: String { get }
+    var amount: String { get }
+    var label: String { get }
+    var priority: String? { get }
 }

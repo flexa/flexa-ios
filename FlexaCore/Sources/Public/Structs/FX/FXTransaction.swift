@@ -16,9 +16,9 @@ public struct FXTransaction: FlexaModelProtocol {
     public let commerceSessionId: String
     /// Amount of the transaction
     public let amount: String
-    /// The appAccountId the funds will be taken from
-    public let appAccountId: String
-    /// The appAccounts's asset that must be used
+    /// The account hash the funds will be taken from
+    public let assetAccountHash: String
+    /// The asset that must be used
     public let assetId: String
     /// Destination address of the transaction
     public let destinationAddress: String
@@ -37,7 +37,7 @@ public struct FXTransaction: FlexaModelProtocol {
 
     public init(commerceSessionId: String,
                 amount: String,
-                appAccountId: String,
+                assetAccountHash: String,
                 assetId: String,
                 destinationAddress: String,
                 feeAmount: String,
@@ -51,7 +51,7 @@ public struct FXTransaction: FlexaModelProtocol {
     ) {
         self.commerceSessionId = commerceSessionId
         self.amount = amount
-        self.appAccountId = appAccountId
+        self.assetAccountHash = assetAccountHash
         self.assetId = assetId
         self.destinationAddress = destinationAddress
         self.feeAmount = feeAmount

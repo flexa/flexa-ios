@@ -3,7 +3,7 @@ import SwiftUI
 import Factory
 
 class AssetSelectionViewModel: ObservableObject, Identifiable {
-    @Published var appAccounts: [AppAccount] = []
+    @Published var assetAccounts: [AssetAccount] = []
     @Published var hideShortBalances: Bool = false
     @Published var amount: Decimal = 0
     @Published var networkFeeLabel = ""
@@ -11,20 +11,20 @@ class AssetSelectionViewModel: ObservableObject, Identifiable {
     @Injected(\.flexaClient) var flexaClient
 
     var firstAsset: AssetWrapper? {
-        appAccounts.first?.assets.first
+        assetAccounts.first?.assets.first
     }
 
     var lastAsset: AssetWrapper? {
-        appAccounts.last?.assets.last
+        assetAccounts.last?.assets.last
     }
 
     var showSelectedAssetDetail: Bool = false
 
-    required init(_ appAccounts: [AppAccount],
+    required init(_ assetAccounts: [AssetAccount],
                   _ hideShortBalances: Bool,
                   _ amount: Decimal,
                   _ selectedAsset: AssetWrapper?) {
-        self.appAccounts = appAccounts
+        self.assetAccounts = assetAccounts
         self.hideShortBalances = hideShortBalances
         self.amount = amount
         self.selectedAsset = selectedAsset

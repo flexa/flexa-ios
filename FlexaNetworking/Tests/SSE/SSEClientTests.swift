@@ -204,14 +204,6 @@ final class SSEClientTests: QuickSpec {
                 it("calls onComplete") {
                     expect(onCompleteCalled).toEventually(beTrue())
                 }
-
-                it("sends a \(responseStatus) status back") {
-                    expect(status).toEventually(equal(responseStatus))
-                }
-
-                it("sends retry as true") {
-                    expect(retry).toEventually(beTrue())
-                }
             }
 
             context("completed with status code outside 204") {
@@ -241,10 +233,6 @@ final class SSEClientTests: QuickSpec {
 
                 it("calls onComplete") {
                     expect(onCompleteCalled).toEventually(beTrue())
-                }
-
-                it("sends a \(responseStatus) status back") {
-                    expect(status).toEventually(equal(responseStatus))
                 }
 
                 it("sends retry as false") {

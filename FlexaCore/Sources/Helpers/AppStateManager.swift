@@ -13,6 +13,7 @@ import UIKit
 class AppStateManager: AppStateManagerProtocol {
     @Injected(\.oneTimeKeysRepository) var oneTimeKeysRepository
     @Injected(\.transactionsRespository) var transactionsRepository
+    @Injected(\.transactionFeesRepository) var transactionFeesRepository
     @Injected(\.accountRepository) var accountsRepository
     @Injected(\.brandsRepository) var brandsRepository
     @Injected(\.assetsRepository) var assetsRepository
@@ -68,7 +69,7 @@ class AppStateManager: AppStateManagerProtocol {
             assetsRepository.backgroundRefresh()
             brandsRepository.backgroundRefresh()
 
-            if !flexaClient.appAccounts.isEmpty {
+            if !flexaClient.assetAccounts.isEmpty {
                 oneTimeKeysRepository.backgroundRefresh()
                 exchangeRateRepository.backgroundRefresh()
             }
@@ -87,7 +88,7 @@ class AppStateManager: AppStateManagerProtocol {
             try await brandsRepository.refresh()
             try await brandsRepository.refreshLegacyFlexcodeBrands()
 
-            if !flexaClient.appAccounts.isEmpty {
+            if !flexaClient.assetAccounts.isEmpty {
                 try await oneTimeKeysRepository.refresh()
                 try await exchangeRateRepository.refresh()
             }
@@ -160,7 +161,7 @@ private extension AppStateManager {
             do {
                 try await authStore.refreshToken()
             } catch let error {
-                if error.isUnauthorized {
+                if error.isUnauthorized || error.isRestrictedRegion {
                     eventNotifier.post(name: .flexaAuthorizationError)
                 }
                 FlexaLogger.error(error)

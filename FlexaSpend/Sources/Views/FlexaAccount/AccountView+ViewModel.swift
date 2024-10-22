@@ -71,16 +71,16 @@ extension AccountView {
         }
 
         func loadAccount() {
-            DispatchQueue.main.async { [self] in
-                account = accountRepository.account
-            }
             Task {
+                if let account = accountRepository.account {
+                    await handleAccountUpdate(account: account)
+                }
                 do {
                     let account = try await accountRepository.getAccount()
-                    await updateAccount(account)
+                    await handleAccountUpdate(account: account)
                 } catch let error {
                     FlexaLogger.error(error)
-                    self.error = error
+                    await handleAccountUpdate(error: error)
                 }
             }
         }
@@ -90,8 +90,9 @@ extension AccountView {
         }
 
         @MainActor
-        func updateAccount(_ account: Account) {
+        func handleAccountUpdate(account: Account? = nil, error: Error? = nil) {
             self.account = account
+            self.error = error
         }
     }
 }

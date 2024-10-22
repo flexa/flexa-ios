@@ -72,8 +72,6 @@ class TransactionAssetDetailsViewModelTests: QuickSpec {
 
                 let amount = "$5,000.00"
                 let baseAmount = "$3,000.00"
-                let networkFee = "0.01 SOL"
-                let baseNetworkFee = "$0,25"
 
                 beforeEach {
                     asset = createAssetWrapper()
@@ -81,9 +79,7 @@ class TransactionAssetDetailsViewModelTests: QuickSpec {
                         displayMode: .transaction,
                         asset: asset,
                         secondaryAmount: amount,
-                        mainAmount: baseAmount,
-                        networkFee: networkFee,
-                        baseNetworkFee: baseNetworkFee
+                        mainAmount: baseAmount
                     )
                 }
 
@@ -93,10 +89,6 @@ class TransactionAssetDetailsViewModelTests: QuickSpec {
 
                 it("sets the title to Details") {
                     expect(viewModel.title).to(equal("Details"))
-                }
-
-                it("correctly sets the amount") {
-                    expect(viewModel.secondaryAmount).to(equal(amount))
                 }
 
                 it("correctly sets the base amount") {
@@ -112,32 +104,12 @@ class TransactionAssetDetailsViewModelTests: QuickSpec {
                 it("correctly sets the URL") {
                     expect(viewModel.logoUrl).to(equal(testURL))
                 }
-
-                it("correctly sets the network fee") {
-                    expect(viewModel.networkFee).to(equal(networkFee))
-                }
-
-                it("correctly sets the base network fee fee") {
-                    expect(viewModel.baseNetworkFee).to(equal(baseNetworkFee))
-                }
-
-                it("shows the network fee if it is not empty") {
-                    expect(viewModel.showNetworkFee).to(beTrue())
-                }
-
-                it("shows the badge network fee when it is empty") {
-                    expect(viewModel.showBadgeNetworkFee).to(beTrue())
-                }
-
-                it("sets the base network fee to the formatted fee") {
-                    expect(viewModel.baseNetworkFee).to(equal(baseNetworkFee))
-                }
             }
         }
     }
 
     static func createAssetWrapper() -> AssetWrapper {
-        AssetWrapper(appAccountId: "wallet", assetId: "SOL")
+        AssetWrapper(accountHash: "wallet", assetId: "SOL")
     }
 }
 
@@ -178,7 +150,7 @@ private struct TestAssetHelper: AssetHelperProtocol {
         .purple
     }
 
-    func fxAccount(for: AssetWrapper) -> FXAppAccount? {
+    func fxAccount(for: AssetWrapper) -> FXAssetAccount? {
         nil
     }
 
