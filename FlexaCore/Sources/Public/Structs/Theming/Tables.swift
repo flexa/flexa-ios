@@ -22,7 +22,7 @@ public extension FXTheme {
         public var cell: Cells
         public var separator: Separator
 
-        init(borderRadius: CGFloat = 6,
+        init(borderRadius: CGFloat = 10,
              margin: CGFloat = 20,
              cellSpacing: CGFloat = 0,
              headingPadding: CGFloat = 0,

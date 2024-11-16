@@ -71,7 +71,10 @@ extension AccountView {
         }
 
         func loadAccount() {
-            Task {
+            Task.detached { [weak self] in
+                guard let self else {
+                    return
+                }
                 if let account = accountRepository.account {
                     await handleAccountUpdate(account: account)
                 }
@@ -80,7 +83,7 @@ extension AccountView {
                     await handleAccountUpdate(account: account)
                 } catch let error {
                     FlexaLogger.error(error)
-                    await handleAccountUpdate(error: error)
+                    await handleAccountUpdate(account: accountRepository.account, error: error)
                 }
             }
         }

@@ -76,6 +76,7 @@ public extension ReasonableError {
         case cannotGetCommerceSession(Error?)
         case cannotWatchSession(Error?)
         case cannotCloseCommerceSession(Error?)
+        case cannotApproveCommerceSession(Error?)
         case cannotSetCommerceSessionPaymentAsset(Error?)
         case cannotCreateToken(Error?)
         case cannotVerifyToken(Error?)
@@ -139,10 +140,32 @@ public extension ReasonableError {
 
         var error: Error? {
             switch self {
-                case .custom(let error):
-                    return error
-                default:
-                    return nil
+            case .custom(let error):
+                return error
+            case .networkError(let error),
+                    .cannotCreateAccount(let error),
+                    .cannotGetAccount(let error),
+                    .cannotDeleteAccount(let error),
+                    .cannotDeleteAppNotification(let error),
+                    .cannotConvertAsset(let error),
+                    .cannotGetExchangeRates(let error),
+                    .cannotGetAssets(let error),
+                    .cannotGetBrands(let error),
+                    .cannotSignTransaction(let error),
+                    .cannotCreateCommerceSession(let error),
+                    .cannotGetCommerceSession(let error),
+                    .cannotWatchSession(let error),
+                    .cannotCloseCommerceSession(let error),
+                    .cannotApproveCommerceSession(let error),
+                    .cannotSetCommerceSessionPaymentAsset(let error),
+                    .cannotCreateToken(let error),
+                    .cannotVerifyToken(let error),
+                    .cannotRefreshToken(let error),
+                    .cannotDeleteToken(let error),
+                    .cannotSyncOneTimeKeys(let error):
+                return error
+            default:
+                return nil
             }
         }
     }
@@ -180,9 +203,9 @@ extension Error {
         }
 
         if let reasonableError = self as? ReasonableError,
-           case .custom(let error) = reasonableError.reason,
+           let error = reasonableError.reason.error,
            let networkError = error as? FlexaNetworking.NetworkError,
-           networkError.isUnauthorized {
+           networkError.isUnauthorized || networkError.isForbidden {
             return true
         }
 

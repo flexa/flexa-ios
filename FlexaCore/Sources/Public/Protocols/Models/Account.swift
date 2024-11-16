@@ -31,10 +31,25 @@ public protocol Account {
     var joinedIn: Date { get }
 }
 
+public extension Account {
+    var hasBalance: Bool {
+        guard let balance else {
+            return false
+        }
+        return !balance.isEmpty
+    }
+}
+
 public protocol AccountBalance {
-    var amount: String { get }
-    var asset: String { get }
-    var label: String { get }
+    var amount: String? { get }
+    var asset: String? { get }
+    var label: String? { get }
+}
+
+public extension AccountBalance {
+    var isEmpty: Bool {
+        [amount, asset].contains { $0 == nil }
+    }
 }
 
 public protocol AccountLimit {

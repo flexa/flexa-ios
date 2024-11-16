@@ -8,6 +8,7 @@
 
 import Foundation
 import Factory
+import os.log
 
 public enum SSE {
     static let lfChar: UInt8 = 0x0A
@@ -36,6 +37,7 @@ public protocol SSEClientProtocol {
     init?(resource: APIResource, timeoutInterval: TimeInterval)
 
     func connect(lastEventId: String?)
+    func connect(request: URLRequest, lastEventId: String?)
     func disconnect()
 
     func addListener(for event: String, handler: @escaping (SSE.Event) -> Void)
@@ -56,6 +58,7 @@ class SSEClient: NSObject, SSEClientProtocol {
     var listeners: [String: (SSE.Event) -> Void] = [:]
     var eventsParser = SSE.Parser()
     let customHeaders = ["Accept", "Cache-Control", "Last-Event-ID"]
+    let logger = Logger(subsystem: ((Bundle.main.bundleIdentifier ?? "") + "-Flexa"), category: "SSE")
 
     required init(request: URLRequest, timeoutInterval: TimeInterval) {
         self.request = request
@@ -73,13 +76,22 @@ class SSEClient: NSObject, SSEClientProtocol {
     }
 
     func connect(lastEventId: String?) {
+        logger.debug("SEEClient.connect")
         self.lastEventId = lastEventId
         urlSession = Container.shared.sseUrlSession((lastEventId, timeoutInterval, self))
         urlSession?.dataTask(with: request).resume()
         readyState = .connecting
     }
 
+    func connect(request: URLRequest, lastEventId: String?) {
+        logger.debug("SEEClient.connect withRequest")
+        disconnect()
+        self.request = request
+        connect(lastEventId: lastEventId)
+    }
+
     func disconnect() {
+        logger.debug("SEEClient.disconnect")
         readyState = .closed
         urlSession?.invalidateAndCancel()
         urlSession = nil
@@ -169,6 +181,17 @@ extension SSEClient: URLSessionDataDelegate {
             return
         }
 
+        if let string = String(data: data, encoding: .utf8) {
+            if string.hasPrefix("data: keep-alive") {
+                logger.debug("SSE Event\n\(string, privacy: .public)")
+            }
+            for event in listeners.keys {
+                let prefix = "event: \(event)"
+                if string.hasPrefix(prefix) {
+                    logger.debug("SSE Event\n\(prefix, privacy: .public)")
+                }
+            }
+        }
         let events = eventsParser.append(data: data)
         send(notifications: events)
     }

@@ -14,7 +14,6 @@ class ExchangeRatesRepository: ExchangeRatesRepositoryProtocol {
     @Injected(\.userDefaults) private var userDefaults
     @Injected(\.flexaClient) private var flexaClient
     @Injected(\.assetsRepository) private var assetsRepository
-    @Injected(\.transactionFeesRepository) private var transactionFeesRepository
 
     private var lastSyncedAt: TimeInterval?
     private let maxAssetIds = 20

@@ -28,50 +28,90 @@ struct AssetSelectionView: View {
         ZStack {
             backgroundColor.ignoresSafeArea()
             List {
-                ForEach($viewModel.assetAccounts, id: \.id) { account in
-                    ForEach(account.assets, id: \.id) { asset in
-                        if !viewModel.enoughAmount(for: asset.wrappedValue) && viewModel.hideShortBalances {
-                            EmptyView()
-                        } else {
-                            assetRow(asset.wrappedValue)
-                                .listRowSeparator(.hidden, edges: hidingSeparatorEdges(for: asset.wrappedValue))
-                                .listRowSeparatorTint(tableTheme.separator.color)
-                        }
-                    }
+                balanceView
+                if !viewModel.accountBalanceCoversFullAmount {
+                    assetsList
                 }
-                if viewModel.amount > 0 {
-                    Toggle(L10n.Payment.HideShortBalances.title, isOn: $viewModel.hideShortBalances)
-                        .font(.system(size: 17, weight: .semibold, design: .default))
-                        .foregroundColor(Color.primary)
-                        .toggleStyle(SwitchToggleStyle(tint: Color.gray))
-                }
-            }
-            .listStyle(PlainListStyle())
-            .listRowSpacing(tableTheme.cellSpacing)
+            }.listStyle(PlainListStyle())
+                .listRowSpacing(tableTheme.cellSpacing)
 
-            .shadow(color: tableTheme.shadow.color,
-                    radius: tableTheme.shadow.radius,
-                    x: tableTheme.shadow.x,
-                    y: tableTheme.shadow.y)
-            .background(NavigationLink("",
-                                       destination: transactionAssetDetailsView,
-                                       isActive: $isAssetExchangeRateViewPresented).hidden())
-            .padding(.horizontal, listPadding)
+                .shadow(color: tableTheme.shadow.color,
+                        radius: tableTheme.shadow.radius,
+                        x: tableTheme.shadow.x,
+                        y: tableTheme.shadow.y)
+                .background(NavigationLink("",
+                                           destination: transactionAssetDetailsView,
+                                           isActive: $isAssetExchangeRateViewPresented).hidden())
+                .padding(.horizontal, listPadding)
         }.animation(.none)
             .onAppear {
+                viewModel.loadAccount()
                 if let asset = viewModel.selectedAsset, viewModel.showSelectedAssetDetail {
-                    showAssetInfo(asset)
+                    showAssetInfo(asset, standAlone: true)
                     viewModel.showSelectedAssetDetail = false
                 }
             }
     }
 
-    func showAssetInfo(_ asset: AssetWrapper) {
+    @ViewBuilder
+    private var assetsList: some View {
+        Section(
+            header: sectionHeader
+        ) {
+            ForEach($viewModel.assetAccounts, id: \.id) { account in
+                ForEach(account.assets, id: \.id) { asset in
+                    if !viewModel.enoughAmount( asset.wrappedValue) && viewModel.hideShortBalances {
+                        EmptyView()
+                    } else {
+                        assetRow(asset.wrappedValue)
+                            .listRowSeparator(.hidden, edges: hidingSeparatorEdges(for: asset.wrappedValue))
+                            .listRowSeparatorTint(tableTheme.separator.color)
+                    }
+                }
+            }
+            if viewModel.showShortBalanceToggle {
+                Toggle(L10n.Payment.HideShortBalances.title, isOn: $viewModel.hideShortBalances)
+                    .font(.system(size: 17, weight: .semibold, design: .default))
+                    .foregroundColor(Color.primary)
+                    .toggleStyle(SwitchToggleStyle(tint: Color.gray))
+                    .padding(.bottom, 10)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var balanceView: some View {
+        if viewModel.hasAccountBalance {
+            Section {
+                FlexaBalanceView(
+                    iconAlignment: viewModel.accountBalanceCoversFullAmount ? .top : .left,
+                    title: viewModel.accountBalanceTitle,
+                    subtitle: viewModel.accountBalanceSubtitle
+                )
+            }.listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: 12, leading: 20, bottom: 12, trailing: 20))
+        }
+    }
+
+    @ViewBuilder
+    private var sectionHeader: some View {
+        if viewModel.hasAccountBalance {
+            Text(viewModel.sectionHeaderTitle)
+                .fontWeight(.regular)
+                .listRowInsets(EdgeInsets(top: 0, leading: 8, bottom: 8, trailing: 0))
+        }
+
+    }
+
+    func showAssetInfo(_ asset: AssetWrapper, standAlone: Bool = false) {
         transactionAssetDetailsView = TransactionAssetDetailsView(
             showView: $showAssetsModal,
+            tintColor: asset.assetColor ?? .purple,
             viewModel: TransactionAssetDetailsViewModel(
                 displayMode: .asset,
-                asset: asset
+                asset: asset,
+                isStandAlone: standAlone,
+                hasAmount: viewModel.hasAmount
             )
         )
 
@@ -89,7 +129,7 @@ struct AssetSelectionView: View {
     @ViewBuilder
     private func assetRow(_ asset: AssetWrapper) -> some View {
         Button {
-            if viewModel.enoughAmount(asset) {
+            if viewModel.isRowEnabled(asset) {
                 showAssetsModal = false
                 viewModel.updateSelectedAsset(asset)
                 if let selectedAsset = viewModel.selectedAsset {
@@ -99,14 +139,14 @@ struct AssetSelectionView: View {
         } label: {
             AssetRow(asset: asset,
                      selected: viewModel.isAssetSelected(asset),
-                     enable: viewModel.enoughAmount(asset),
+                     enable: viewModel.isRowEnabled(asset),
                      showInfo: {
                 showAssetInfo(asset)
             })
         }.listRowBackground(
             Rectangle()
                 .fill(cellBackgroundColor)
-                .cornerRadius(theme.borderRadius, corners: roundableCorners(for: asset))
+                .cornerRadius(cornerRadius(for: asset), corners: roundableCorners(for: asset))
         )
     }
 }

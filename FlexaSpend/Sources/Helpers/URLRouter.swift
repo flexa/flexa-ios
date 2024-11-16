@@ -13,10 +13,22 @@ enum FlexaLink {
     case systemBrowser(URL?)
     case account
 
+    static let howToPay = FlexaLink.webView(URL(string: L10n.WebLinks.howToPay))
+    static let reportIssue = FlexaLink.webView(URL(string: L10n.WebLinks.reportIssue))
+
     var path: String? {
         switch self {
         case .account:
             return "/account"
+        default:
+            return nil
+        }
+    }
+
+    var url: URL? {
+        switch self {
+        case .systemBrowser(let url), .webView(let url):
+            return url
         default:
             return nil
         }

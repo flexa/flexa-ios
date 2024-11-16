@@ -13,6 +13,8 @@ public extension Notification.Name {
         .nameWithPrefix("authorizationError")
     static let oneTimeKeysDidUpdate: Notification.Name =
         .nameWithPrefix("oneTimeKeysDidUpdate")
+    static let transactionSent: Notification.Name =
+        .nameWithPrefix("transactionSent")
 
     private static func nameWithPrefix(_ name: String) -> Notification.Name {
         .init(rawValue: "\(prefix).\(name)")

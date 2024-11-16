@@ -89,7 +89,8 @@ struct FXAvailableAsset {
     let balance: Decimal
     let balanceAvailable: Decimal?
     let displayName: String?
-    let icon: UIImage
+    let icon: UIImage?
+    let logoImageUrl: URL?
     let symbol: String?
 }
 
@@ -233,10 +234,15 @@ func onTransactionRequest(result: Result<FXTransaction, Error>) {
     debugPrint(result)
     switch result {
     case .success(let transaction):
-        // Sign and send the transaction
-        // Once the transaction is sent the parent application can pass the signature (String) to Flexa through Flexa.transactionSent
-        let signature = ...
-        Flexa.transactionSent(commerceSessionId: transaction.commerceSessionId, signature: signature)
+        do {
+            // Sign and send the transaction
+            // Once the transaction is sent the parent application can pass the signature (String) to Flexa through Flexa.transactionSent
+            let signature = try ...
+            Flexa.transactionSent(commerceSessionId: transaction.commerceSessionId, signature: signature)
+        } catch let error {
+            // An error happened while singning/sending the transaction. Calling Flexa.onTransactionFailed instructs the SDK to cancel the ongoing commerce session.
+            Flexa.onTransactonFailed(commerceSessionId: transaction.commerceSessionId)
+        }
     default:
         break
     }

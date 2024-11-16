@@ -46,7 +46,7 @@ public extension Promotion {
         if let amountOff {
             discount = min(amountOff, amount)
         } else if let percentOff {
-            discount = min(amount * percentOff / 100, amount)
+            discount = min(amount * percentOff, amount)
         }
         return min(discount, restrictions?.maximumDiscount ?? amount)
     }

@@ -55,7 +55,7 @@ class AccountsRepository: AccountsRepositoryProtocol {
     }
 
     func refresh() async throws {
-        await try getAccount()
+        try await getAccount()
     }
 
     func backgroundRefresh() {

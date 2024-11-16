@@ -164,7 +164,7 @@ private extension BrandsRepository {
                 brands.append(contentsOf: data)
             }
         }
-
+        lastSyncedAt = Date.now.timeIntervalSince1970
         all = brands
         return brands
     }
@@ -189,6 +189,7 @@ private extension BrandsRepository {
             }
         }
 
+        legacyLastSyncedAt = Date.now.timeIntervalSince1970
         legacyFlexcodeBrands = brands
         return brands
     }

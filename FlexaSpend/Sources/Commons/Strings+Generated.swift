@@ -70,14 +70,36 @@ internal enum L10n {
       }
     }
   }
-  internal enum Brand {
-    internal enum Links {
-      /// https://flexa.network/directory
-      internal static let merchantList = L10n.tr("Localizable", "brand.links.merchant_list", fallback: "https://flexa.network/directory")
-      /// %@/%@/locations
-      internal static func merchantLocations(_ p1: Any, _ p2: Any) -> String {
-        return L10n.tr("Localizable", "brand.links.merchant_locations", String(describing: p1), String(describing: p2), fallback: "%@/%@/locations")
+  internal enum AccountBalance {
+    /// %s in your Flexa Account
+    internal static func title(_ p1: UnsafePointer<CChar>) -> String {
+      return L10n.tr("Localizable", "account_balance.title", p1, fallback: "%s in your Flexa Account")
+    }
+    internal enum CurrentPayment {
+      /// Applied to this payment
+      internal static let text = L10n.tr("Localizable", "account_balance.current_payment.text", fallback: "Applied to this payment")
+    }
+    internal enum FullAmount {
+      /// The balance of your Flexa Account
+      /// will cover this payment. You don’t
+      /// need to send anything else.
+      internal static let text = L10n.tr("Localizable", "account_balance.full_amount.text", fallback: "The balance of your Flexa Account\nwill cover this payment. You don’t\nneed to send anything else.")
+    }
+    internal enum NextPayment {
+      /// Applied to your next payment
+      internal static let text = L10n.tr("Localizable", "account_balance.next_payment.text", fallback: "Applied to your next payment")
+    }
+    internal enum PayRemaining {
+      /// PAY REMAINING %s USING
+      internal static func title(_ p1: UnsafePointer<CChar>) -> String {
+        return L10n.tr("Localizable", "account_balance.pay_remaining.title", p1, fallback: "PAY REMAINING %s USING")
       }
+    }
+  }
+  internal enum AssetSwitcher {
+    internal enum UsingFlexaAccount {
+      /// Using your Flexa Account
+      internal static let title = L10n.tr("Localizable", "asset_switcher.using_flexa_account.title", fallback: "Using your Flexa Account")
     }
   }
   internal enum Common {
@@ -91,6 +113,10 @@ internal enum L10n {
     internal static let loading = L10n.tr("Localizable", "common.loading", fallback: "Loading")
     /// Ok
     internal static let ok = L10n.tr("Localizable", "common.ok", fallback: "Ok")
+    /// Sending...
+    internal static let sending = L10n.tr("Localizable", "common.sending", fallback: "Sending...")
+    /// Signing...
+    internal static let signing = L10n.tr("Localizable", "common.signing", fallback: "Signing...")
     /// Updating
     internal static let updating = L10n.tr("Localizable", "common.updating", fallback: "Updating")
   }
@@ -209,13 +235,15 @@ internal enum L10n {
           /// Balance Not Yet Available
           internal static let title = L10n.tr("Localizable", "legacy_flexcode.amount_entry.buttons.balance_unavailable.title", fallback: "Balance Not Yet Available")
         }
-        internal enum EnterAmount {
-          /// Enter Amount
-          internal static let title = L10n.tr("Localizable", "legacy_flexcode.amount_entry.buttons.enter_amount.title", fallback: "Enter Amount")
-        }
-        internal enum PayNow {
-          /// Confirm
-          internal static let title = L10n.tr("Localizable", "legacy_flexcode.amount_entry.buttons.pay_now.title", fallback: "Confirm")
+        internal enum Payment {
+          internal enum Confirm {
+            /// Confirm
+            internal static let title = L10n.tr("Localizable", "legacy_flexcode.amount_entry.buttons.payment.confirm.title", fallback: "Confirm")
+          }
+          internal enum EnterAmount {
+            /// Enter Amount
+            internal static let title = L10n.tr("Localizable", "legacy_flexcode.amount_entry.buttons.payment.enter_amount.title", fallback: "Enter Amount")
+          }
         }
       }
       internal enum Labels {
@@ -333,6 +361,10 @@ internal enum L10n {
         internal static let cannotLoadNetworkFee = L10n.tr("Localizable", "payment.asset.exchange_rate.cannot_load_network_fee", fallback: "Network fee cannot be loaded")
         /// Free
         internal static let free = L10n.tr("Localizable", "payment.asset.exchange_rate.free", fallback: "Free")
+        /// Less than %s network fee
+        internal static func lessThanMinNetworkFee(_ p1: UnsafePointer<CChar>) -> String {
+          return L10n.tr("Localizable", "payment.asset.exchange_rate.less_than_min_network_fee", p1, fallback: "Less than %s network fee")
+        }
         /// %s network fee
         internal static func networkFee(_ p1: UnsafePointer<CChar>) -> String {
           return L10n.tr("Localizable", "payment.asset.exchange_rate.network_fee", p1, fallback: "%s network fee")
@@ -419,14 +451,31 @@ internal enum L10n {
         return L10n.tr("Localizable", "payment.using_ticker.subtitle", p1, fallback: "Using %s")
       }
     }
+    internal enum YourFlexaAccount {
+      /// Your Flexa Account
+      internal static let title = L10n.tr("Localizable", "payment.your_flexa_account.title", fallback: "Your Flexa Account")
+    }
   }
   internal enum UpdatingBalance {
-    /// Your recent transaction is still mining. You can spend up to **%s** now, or wait for your full balance to become available.
+    /// Your recent transaction is still mining.
+    /// You can spend up to **%s** now, or wait for your full balance to become available.
     internal static func text(_ p1: UnsafePointer<CChar>) -> String {
-      return L10n.tr("Localizable", "updating_balance.text", p1, fallback: "Your recent transaction is still mining. You can spend up to **%s** now, or wait for your full balance to become available.")
+      return L10n.tr("Localizable", "updating_balance.text", p1, fallback: "Your recent transaction is still mining.\nYou can spend up to **%s** now, or wait for your full balance to become available.")
     }
     /// Balance Updating...
     internal static let title = L10n.tr("Localizable", "updating_balance.title", fallback: "Balance Updating...")
+  }
+  internal enum WebLinks {
+    /// https://flexa.co/guides/how-to-pay
+    internal static let howToPay = L10n.tr("Localizable", "web_links.how_to_pay", fallback: "https://flexa.co/guides/how-to-pay")
+    /// https://flexa.network/directory
+    internal static let merchantList = L10n.tr("Localizable", "web_links.merchant_list", fallback: "https://flexa.network/directory")
+    /// %@/%@/locations
+    internal static func merchantLocations(_ p1: Any, _ p2: Any) -> String {
+      return L10n.tr("Localizable", "web_links.merchant_locations", String(describing: p1), String(describing: p2), fallback: "%@/%@/locations")
+    }
+    /// https://flexa.co/report-an-issue
+    internal static let reportIssue = L10n.tr("Localizable", "web_links.report_issue", fallback: "https://flexa.co/report-an-issue")
   }
 }
 // swiftlint:enable explicit_type_interface function_parameter_count identifier_name line_length

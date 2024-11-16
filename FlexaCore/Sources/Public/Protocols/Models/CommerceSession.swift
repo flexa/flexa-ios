@@ -12,6 +12,7 @@ public enum CommerceSessionStatus: String {
     case completed, unknown, closed
     case requiresPaymentAsset = "requires_payment_asset"
     case requiresTransaction = "requires_transaction"
+    case requiresApproval = "requires_approval"
 }
 
 public protocol CommerceSession {
@@ -25,6 +26,7 @@ public protocol CommerceSession {
     var status: CommerceSessionStatus { get }
     var transactions: [FlexaCore.Transaction] { get }
     var authorization: CommerceSessionAuthorization? { get set }
+    var credits: [FlexaCore.CommerceSessionCredit] { get }
 }
 
 public protocol CommerceSessionPreference {
@@ -36,6 +38,14 @@ public protocol CommerceSessionAuthorization {
     var instructions: String? { get }
     var number: String { get }
     var details: String? { get }
+}
+
+public protocol CommerceSessionCredit {
+    var id: String { get }
+    var amount: String { get }
+    var asset: String { get }
+    var label: String { get }
+    var status: String { get }
 }
 
 public extension CommerceSession {

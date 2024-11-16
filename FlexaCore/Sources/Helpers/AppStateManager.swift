@@ -13,7 +13,7 @@ import UIKit
 class AppStateManager: AppStateManagerProtocol {
     @Injected(\.oneTimeKeysRepository) var oneTimeKeysRepository
     @Injected(\.transactionsRespository) var transactionsRepository
-    @Injected(\.transactionFeesRepository) var transactionFeesRepository
+    @Injected(\.commerceSessionRepository) var commerceSessionRepository
     @Injected(\.accountRepository) var accountsRepository
     @Injected(\.brandsRepository) var brandsRepository
     @Injected(\.assetsRepository) var assetsRepository
@@ -102,6 +102,10 @@ class AppStateManager: AppStateManagerProtocol {
     }
 
     func signTransaction(commerceSessionId: String, signature: String) {
+        DispatchQueue.main.async {
+            self.eventNotifier.post(name: .transactionSent, object: commerceSessionId)
+        }
+
         guard let transactionId = unsignedTransactions[commerceSessionId] else {
             return
         }
@@ -114,7 +118,16 @@ class AppStateManager: AppStateManagerProtocol {
                 FlexaLogger.error(error)
             }
         }
+    }
 
+    func closeCommerceSession(commerceSessionId: String) {
+        Task {
+            do {
+                try await commerceSessionRepository.close(commerceSessionId)
+            } catch let error {
+                FlexaLogger.commerceSessionLogger.error(error)
+            }
+        }
     }
 }
 
@@ -163,6 +176,7 @@ private extension AppStateManager {
             } catch let error {
                 if error.isUnauthorized || error.isRestrictedRegion {
                     eventNotifier.post(name: .flexaAuthorizationError)
+                    FlexaIdentity.disconnect()
                 }
                 FlexaLogger.error(error)
             }

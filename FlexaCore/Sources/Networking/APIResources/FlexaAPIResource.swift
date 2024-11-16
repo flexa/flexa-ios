@@ -100,7 +100,7 @@ protocol JWTAuthenticable: Authenticable {
 extension JWTAuthenticable {
     var authToken: String? {
         guard let jwt = Container.shared.authStore().token?.value else {
-            FlexaLogger.info("JWT not available")
+            FlexaLogger.error("JWT not available")
             return nil
         }
         return Data((":" + jwt).utf8).base64EncodedString()

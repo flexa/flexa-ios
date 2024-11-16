@@ -3,6 +3,7 @@ import FlexaUICore
 
 struct NavigationMenu: View {
     private typealias MenuStrings = L10n.Payment.Settings.Items
+    @Environment(\.openURL) private var openURL
 
     @Binding var showBrandDirectory: Bool
     @Binding var showManageFlexaIDModal: Bool
@@ -29,10 +30,16 @@ struct NavigationMenu: View {
                 }
                 Menu {
                     Button {
+                        if let url = FlexaLink.howToPay.url {
+                            openURL(url)
+                        }
                     } label: {
                         Label(MenuStrings.Help.Items.HowToPay.title, systemImage: "rays")
                     }
                     Button {
+                        if let url = FlexaLink.reportIssue.url {
+                            openURL(url)
+                        }
                     } label: {
                         Label(MenuStrings.Help.Items.ReportIssue.title, systemImage: "exclamationmark.bubble")
                     }

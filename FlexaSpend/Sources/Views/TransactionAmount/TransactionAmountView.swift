@@ -12,6 +12,7 @@ import FlexaCore
 import Factory
 
 struct TransactionAmountView: View {
+    @Environment(\.presentationMode) var presentationMode
     @Environment(\.theme) private var theme
     @Environment(\.colorScheme) private var colorScheme
 
@@ -106,6 +107,10 @@ struct TransactionAmountView: View {
         .dragIndicator(true)
         .sheet(isPresented: $showWebView) {
             FlexaWebView(url: viewModel.promotion?.url)
+        }.onTransactionSent {
+            viewModel.transactionSent()
+        }.onAppear {
+            viewModel.loadAccount()
         }
 
         transactionDetailsSheet
@@ -196,10 +201,12 @@ struct TransactionAmountView: View {
     var assetSwitcherButton: some View {
         ZStack {
             Button {
+                viewModelAsset.amount = viewModel.decimalAmount - viewModel.promotionDiscount
+                viewModelAsset.hasAmount = viewModel.hasAmount
                 showAssetsModal = true
             } label: {
                 HStack {
-                    Text(L10n.Payment.UsingTicker.subtitle(viewModel.selectedAsset?.assetSymbol ?? ""))
+                    Text(viewModel.assetSwitcherTitle)
                         .font(.callout)
                         .foregroundColor(grayColor)
                         .fontWeight(.semibold)
@@ -242,9 +249,17 @@ struct TransactionAmountView: View {
     var closeButton: some View {
         HStack(alignment: .top) {
             Spacer()
-            FlexaRoundedButton(.info) {
-                self.showTransactionDetails = true
-            }.padding()
+            if viewModel.isLoading {
+                FlexaRoundedButton(.close) {
+                    viewModel.cancelledByUser = true
+                    presentationMode.wrappedValue.dismiss()
+                }.padding()
+            } else {
+                FlexaRoundedButton(.info) {
+                    self.showTransactionDetails = true
+                }.padding()
+            }
+
         }.frame(maxWidth: .infinity)
     }
 
@@ -253,9 +268,16 @@ struct TransactionAmountView: View {
             Button {
                 viewModel.createCommerceSession()
             } label: {
-                HStack {
-                    if viewModel.isLoading {
+                HStack(spacing: 10) {
+                    if viewModel.isPaymentDone {
+                        Image(systemName: "checkmark")
+                            .foregroundColor(.white)
+                        Text(viewModel.payButtonTitle)
+                            .foregroundColor(.white)
+                    } else if viewModel.isLoading {
                         ProgressView().tint(.white)
+                        Text(viewModel.payButtonTitle)
+                            .foregroundColor(.white)
                     } else {
                         if viewModel.showConfirmationButtonTitle && !viewModel.showNoBalanceButton {
                             Image(systemName: "faceid")
@@ -264,6 +286,7 @@ struct TransactionAmountView: View {
                         }
                         Text(viewModel.payButtonTitle)
                     }
+
                 }.flexaButton(
                     background: linearGradient,
                     disabledTextColor: disabledTextColor,
@@ -301,9 +324,15 @@ struct TransactionAmountView: View {
     @ViewBuilder
     var transactionDetailsSheet: some View {
         if #available(iOS 16.0, *) {
+            let detents: Set<PresentationDetent> = {
+                if viewModel.accountBalanceCoversFullAmount {
+                    return [.fraction(0.40)]
+                }
+                return [.fraction(viewModel.hasAccountBalance ? 0.45 : 0.35)]
+            }()
             ZStack {}
                 .sheet(isPresented: $showTransactionDetails) {
-                    transactionDetailsView.presentationDetents([.fraction(0.35)])
+                    transactionDetailsView.presentationDetents(detents)
                 }
         } else {
             var backgroundColor: Color {
@@ -333,7 +362,8 @@ struct TransactionAmountView: View {
                         asset: asset,
                         mainAmount: viewModel.amountText.digitsAndSeparator?.decimalValue?.asCurrency ?? "0",
                         discount: viewModel.promotionApplies ? viewModel.promotionDiscount : nil,
-                        fee: viewModel.fee
+                        fee: viewModel.fee,
+                        hasAmount: true
                     )
                 )
             }
@@ -425,7 +455,14 @@ private extension TransactionAmountView {
     }
 
     @available(iOS 16.0, *)
+    @ViewBuilder
     var assetsSwitcherSheet: some View {
+        let detents: Set<PresentationDetent> = {
+            if viewModel.accountBalanceCoversFullAmount {
+                return [.fraction(0.40)]
+            }
+            return [.medium]
+        }()
         ZStack {}
             .sheet(isPresented: $showAssetsModal) {
                 VStack {
@@ -438,7 +475,7 @@ private extension TransactionAmountView {
                 .environment(\.colorScheme, theme.interfaceStyle.colorSheme ?? colorScheme)
                 .sheetCornerRadius(theme.views.sheet.borderRadius)
                 .ignoresSafeArea()
-                .presentationDetents([.medium])
+                .presentationDetents(detents)
             }
     }
 

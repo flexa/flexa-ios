@@ -14,7 +14,7 @@ import Factory
 extension BrandViewController {
     enum Link {
         static var brandDirectoryUrlString: String {
-            L10n.Brand.Links.merchantList
+            L10n.WebLinks.merchantList
         }
 
         case merchantList
@@ -26,7 +26,7 @@ extension BrandViewController {
             case .merchantList:
                 return URL(string: Self.brandDirectoryUrlString)
             case .merchantLocations(let slug):
-                return URL(string: L10n.Brand.Links.merchantLocations(Self.brandDirectoryUrlString, slug))
+                return URL(string: L10n.WebLinks.merchantLocations(Self.brandDirectoryUrlString, slug))
             case .custom(let url):
                 return url
             }

@@ -14,7 +14,7 @@ public extension String {
     }
 
     var decimalValue: Decimal? {
-        guard let decimalString = self.digitsAndSeparator else {
+        guard let decimalString = self.digitsAndSeparator, !isEmpty else {
             return nil
         }
 

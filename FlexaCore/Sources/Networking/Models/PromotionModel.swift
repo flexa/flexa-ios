@@ -26,6 +26,23 @@ extension Models {
         private let amountOffString: String?
         private let percentOffString: String?
         private let promotionRestrictions: Restriction
+
+        init(from decoder: any Decoder) throws {
+            let container: KeyedDecodingContainer<CodingKeys> = try decoder.container(keyedBy: CodingKeys.self)
+            self.id = try container.decode(String.self, forKey: CodingKeys.id)
+            self.livemode = try container.decode(Bool.self, forKey: CodingKeys.livemode)
+            self.label = try container.decode(String.self, forKey: CodingKeys.label)
+            self.asset = try container.decode(String.self, forKey: CodingKeys.asset)
+            self.amountOffString = try container.decodeIfPresent(String.self, forKey: CodingKeys.amountOffString)
+            self.percentOffString = try container.decodeIfPresent(String.self, forKey: CodingKeys.percentOffString)
+            self.promotionRestrictions = try container.decode(Restriction.self, forKey: CodingKeys.promotionRestrictions)
+
+            if let urlString = try container.decodeIfPresent(String.self, forKey: CodingKeys.url), !urlString.isEmpty {
+                self.url = URL(string: urlString)
+            } else {
+                self.url = nil
+            }
+        }
     }
 }
 

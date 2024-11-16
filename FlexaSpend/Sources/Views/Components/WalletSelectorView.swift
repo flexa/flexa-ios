@@ -13,15 +13,18 @@ import FlexaUICore
 struct WalletSelectorView: View {
     @Environment(\.colorScheme) var colorScheme
     var asset: AssetWrapper
+    var usingAccountBalance: Bool
     var buttonAction: () -> Void
     var backgroundColor: Color {
         Color(colorScheme == .dark ? UIColor.tertiarySystemFill.withAlphaComponent(0.16) : .white)
     }
 
     init(asset: AssetWrapper,
+         usingAccountBalance: Bool = false,
          buttonAction: @escaping () -> Void) {
         self.buttonAction = buttonAction
         self.asset = asset
+        self.usingAccountBalance = usingAccountBalance
     }
 
     var body: some View {
@@ -33,21 +36,12 @@ struct WalletSelectorView: View {
                     .font(.body)
                     .foregroundColor(.primary)
                 Spacer()
-                if let logoImage = asset.logoImage {
-                    SpendCircleImage(
-                        Image(uiImage: logoImage),
-                        size: 18,
-                        gradientColors: asset.gradientColors
-                    ).padding(4)
+
+                if usingAccountBalance {
+                    accountBalanceView
                 } else {
-                    SpendCircleImage(asset.logoImageUrl, size: 18, gradientColors: asset.gradientColors).padding(4)
+                    assetView
                 }
-
-                Text(asset.assetDisplayName)
-                    .lineLimit(1)
-                    .font(.body)
-                    .foregroundColor(.secondary)
-
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.footnote.weight(.semibold))
                     .foregroundColor(.secondary)
@@ -55,6 +49,39 @@ struct WalletSelectorView: View {
             }.padding([.horizontal], 16)
                 .frame(height: 44, alignment: .center)
                 .modifier(RoundedView(color: backgroundColor))
+
         }
+    }
+
+    @ViewBuilder
+    private var accountBalanceView: some View {
+        Text(L10n.Payment.YourFlexaAccount.title)
+            .lineLimit(1)
+            .font(.body)
+            .foregroundColor(.secondary)
+    }
+
+    @ViewBuilder
+    private var assetView: some View {
+        if let logoImage = asset.logoImage {
+            SpendCircleImage(
+                Image(uiImage: logoImage),
+                size: 18,
+                gradientColors: asset.gradientColors,
+                placeholderColor: .clear
+            ).padding(4)
+        } else {
+            SpendCircleImage(
+                asset.logoImageUrl,
+                size: 18,
+                gradientColors: asset.gradientColors,
+                placeholderColor: .clear
+            ).padding(4)
+        }
+
+        Text(asset.assetDisplayName)
+            .lineLimit(1)
+            .font(.body)
+            .foregroundColor(.secondary)
     }
 }

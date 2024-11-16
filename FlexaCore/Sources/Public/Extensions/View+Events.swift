@@ -26,6 +26,10 @@ public extension View {
         onNotification(.flexaAuthorizationError, perform: perform, notificationCenter: flexaNotificationCenter)
     }
 
+    func onTransactionSent(_ perform: @escaping () -> Void) -> some View {
+        onNotification(.transactionSent, perform: perform, notificationCenter: flexaNotificationCenter)
+    }
+
     func onNotification(
         _ name: Notification.Name,
         perform: @escaping () -> Void,

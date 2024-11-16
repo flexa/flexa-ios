@@ -14,17 +14,30 @@ public struct SpendCircleImage: View {
     var url: URL?
     let size: CGFloat
     let gradientColors: [Color]
+    let placeholderColor: Color
 
-    public init(_ image: Image, size: CGFloat = 24, gradientColors: [Color] = []) {
+    public init(
+        _ image: Image,
+        size: CGFloat = 24,
+        gradientColors: [Color] = [],
+        placeholderColor: Color = .primary.opacity(0.2)
+    ) {
         self.image = image
         self.size = size
         self.gradientColors = gradientColors
+        self.placeholderColor = placeholderColor
     }
 
-    public init(_ url: URL?, size: CGFloat = 24, gradientColors: [Color] = []) {
+    public init(
+        _ url: URL?,
+        size: CGFloat = 24,
+        gradientColors: [Color] = [],
+        placeholderColor: Color = .primary.opacity(0.2)
+    ) {
         self.url = url
         self.size = size
         self.gradientColors = gradientColors
+        self.placeholderColor = placeholderColor
     }
 
     public var body: some View {
@@ -49,10 +62,10 @@ public struct SpendCircleImage: View {
                         )
                 },
                 placeholder: {
-                    CircularGradientView(gradientColors: [.primary.opacity(0.2)], size: size)
+                    CircularGradientView(gradientColors: [placeholderColor], size: size)
                 })
         } else {
-            CircularGradientView(gradientColors: [.primary.opacity(0.2)], size: size)
+            CircularGradientView(gradientColors: [placeholderColor], size: size)
         }
     }
 }

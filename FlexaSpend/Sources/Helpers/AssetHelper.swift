@@ -46,7 +46,7 @@ struct AssetHelper: AssetHelperProtocol {
     }
 
     func logoImageUrl(for asset: AssetWrapper) -> URL? {
-        fxAsset(asset)?.logoImageUrl ?? assetsRepository.assets.findBy(id: asset.assetId)?.iconUrl
+        fxAsset(asset)?.logoImageUrl
     }
 
     func displayName(for asset: AssetWrapper) -> String {

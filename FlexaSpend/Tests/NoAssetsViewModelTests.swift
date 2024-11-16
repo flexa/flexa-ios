@@ -11,6 +11,7 @@ import Quick
 import Fakery
 import FlexaCore
 import Factory
+import UIKit
 import Foundation
 @testable import FlexaSpend
 
@@ -29,7 +30,7 @@ class NoAssetsViewModelSpec: QuickSpec {
 
             context("1 invalid asset") {
                 let viewModel = NoAssetsView.ViewModel([
-                    FXAvailableAsset(assetId: "BTC", symbol: "BTC", balance: 0.1)
+                    FXAvailableAsset.build(assetId: "BTC", symbol: "BTC", balance: 0.1)
                 ])
                 let expectedValue = "Flexa doesn’t currently support BTC."
 
@@ -40,8 +41,8 @@ class NoAssetsViewModelSpec: QuickSpec {
 
             context("2 invalid assets") {
                 let viewModel = NoAssetsView.ViewModel([
-                    FXAvailableAsset(assetId: "BTC", symbol: "BTC", balance: 0.1),
-                    FXAvailableAsset(assetId: "ETH", symbol: "ETH", balance: 1.0)
+                    FXAvailableAsset.build(assetId: "BTC", symbol: "BTC", balance: 0.1),
+                    FXAvailableAsset.build(assetId: "ETH", symbol: "ETH", balance: 1.0)
                 ])
                 let expectedValue = "Flexa doesn’t currently support BTC or ETH."
 
@@ -52,10 +53,10 @@ class NoAssetsViewModelSpec: QuickSpec {
 
             context("3 or more invalid assets") {
                 let viewModel = NoAssetsView.ViewModel([
-                    FXAvailableAsset(assetId: "BTC", symbol: "BTC", balance: 0.1),
-                    FXAvailableAsset(assetId: "ETH", symbol: "ETH", balance: 1.0),
-                    FXAvailableAsset(assetId: "SOL", symbol: "SOL", balance: 1.0),
-                    FXAvailableAsset(assetId: "BAT", symbol: "BAT", balance: 1.0)
+                    FXAvailableAsset.build(assetId: "BTC", symbol: "BTC", balance: 0.1),
+                    FXAvailableAsset.build(assetId: "ETH", symbol: "ETH", balance: 1.0),
+                    FXAvailableAsset.build(assetId: "SOL", symbol: "SOL", balance: 1.0),
+                    FXAvailableAsset.build(assetId: "BAT", symbol: "BAT", balance: 1.0)
                 ])
                 let expectedValue = "Flexa doesn’t currently support BTC, ETH, or any of the other assets in your wallet."
 
@@ -66,4 +67,12 @@ class NoAssetsViewModelSpec: QuickSpec {
         }
     }
 }
+
+private extension FXAvailableAsset {
+    static func build(assetId: String, symbol: String, balance: Decimal) -> FXAvailableAsset {
+        FXAvailableAsset(assetId: assetId, symbol: symbol, balance: balance, icon: UIImage())
+    }
+
+}
+
 // swiftlint:enable line_length

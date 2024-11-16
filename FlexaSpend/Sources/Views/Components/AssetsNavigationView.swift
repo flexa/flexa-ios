@@ -39,6 +39,7 @@ public struct AssetsNavigationView: View {
                     showAssetsModal = false
                 }, label: {
                     Text(L10n.Payment.done)
+                        .font(.body.weight(.semibold))
                         .foregroundColor(Color.purple)
                 })
             )

@@ -45,7 +45,7 @@ final class AuthStore: AuthStoreProtocol {
     @Injected(\.pkceHelper) private var pkceHelper
 
     private(set) var state: AuthStoreState = .none
-    private var refreshTokenAsyncTask: Task<AuthStoreState, Error>?
+    @Synchronized private var refreshTokenAsyncTask: Task<AuthStoreState, Error>?
 
     var isSignedIn: Bool {
         switch state {

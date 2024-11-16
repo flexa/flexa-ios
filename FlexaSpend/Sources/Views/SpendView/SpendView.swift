@@ -106,6 +106,7 @@ struct SpendView: View {
                 }
             }
         }
+        .interactiveDismissDisabled(viewModel.showPaymentModal || viewModel.showLegacyFlexcode)
         .navigationViewStyle(.stack)
         .navigationTitleAttributes(
             largeTitleAttributes: [.font: UIFont.systemFont(ofSize: 28, weight: .bold)],
@@ -127,6 +128,8 @@ struct SpendView: View {
             FlexaWebView(url: viewModel.url)
         }.onReceive(timer) { _ in
             viewModel.refreshFlexcodes()
+        }.onTransactionSent {
+            viewModel.transactionSentHandler()
         }
 
         if #available(iOS 16, *) {
@@ -160,6 +163,8 @@ struct SpendView: View {
             SpendCodeView(
                 viewModel: code,
                 buttonAction: {
+                    viewModelAsset.amount = 0
+                    viewModelAsset.hasAmount = false
                     viewModel.viewModelAsset.showSelectedAssetDetail = true
                     viewModel.showAssetsModal = true
                 }
@@ -170,7 +175,9 @@ struct SpendView: View {
 
     private var assetSwitcherButton: some View {
         Button {
-            viewModel.viewModelAsset.showSelectedAssetDetail = false
+            viewModelAsset.amount = 0
+            viewModelAsset.hasAmount = false
+            viewModelAsset.showSelectedAssetDetail = false
             viewModel.showAssetsModal = true
         } label: {
             HStack {
@@ -277,7 +284,14 @@ private extension SpendView {
     }
 
     @available(iOS 16.0, *)
+    @ViewBuilder
     var assetsSwitcherSheet: some View {
+        let detents: Set<PresentationDetent> = {
+            if viewModel.viewModelAsset.accountBalanceCoversFullAmount {
+                return [.fraction(0.40)]
+            }
+            return [.medium]
+        }()
         ZStack {}
             .sheet(isPresented: $viewModel.showAssetsModal) {
                 VStack {
@@ -291,7 +305,7 @@ private extension SpendView {
                 .environment(\.colorScheme, flexaClient.theme.interfaceStyle.colorSheme ?? colorScheme)
                 .sheetCornerRadius(sheetBorderRadius)
                 .ignoresSafeArea()
-                .presentationDetents([.medium])
+                .presentationDetents(detents)
             }
     }
 
@@ -310,13 +324,14 @@ private extension SpendView {
         ZStack {}
             .onChange(of: transactionAmountViewModel.commerceSessionCreated) { created in
                 if created {
-                    self.viewModel.signAndSendLegacy(commerceSession: transactionAmountViewModel.commerceSession)
+                    self.viewModel.sendLegacy(commerceSession: transactionAmountViewModel.commerceSession)
                 }
             }
             .sheet(
                 isPresented: $viewModel.showInputAmountView,
                 onDismiss: {
-                    viewModel.clearIfAuthorizationIsPending()
+                    let canceled = !transactionAmountViewModel.isPaymentDone && transactionAmountViewModel.cancelledByUser
+                    viewModel.clearIfAuthorizationIsPending(canceled: canceled)
                     viewModel.updateSelectedAsset()
 
                     if let selectedAssetId = viewModel.selectedAsset?.assetId {
@@ -357,15 +372,20 @@ private extension SpendView {
                         paymentDone: $viewModel.paymentCompleted,
                         payButtonEnabled: $viewModel.paymentButtonEnabled,
                         assetSwitcherEnabled: $viewModel.assetSwitcherEnabled,
+                        isLoading: viewModel.transactionSent,
+                        loadingTitle: viewModel.loadingTitle,
+                        isUsingAccountBalance: viewModel.isUsingAccountBalance,
                         merchantLogoUrl: viewModel.merchantLogoUrl,
                         merchantName: viewModel.merchantName,
                         fee: viewModel.fee,
                         didConfirm: {
-                viewModel.signAndSend()
+                viewModel.sendNextGen()
             }, didCancel: {
-                viewModel.clear()
+                viewModel.clear(canceled: true)
             }, didSelect: {
                 viewModel.viewModelAsset.showSelectedAssetDetail = false
+                viewModel.viewModelAsset.amount = viewModel.amount
+                viewModel.viewModelAsset.hasAmount = true
                 viewModel.showAssetsModal = true
             }).zIndex(1)
         }

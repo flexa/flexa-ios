@@ -20,6 +20,7 @@ extension Models {
             case statusString = "status"
             case sessionTransactions = "transactions"
             case sessionAuthorization = "authorization"
+            case sessionCredits = "credits"
         }
         var id: String
         var asset: String
@@ -31,6 +32,7 @@ extension Models {
         var sessionRate: Models.Rate
         var sessionTransactions: [Models.Transaction]?
         var sessionAuthorization: Authorization?
+        var sessionCredits: [Credit]
 
         init(from decoder: any Decoder) throws {
             let container: KeyedDecodingContainer<Models.CommerceSession.CodingKeys> = try decoder.container(
@@ -55,6 +57,11 @@ extension Models {
                 Models.CommerceSession.Authorization.self,
                 forKey: CodingKeys.sessionAuthorization
             )
+
+            self.sessionCredits = try container.decodeIfPresent(
+                [Models.CommerceSession.Credit].self,
+                forKey: CodingKeys.sessionCredits
+            ) ?? []
 
             do {
                 self.sessionBrand = try container.decodeIfPresent(Models.Brand.self, forKey: CodingKeys.sessionBrand)
@@ -85,6 +92,16 @@ extension Models.CommerceSession {
     struct Authorization: FlexaModelProtocol, CommerceSessionAuthorization {
         var instructions, details: String?
         var number: String
+    }
+}
+
+extension Models.CommerceSession {
+    struct Credit: FlexaModelProtocol, CommerceSessionCredit {
+        var id: String
+        var amount: String
+        var asset: String
+        var label: String
+        var status: String
     }
 }
 
@@ -125,5 +142,9 @@ extension Models.CommerceSession: CommerceSession {
                 sessionAuthorization = nil
             }
         }
+    }
+
+    var credits: [CommerceSessionCredit] {
+        sessionCredits
     }
 }

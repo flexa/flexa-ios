@@ -13,6 +13,8 @@ struct UpdatingBalanceView: View {
 
     var backgroundColor: Color
     var amount: Decimal
+    var horizontalPadding: CGFloat
+    var verticalPadding: CGFloat
 
     var body: some View {
         ZStack {
@@ -32,10 +34,20 @@ struct UpdatingBalanceView: View {
                         .minimumScaleFactor(0.5)
                 }
                 .multilineTextAlignment(.leading)
-            }.padding(EdgeInsets(top: 12, leading: 16, bottom: 12, trailing: 16))
+            }.padding(.vertical, verticalPadding)
+                .padding(.horizontal, horizontalPadding)
         }
-        .listRowInsets(EdgeInsets(top: 24, leading: 0, bottom: 14, trailing: 0))
         .textCase(nil)
+    }
+
+    init(backgroundColor: Color,
+         amount: Decimal,
+         horizontalPadding: CGFloat = 16,
+         verticalPadding: CGFloat = 12) {
+        self.backgroundColor = backgroundColor
+        self.amount = amount
+        self.horizontalPadding = horizontalPadding
+        self.verticalPadding = verticalPadding
     }
 
     static func alert(_ amount: Decimal) -> Alert {

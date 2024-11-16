@@ -76,6 +76,7 @@ public final class FlexaSpend {
     }
 
     public static func transactionSent(commerceSessionId: String, signature: String) {
+        FlexaLogger.commerceSessionLogger.debug("Flexa.transactionSent(cs: \(commerceSessionId), hash: \(signature))")
         Container
             .shared
             .appStateManager()
@@ -83,6 +84,14 @@ public final class FlexaSpend {
                 commerceSessionId: commerceSessionId,
                 signature: signature
             )
+    }
+
+    public static func onTransactionFailed(commerceSessionId: String) {
+        FlexaLogger.commerceSessionLogger.debug("Flexa.onTransactionFailed(cs: \(commerceSessionId))")
+        Container
+            .shared
+            .appStateManager()
+            .closeCommerceSession(commerceSessionId: commerceSessionId)
     }
 
     /// Opens FlexaSpend's main screen, if the user is already signed in, or the sign in/sign up screen otherwise
@@ -192,6 +201,10 @@ public extension Flexa {
     static func transactionSent(commerceSessionId: String, signature: String) {
         FlexaSpend.transactionSent(commerceSessionId: commerceSessionId, signature: signature)
     }
+
+    static func onTransactionFailed(commerceSessionId: String) {
+        FlexaSpend.onTransactionFailed(commerceSessionId: commerceSessionId)
+    }
 }
 
 // MARK: View Wrappers and Environment Objects
@@ -216,9 +229,6 @@ private extension FlexaSpend {
                 .onAuthorizationError {
                     FlexaIdentity.disconnect()
                     dismiss()
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
-                        spend.open()
-                    }
                 }
         }
 

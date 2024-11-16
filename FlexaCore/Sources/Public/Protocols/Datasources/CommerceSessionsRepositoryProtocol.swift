@@ -10,14 +10,18 @@ import Foundation
 
 public enum CommerceSessionEvent {
     case created(CommerceSession)
-    case updated(CommerceSession)
+    case requiresTransaction(CommerceSession)
+    case requiresApproval(CommerceSession)
     case completed(CommerceSession)
+    case closed(CommerceSession)
 
     public var commerceSession: CommerceSession {
         switch self {
         case .created(let commerceSession),
-                .updated(let commerceSession),
-                .completed(let commerceSession):
+                .requiresTransaction(let commerceSession),
+                .requiresApproval(let commerceSession),
+                .completed(let commerceSession),
+                .closed(let commerceSession):
             return commerceSession
         }
     }
@@ -35,6 +39,7 @@ public protocol CommerceSessionsRepositoryProtocol {
     func setCurrent(_ commerceSession: CommerceSession?, isLegacy: Bool, wasTransactionSent: Bool)
     func clearCurrent()
     func close(_ id: String) async throws
+    func approve(_ id: String) async throws
     func setPaymentAsset(commerceSessionId: String, assetId: String) async throws
     func stopWatching()
     func create(brand: Brand, amount: Decimal, assetId: String, paymentAssetId: String) async throws -> CommerceSession

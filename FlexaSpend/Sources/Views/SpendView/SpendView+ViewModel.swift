@@ -57,9 +57,8 @@ extension SpendView {
         @Injected(\.eventNotifier) var eventNotifier
         @Injected(\.exchangeRatesRepository) var exchangeRatesRepository
         @Injected(\.oneTimeKeysRepository) var oneTimeKeysRepository
-        @Injected(\.assetsRepository) var assetsRepository
-        @Injected(\.transactionFeesRepository) var transactionFeesRepository
         @Injected(\.urlRouter) var urlRouter
+        @Injected(\.accountRepository) var accountRepository
 
         @Published var activeSheet: ActiveSheet?
         @Published var paymentCompleted = false
@@ -72,6 +71,7 @@ extension SpendView {
         @Published var flexCodes: [SpendCodeView.ViewModel] = []
         @Published var isShowingModal = false
         @Published var isShowingWebView = false
+        @Published var loadingTitle = ""
 
         @Published var hideShortBalances: Bool = false {
             didSet {
@@ -173,6 +173,18 @@ extension SpendView {
             commerceSession?.requestedTransaction != nil
         }
 
+        var transactionSent: Bool {
+            state == .transactionSent || state == .commerceSessionCompleted
+        }
+
+        var isUsingAccountBalance: Bool {
+            commerceSession?.status == .requiresApproval
+        }
+
+        private var requiresApprovalOnly: Bool {
+            commerceSession?.status == .requiresApproval
+        }
+
         required init(signTransaction: ((Result<FXTransaction, Error>) -> Void)?) {
             self.signTransaction = signTransaction
 
@@ -261,21 +273,69 @@ extension SpendView.ViewModel {
         }
     }
 
-    func signAndSendLegacy(commerceSession: CommerceSession?) {
+    func sendLegacy(commerceSession: CommerceSession?) {
         legacyMode = commerceSession != nil
         if let id = commerceSession?.id {
             legacyCommerceSessionIds.append(id)
         }
         self.commerceSession = commerceSession
         state = .commerceSessionCreated
-        signAndSend()
+
+        guard let commerceSession else {
+            FlexaLogger.commerceSessionLogger.error("Missing commerce session")
+            return
+        }
+
+        guard state != .transactionSent else {
+            return
+        }
+
+        if requiresApprovalOnly {
+            approveAndSend(commerceSession)
+        } else {
+            signAndSend(commerceSession)
+        }
     }
 
-    func signAndSend() {
-        guard let commerceSession, let transaction = commerceSession.requestedTransaction else {
+    func sendNextGen() {
+        guard let commerceSession else {
+            FlexaLogger.commerceSessionLogger.error("Missing commerce session")
+            return
+        }
+
+        guard state != .transactionSent else {
+            return
+        }
+
+        if requiresApprovalOnly {
+            approveAndSend(commerceSession)
+        } else {
+            signAndSend(commerceSession)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                guard let self, self.loadingTitle.isEmpty else {
+                    return
+                }
+                setLoadingButtonTitle(L10n.Common.signing)
+            }
+        }
+    }
+
+    func approveAndSend(_ commerceSession: CommerceSession) {
+        approveTransaction(commerceSession)
+        DispatchQueue.main.async { [self] in
             paymentButtonEnabled = false
             assetSwitcherEnabled = false
-            FlexaLogger.error("Missing commerce session or transaction")
+            state = .transactionSent
+            commerceSessionRepository.setCurrent(commerceSession, isLegacy: legacyMode, wasTransactionSent: false)
+        }
+    }
+
+    private func signAndSend(_ commerceSession: CommerceSession) {
+        guard let transaction = commerceSession.requestedTransaction else {
+            paymentButtonEnabled = false
+            assetSwitcherEnabled = false
+            sendTransactionWhenAvailable = true
+            FlexaLogger.commerceSessionLogger.error("Missing commerce session or transaction")
             return
         }
 
@@ -292,6 +352,7 @@ extension SpendView.ViewModel {
         }
 
         Task {
+            FlexaLogger.commerceSessionLogger.debug("Send transaction to parent application")
             signTransaction?(
                 .success(
                     FXTransaction(
@@ -354,21 +415,28 @@ extension SpendView.ViewModel {
         asset.balance >= amount
     }
 
-    func clear() {
+    func clear(canceled: Bool = false) {
+        if canceled && (!legacyMode && !paymentCompleted || legacyMode) {
+            signTransaction?(.failure(FXError.transactionCanceledByUser))
+        }
         closeCommerceSession()
         legacyMode = false
+        showInputAmountView = false
+        sendTransactionWhenAvailable = false
         paymentCompleted = false
         showLegacyFlexcode = false
+        paymentCompleted = false
         showPaymentModal = false
         isUpdatingPaymentAsset = false
         state = .accountsLoaded
+        accountRepository.backgroundRefresh()
     }
 
-    func clearIfAuthorizationIsPending() {
+    func clearIfAuthorizationIsPending(canceled: Bool = false) {
         guard commerceSession?.authorization == nil else {
             return
         }
-        clear()
+        clear(canceled: canceled)
     }
 
     func setAccounts() {
@@ -392,6 +460,7 @@ extension SpendView.ViewModel {
 
     func startWatching() {
         exchangeRatesRepository.backgroundRefresh()
+        accountRepository.backgroundRefresh()
         Task {
             do {
                 let current = try await commerceSessionRepository.getCurrent()
@@ -417,7 +486,6 @@ extension SpendView.ViewModel {
                 }
             }
         }
-
     }
 
     func stopWatching() {
@@ -447,9 +515,46 @@ extension SpendView.ViewModel {
     func refreshFlexcodes() {
         flexCodes.forEach { $0.updateIfNeeded() }
     }
+
+    func transactionSentHandler() {
+        Task {
+            await setLoadingButtonTitle(L10n.Common.sending)
+        }
+    }
+
+    @MainActor
+    func setLoadingButtonTitle(_ title: String) {
+        self.loadingTitle = title
+    }
 }
 
 private extension SpendView.ViewModel {
+    func approveTransaction(_ commerceSession: CommerceSession) {
+        guard commerceSession.status == .requiresApproval else {
+            return
+        }
+        Task {
+            do {
+                FlexaLogger.commerceSessionLogger.debug("Approving transaction...")
+                try await commerceSessionRepository.approve(commerceSession.id)
+                accountRepository.backgroundRefresh()
+                FlexaLogger.commerceSessionLogger.debug("Transaction approved")
+            } catch let error {
+                FlexaLogger.commerceSessionLogger.error(error)
+                await MainActor.run {
+                    if legacyMode {
+                        self.transactionAmountViewModel.error = error
+                    } else {
+                        paymentButtonEnabled = true
+                        assetSwitcherEnabled = true
+                        state = .commerceSessionUpdated
+                        self.error = error
+                    }
+                }
+            }
+        }
+    }
+
     @MainActor
     func resumeCommerceSession(_ commerceSession: CommerceSession?, isLegacy: Bool, wasTransactionSent: Bool) {
 
@@ -466,6 +571,9 @@ private extension SpendView.ViewModel {
             self.legacyCommerceSessionIds.append(commerceSession.id)
         } else if commerceSession.isCompleted {
             event = .completed(commerceSession)
+        } else if wasTransactionSent {
+            loadingTitle = L10n.Common.sending
+            paymentButtonEnabled = false
         }
 
         // If the transaction was already sent, then we should display the CommerceSession's transaction
@@ -575,12 +683,8 @@ private extension SpendView.ViewModel {
                 }
             }
             commerceSessionRepository.setCurrent(commerceSession, isLegacy: false, wasTransactionSent: state == .transactionSent)
-        case .updated(let commerceSession):
-            guard !commerceSession.isClosed else {
-                commerceSessionRepository.clearCurrent()
-                return
-            }
-
+        case .requiresTransaction(let commerceSession),
+                .requiresApproval(let commerceSession):
             if state == .commerceSessionCreated {
                 state = .commerceSessionUpdated
             }
@@ -588,8 +692,8 @@ private extension SpendView.ViewModel {
             self.commerceSession = commerceSession
             showPaymentModal = true
 
-            if !paymentButtonEnabled, !isUpdatingPaymentAsset, hasTransaction, state != .transactionSent {
-                signAndSend()
+            if sendTransactionWhenAvailable, !isUpdatingPaymentAsset, hasTransaction, state != .transactionSent {
+                sendNextGen()
             }
         case .completed(let commerceSession):
             self.commerceSession = commerceSession
@@ -597,6 +701,12 @@ private extension SpendView.ViewModel {
             showPaymentModal = true
             paymentCompleted = true
             commerceSessionRepository.clearCurrent()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                self.clear()
+            }
+        case .closed:
+            commerceSessionRepository.clearCurrent()
+            clear()
         }
     }
 
@@ -614,12 +724,8 @@ private extension SpendView.ViewModel {
             }
 
             commerceSessionRepository.setCurrent(commerceSession, isLegacy: true, wasTransactionSent: true)
-        case .updated(let commerceSession):
-            guard !commerceSession.isClosed else {
-                commerceSessionRepository.clearCurrent()
-                return
-            }
-
+        case .requiresTransaction(let commerceSession),
+                .requiresApproval(let commerceSession):
             if state == .commerceSessionCreated {
                 state = .commerceSessionUpdated
             }
@@ -632,6 +738,10 @@ private extension SpendView.ViewModel {
             self.commerceSession = commerceSession
             state = .commerceSessionCompleted
             paymentCompleted = true
+        case .closed:
+            commerceSessionRepository.clearCurrent()
+            clear()
+            return
         }
 
         showLegacyFlexcodeCardIfNeeded()
@@ -642,7 +752,15 @@ private extension SpendView.ViewModel {
             return
         }
 
-        showInputAmountView = false
-        showLegacyFlexcode = true
+        transactionAmountViewModel.isPaymentDone = true
+        commerceSessionRepository.clearCurrent()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            guard let self else {
+                return
+            }
+            self.showInputAmountView = false
+            self.showLegacyFlexcode = true
+        }
     }
 }

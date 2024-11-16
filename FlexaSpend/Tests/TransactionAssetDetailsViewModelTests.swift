@@ -155,7 +155,7 @@ private struct TestAssetHelper: AssetHelperProtocol {
     }
 
     func fxAsset(_ asset: AssetWrapper) -> FXAvailableAsset? {
-        FXAvailableAsset(assetId: "SOL", symbol: "SOL", balance: Self.balance)
+        FXAvailableAsset(assetId: "SOL", symbol: "SOL", balance: Self.balance, icon: UIImage())
     }
 
     func exchangeRate(_ asset: AssetWrapper) -> FlexaCore.ExchangeRate? {

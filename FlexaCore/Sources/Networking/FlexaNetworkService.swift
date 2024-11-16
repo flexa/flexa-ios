@@ -52,6 +52,10 @@ class FlexaNetworkService: Networkable {
         var response: HTTPURLResponse?
         var error: Error?
 
+        guard resource.authHeader != nil else {
+            return signOut(resource)
+        }
+
         if let token = authStore.token, token.isExpired {
             _ = try? await authStore.refreshToken()
         }
@@ -69,6 +73,7 @@ class FlexaNetworkService: Networkable {
         }
 
         Flexa.canSpend = true
+
         guard refreshTokenOnFailure else {
             return (nil, nil, wrapError(error, resource: resource))
         }
@@ -98,19 +103,28 @@ class FlexaNetworkService: Networkable {
     }
 
     func refreshTokenAndSendRequest<T>(resource: APIResource, error: Error) async -> ResponseTuple<T> {
+        var refreshTokenError: Error?
         do {
            try await authStore.refreshToken()
         } catch let error {
+            refreshTokenError = error
             FlexaLogger.error(error)
         }
 
-        if authStore.isSignedIn {
-            return await sendRequest(resource: resource, refreshTokenOnFailure: false)
-        } else if error.isRestrictedRegion {
-            return (nil, nil, error)
-        } else {
-            return (nil, nil, NetworkError.unauthorizedError(for: resource))
+        if let refreshTokenError, refreshTokenError.isRestrictedRegion {
+            return (nil, nil, refreshTokenError)
+        } else if let refreshTokenError, refreshTokenError.isUnauthorized {
+            return signOut(resource)
+        } else if authStore.isSignedIn {
+                return await sendRequest(resource: resource, refreshTokenOnFailure: false)
         }
+        return (nil, nil, error)
+    }
+
+    private func signOut<T>(_ resource: APIResource) -> ResponseTuple<T> {
+        FlexaIdentity.disconnect()
+        eventNotifier.post(name: .flexaAuthorizationError)
+        return (nil, nil, NetworkError.unauthorizedError(for: resource))
     }
 
     private func wrapError(_ error: Error?, resource: APIResource) -> Error? {

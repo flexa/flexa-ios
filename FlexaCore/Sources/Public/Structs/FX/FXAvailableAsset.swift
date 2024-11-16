@@ -9,9 +9,6 @@ import Foundation
 import UIKit
 
 public struct FXAvailableAsset {
-    @available(*, deprecated, message: "logoImageUrl will be removed in future iterations. Use icon instead")
-    public let logoImageUrl: URL?
-
     /// An accent color for the asset to be used in Dark Mode or Light Mode (via dynamicProvider).
     public let accentColor: UIColor?
 
@@ -21,8 +18,11 @@ public struct FXAvailableAsset {
     /// A custom display name to be used when representing this asset throughout Flexa SDK. Supply the asset display name if you would like to ensure that assets are represented exactly as they appear throughout the rest of your app’s interface (for example, if you refer to the native asset of Ethereum as “Ethereum” instead of “Ether,” you should provide a custom display name of `Ethereum`).
     public let displayName: String?
 
-    /// The icon image you use to represent this asset throughout your app’s interface.
+    /// The icon image you use to represent this asset throughout your app’s interface. You can use it instead of `logoImageUrl`
     public let icon: UIImage?
+
+    /// An url pointing a png/jpeg image you use to to represent this asset throughout your app’s interface. You can use it instead of `icon`
+    public let logoImageUrl: URL?
 
     /// A custom symbol to be used when representing this asset throughout Flexa SDK. Supply the asset symbol if you offer your users the ability to customize symbols, or if you would simply like to ensure that asset balances are represented exactly as they appear throughout the rest of your app’s interface (for example, if you use the symbol “SepETH” to represent balances on Ethereum’s Sepolia testnet, you should provide a custom symbol of `SepETH`).
     public let symbol: String
@@ -35,19 +35,36 @@ public struct FXAvailableAsset {
                 symbol: String,
                 balance: Decimal,
                 balanceAvailable: Decimal? = nil,
-                icon: UIImage? = nil,
                 displayName: String? = nil,
-                logoImageUrl: URL? = nil,
+                logoImageUrl: URL,
                 accentColor: UIColor? = nil
     ) {
         self.assetId = assetId
         self.symbol = symbol
         self.balance = balance
         self.balanceAvailable = balanceAvailable
-        self.displayName = nil
-        self.icon = icon
+        self.displayName = displayName
+        self.icon = nil
         self.accentColor = accentColor
         self.logoImageUrl = logoImageUrl
+    }
+
+    public init(assetId: String,
+                symbol: String,
+                balance: Decimal,
+                balanceAvailable: Decimal? = nil,
+                icon: UIImage,
+                displayName: String? = nil,
+                accentColor: UIColor? = nil
+    ) {
+        self.assetId = assetId
+        self.symbol = symbol
+        self.balance = balance
+        self.balanceAvailable = balanceAvailable
+        self.displayName = displayName
+        self.icon = icon
+        self.accentColor = accentColor
+        self.logoImageUrl = nil
     }
 }
 

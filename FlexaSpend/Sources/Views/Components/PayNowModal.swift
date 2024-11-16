@@ -30,6 +30,9 @@ struct PayNowModal: View {
     private var merchantName = ""
     private var baseAmount: String
     private var fee: Fee?
+    private var isLoading: Bool
+    private var loadingTitle = ""
+    private var isUsingAccountBalance: Bool
     var amount: String = ""
 
     var backgroundColor: Color {
@@ -81,6 +84,9 @@ struct PayNowModal: View {
                             PayNowContentView(paymentDone: $paymentDone,
                                               payButtonEnabled: $payButtonEnabled,
                                               assetSwitcherEnabled: $assetSwitcherEnabled,
+                                              isLoading: isLoading,
+                                              loadingTitle: loadingTitle,
+                                              isUsingAccountBalance: isUsingAccountBalance,
                                               didSelect: didSelect,
                                               value: value,
                                               asset: asset,
@@ -91,20 +97,6 @@ struct PayNowModal: View {
         )
     }
 
-    var transactionDetailsView: some View {
-        NavigationView {
-            TransactionAssetDetailsView(
-                showView: $showTransactionDetails,
-                viewModel: TransactionAssetDetailsViewModel(
-                    displayMode: .transaction,
-                    asset: asset,
-                    mainAmount: value,
-                    fee: fee
-                )
-            )
-        }
-    }
-
     init(isShowing: Binding<Bool>,
          value: String,
          baseAmount: String,
@@ -113,6 +105,9 @@ struct PayNowModal: View {
          paymentDone: Binding<Bool>,
          payButtonEnabled: Binding<Bool>,
          assetSwitcherEnabled: Binding<Bool>,
+         isLoading: Bool,
+         loadingTitle: String,
+         isUsingAccountBalance: Bool,
          merchantLogoUrl: URL?,
          merchantName: String,
          fee: Fee?,
@@ -123,6 +118,9 @@ struct PayNowModal: View {
         _paymentDone = paymentDone
         _payButtonEnabled = payButtonEnabled
         _assetSwitcherEnabled = assetSwitcherEnabled
+        self.isLoading = isLoading
+        self.loadingTitle = loadingTitle
+        self.isUsingAccountBalance = isUsingAccountBalance
         self.didConfirm = didConfirm
         self.didCancel = didCancel
         self.didSelect = didSelect
@@ -137,12 +135,25 @@ struct PayNowModal: View {
     }
 
     var body: some View {
+        let viewModel = TransactionAssetDetailsViewModel(
+            displayMode: .transaction,
+            asset: asset,
+            mainAmount: value,
+            fee: fee,
+            hasAmount: true
+        )
         if #available(iOS 16.0, *) {
+            let detents: Set<PresentationDetent> = {
+                if viewModel.accountBalanceCoversFullAmount {
+                    return [.fraction(0.40)]
+                }
+                return [.fraction(viewModel.hasAccountBalance ? 0.45 : 0.35)]
+            }()
             modal
             .persistentSystemOverlays(isShowing ? .hidden : .automatic)
                 ZStack {}
                     .sheet(isPresented: $showTransactionDetails) {
-                        transactionDetailsView.presentationDetents([.fraction(0.35)])
+                        transactionDetailsView(viewModel).presentationDetents(detents)
                     }
         } else {
             modal
@@ -153,7 +164,16 @@ struct PayNowModal: View {
                                enableHeader: false,
                                backgroundColor: backgroundColor,
                                presentationMode: .sheet,
-                               contentView: transactionDetailsView)
+                               contentView: transactionDetailsView(viewModel))
+        }
+    }
+
+    func transactionDetailsView(_ viewModel: TransactionAssetDetailsViewModel) -> some View {
+        NavigationView {
+            TransactionAssetDetailsView(
+                showView: $showTransactionDetails,
+                viewModel: viewModel
+            )
         }
     }
 
@@ -169,6 +189,10 @@ struct PayNowContentView: View {
     @Binding var paymentDone: Bool
     @Binding var payButtonEnabled: Bool
     @Binding var assetSwitcherEnabled: Bool
+    var isLoading: Bool
+    var loadingTitle: String
+    var isUsingAccountBalance: Bool
+
     @State var showUpdatingBalanceAlert: Bool = false
     public var didSelect: Closure?
     var value: String
@@ -179,7 +203,7 @@ struct PayNowContentView: View {
     var didConfirm: Closure?
 
     var showUpdatingBalanceButton: Bool {
-        !payButtonEnabled && asset.isUpdatingBalance && !asset.enoughBalance(for: value.decimalValue ?? 0)
+        !payButtonEnabled && !isLoading && asset.isUpdatingBalance && !asset.enoughBalance(for: value.decimalValue ?? 0)
     }
 
     private let gradientStops: [Gradient.Stop] = [
@@ -247,14 +271,8 @@ struct PayNowContentView: View {
                         )
                         .frame(height: 20)
                         .transition(.move(edge: .bottom))
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                                self.presentationMode.wrappedValue.dismiss()
-                                UIViewController.topMostViewController?.dismiss(animated: true)
-                            }
-                        }
                     } else {
-                        WalletSelectorView(asset: asset) {
+                        WalletSelectorView(asset: asset, usingAccountBalance: isUsingAccountBalance) {
                             didSelect?()
                         }.frame(idealHeight: 44)
                             .padding(.top, 10)
@@ -264,13 +282,23 @@ struct PayNowContentView: View {
                             Button {
                                 didConfirm?()
                             } label: {
-                                Text(L10n.Payment.payNow)
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .font(.body.weight(.semibold))
-                                    .foregroundColor(payNowButtonForeground)
+                                HStack(spacing: 10) {
+                                    Spacer()
+                                    if isLoading {
+                                        ProgressView()
+                                            .tint(.white)
+                                        Text(loadingTitle)
+                                            .font(.body.weight(.semibold))
+                                            .foregroundColor(.white)
+                                    } else {
+                                        Text(L10n.Payment.payNow)
+                                            .font(.body.weight(.semibold))
+                                            .foregroundColor(payNowButtonForeground)
+                                    }
+                                    Spacer()
+                                }.padding()
+
                             }
-                            .cornerRadius(13)
                             .disabled(!payButtonEnabled)
                             .opacity(payButtonEnabled ? 1 : 0.5)
                             .frame(idealHeight: 51)

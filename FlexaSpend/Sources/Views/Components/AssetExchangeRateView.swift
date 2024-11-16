@@ -58,7 +58,12 @@ public struct AssetExchangeRateView: View {
                                 .foregroundColor(.secondary)
                         }
                         Spacer()
-                        SpendCircleImage(url, size: .circleImageSize, gradientColors: gradientColors)
+                        SpendCircleImage(
+                            url,
+                            size: .circleImageSize,
+                            gradientColors: gradientColors,
+                            placeholderColor: .clear
+                        )
                     }
                     VStack(alignment: .leading) {
                         HStack(spacing: .hStackSpacing) {

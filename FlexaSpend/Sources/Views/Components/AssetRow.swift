@@ -49,9 +49,19 @@ struct AssetRow: View {
         HStack(spacing: .hStackSpacing) {
             if enable {
                 if let logoImage {
-                    SpendCircleImage(Image(uiImage: logoImage), size: .circleImageSize, gradientColors: gradientColors)
-                } else {
-                    SpendCircleImage(logoUrl, size: .circleImageSize, gradientColors: gradientColors)
+                    SpendCircleImage(
+                        Image(uiImage: logoImage),
+                        size: .circleImageSize,
+                        gradientColors: gradientColors,
+                        placeholderColor: .clear
+                    )
+                } else if let logoUrl {
+                    SpendCircleImage(
+                        logoUrl,
+                        size: .circleImageSize,
+                        gradientColors: gradientColors,
+                        placeholderColor: .clear
+                    )
                 }
                 VStack(alignment: .leading, spacing: .vStackSpacing) {
                     Text(title)
@@ -65,7 +75,11 @@ struct AssetRow: View {
                 }
             } else {
                 HStack(spacing: .hStackSpacing) {
-                    SpendCircleImage(logoUrl, size: .circleImageSize)
+                    if let logoUrl {
+                        SpendCircleImage(logoUrl, size: .circleImageSize, placeholderColor: .clear)
+                    } else if let logoImage {
+                        SpendCircleImage(Image(uiImage: logoImage), size: .circleImageSize, placeholderColor: .clear)
+                    }
                     VStack(alignment: .leading, spacing: .vStackSpacing) {
                         Text(title)
                             .multilineTextAlignment(.leading)

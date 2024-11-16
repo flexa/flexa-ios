@@ -5,6 +5,8 @@
 "common.loading" = "Loading";
 "common.cancel" = "Cancel";
 "common.updating" = "Updating";
+"common.signing" = "Signing...";
+"common.sending" = "Sending...";
 
 // Errors
 "errors.restricted_region.message" = "Flexa is running on a restricted region and spends are disabled. Please check Flexa.canSpend";
@@ -46,6 +48,7 @@
 "payment.not_enough" = "Not enough %s for this payment";
 "payment.pay_merchant" = "Pay %s";
 "payment.using" = "Using";
+"payment.your_flexa_account.title" = "Your Flexa Account";
 "payment.balance_unavailable.title" = "Balance Not Yet Available";
 
 // Flexa Account
@@ -87,13 +90,16 @@
 "confirm_account_deletion.buttons.open_email.title" = "Open \"Mail\"";
 
 // Web Links
-"brand.links.merchant_list" = "https://flexa.network/directory";
-"brand.links.merchant_locations" = "%@/%@/locations";
+"web_links.merchant_list" = "https://flexa.network/directory";
+"web_links.merchant_locations" = "%@/%@/locations";
+"web_links.how_to_pay" = "https://flexa.co/guides/how-to-pay";
+"web_links.report_issue" = "https://flexa.co/report-an-issue";
 
 // Exchange Rate
 "payment.asset.exchange_rate.no_network_fee" = "No network fees";
 "payment.asset.exchange_rate.cannot_load_network_fee" = "Network fee cannot be loaded";
 "payment.asset.exchange_rate.network_fee" = "%s network fee";
+"payment.asset.exchange_rate.less_than_min_network_fee" = "Less than %s network fee";
 "payment.asset.exchange_rate.avaliable" = "%s avaliable";
 "payment.asset.exchange_rate.value" = "1 %s = %s";
 "payment.asset.exchange_rate.amount" = "%s %s";
@@ -119,11 +125,21 @@
 "legacy_flexcode.alerts.scan_help.title" = "Tips for Using Flexcodes at %@";
 "legacy_flexcode.amount_entry.labels.minimum_amount" = "Minimum Amount: %s";
 "legacy_flexcode.amount_entry.labels.maximum_amount" = "Maximum Amount: %s";
-"legacy_flexcode.amount_entry.buttons.enter_amount.title" = "Enter Amount";
-"legacy_flexcode.amount_entry.buttons.pay_now.title" = "Confirm";
+"legacy_flexcode.amount_entry.buttons.payment.enter_amount.title" = "Enter Amount";
+"legacy_flexcode.amount_entry.buttons.payment.confirm.title" = "Confirm";
 "legacy_flexcode.amount_entry.buttons.balance_unavailable.title" = "Balance Not Yet Available";
 "legacy_flexcode.promotions.labels.saving" = "Saving %s";
 
 // Updating balance
 "updating_balance.title" = "Balance Updating...";
-"updating_balance.text" = "Your recent transaction is still mining. You can spend up to **%s** now, or wait for your full balance to become available.";
+"updating_balance.text" = "Your recent transaction is still mining.\nYou can spend up to **%s** now, or wait for your full balance to become available.";
+
+// Account balance
+"account_balance.title" = "%s in your Flexa Account";
+"account_balance.next_payment.text" = "Applied to your next payment";
+"account_balance.current_payment.text" = "Applied to this payment";
+"account_balance.full_amount.text" = "The balance of your Flexa Account\nwill cover this payment. You don’t\nneed to send anything else.";
+"account_balance.pay_remaining.title" = "PAY REMAINING %s USING";
+
+// Asset Switcher
+"asset_switcher.using_flexa_account.title" = "Using your Flexa Account";

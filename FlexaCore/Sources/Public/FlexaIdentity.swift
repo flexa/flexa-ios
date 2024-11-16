@@ -75,6 +75,7 @@ public final class FlexaIdentity {
         Container.shared.oneTimeKeysRepository().purgeAll()
         Container.shared.accountRepository.reset()
         Container.shared.appNotificationsRepository.reset()
+        Container.shared.assetsRepository().backgroundRefresh()
     }
 
     /// Handles universal links received by the parent application

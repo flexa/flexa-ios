@@ -13,10 +13,12 @@ import Factory
 extension SpendCodeView {
     class ViewModel: Identifiable, Hashable, ObservableObject {
         @Injected(\.flexcodeGenerator) var flexcodeGenerator
+        @Injected(\.accountRepository) var accountRepository
 
         @Published var code: String = ""
         @Published var pdf417Image: UIImage = UIImage()
         @Published var code128Image: UIImage = UIImage()
+        @Published var account: Account?
 
         private var flexcodes: [FlexcodeSymbology: Flexcode] = [:]
 
@@ -29,8 +31,12 @@ extension SpendCodeView {
             asset.assetColor ?? .purple
         }
 
+        var accountBalance: Decimal {
+            account?.balance?.amount?.decimalValue ?? 0
+        }
+
         var balance: String {
-            let balance = (asset.balanceInLocalCurrency ?? 0).asCurrency
+            let balance = ((asset.balanceInLocalCurrency ?? 0) + accountBalance).asCurrency
 
             if asset.isUpdatingBalance {
                 return L10n.Payment.Balance.title(balance)
@@ -66,6 +72,7 @@ extension SpendCodeView {
             flexcodes = flexcodeGenerator.flexcodes(for: asset.oneTimekey)
             createdDate = Date()
             updateCode()
+            account = accountRepository.account
         }
 
         func hash(into hasher: inout Hasher) {
@@ -93,6 +100,27 @@ extension SpendCodeView {
             self.code = code ?? ""
             self.pdf417Image = flexcodes[.pdf417]?.image ?? UIImage()
             self.code128Image = flexcodes[.code128]?.image ?? UIImage()
+        }
+
+        func loadAccount() {
+            Task {
+                if let account = accountRepository.account {
+                    await handleAccountUpdate(account)
+                    return
+                }
+                do {
+                    let account = try await accountRepository.getAccount()
+                    await handleAccountUpdate(account)
+                } catch let error {
+                    FlexaLogger.error(error)
+                    await handleAccountUpdate(accountRepository.account)
+                }
+            }
+        }
+
+        @MainActor
+        private func handleAccountUpdate(_ account: Account?) {
+            self.account = account
         }
 
         static func == (lhs: SpendCodeView.ViewModel, rhs: SpendCodeView.ViewModel) -> Bool {
@@ -171,6 +199,9 @@ struct SpendCodeView: View {
         .frame(maxWidth: .infinity, alignment: .center)
         .padding([.bottom], 21)
         .modifier(RoundedView(color: backgroundColor, cornerRadius: cornerRadius))
+        .onAppear {
+            viewModel.loadAccount()
+        }
     }
 }
 

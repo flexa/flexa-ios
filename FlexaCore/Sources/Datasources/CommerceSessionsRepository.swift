@@ -14,6 +14,8 @@ import FlexaNetworking
 class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
     @Injected(\.flexaNetworkClient) private var networkClient
     @Injected(\.keychainHelper) private var keychain
+    @Injected(\.authStore) private var authStore
+
     private let timeoutInterval: TimeInterval = 3000
     private var onEvent: ((Result<CommerceSessionEvent, Error>) -> Void)?
     private var sseClient: SSEClientProtocol?
@@ -102,11 +104,17 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
         )
     }
 
+    func approve(_ id: String) async throws {
+        try await networkClient.sendRequest(
+            resource: CommerceSessionResource.approve(id)
+        )
+    }
+
     func watch(currentOnly: Bool, onEvent: @escaping (Result<CommerceSessionEvent, Error>) -> Void) {
         watchCurrentOnly = currentOnly
         let resource = CommerceSessionResource.watch(SSECommerceSessionEvent.allCases.map({ $0.rawValue }))
         guard var sseClient = Container.shared.sseClient((resource, timeoutInterval)) else {
-            FlexaLogger.error("Cannot create an SSEClient for \(resource)")
+            FlexaLogger.commerceSessionLogger.error("Cannot create an SSEClient for \(resource)")
             return
         }
 
@@ -117,23 +125,30 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
             sseClient.addListener(for: event.rawValue, handler: eventHandler)
         }
 
-        sseClient.onComplete = { _, shouldRetry, _ in
-            guard shouldRetry == true else {
+        sseClient.onComplete = { [weak self] status, shouldRetry, error in
+            FlexaLogger.commerceSessionLogger.debug("SSEClient.oncComplete(status: \(status), shouldRetry: \(shouldRetry), error: \(error))")
+            guard let self, shouldRetry == true else {
                 return
             }
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(self.retryInterval)) { [weak self] in
-                guard let self else {
-                    return
-                }
-                sseClient.connect(lastEventId: self.lastEventId)
+            if let error, error.isUnauthorized {
+                refreshTokenAndRetry()
+                return
             }
+
+            if status == NetworkError.unauthorizedStatusCode || status == NetworkError.forbiddenStatusCode {
+                refreshTokenAndRetry()
+                return
+            }
+
+            retryAfterInterval()
         }
 
         sseClient.connect(lastEventId: lastEventId)
     }
 
     func stopWatching() {
+        FlexaLogger.commerceSessionLogger.debug("Stop Watching events")
         SSECommerceSessionEvent.allCases.forEach { event in
             sseClient?.removeListener(for: event.rawValue)
         }
@@ -168,11 +183,10 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
 
         do {
             let event = try Models.Event<Models.CommerceSession>(data)
-
             let commerceSessionEvent = sseCommerceSessionEvent.commerceSessionEvent(event.data)
             onEvent(.success(commerceSessionEvent))
         } catch let error {
-            FlexaLogger.error(error)
+            FlexaLogger.commerceSessionLogger.error(error)
             onEvent(.failure(error))
         }
     }
@@ -184,21 +198,53 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
 
         return current.id == event.data.id
     }
+
+    private func retryAfterInterval() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(self.retryInterval)) { [weak self] in
+            guard let self else {
+                return
+            }
+            sseClient?.connect(lastEventId: self.lastEventId)
+        }
+    }
+
+    private func refreshTokenAndRetry() {
+        Task {
+            do {
+                guard let onEvent else {
+                    return
+                }
+                try await authStore.refreshToken()
+                if let request = CommerceSessionResource.watch(SSECommerceSessionEvent.allCases.map({ $0.rawValue })).request {
+                    sseClient?.connect(request: request, lastEventId: lastEventId)
+                }
+            } catch let error {
+                stopWatching()
+                FlexaLogger.error(error)
+            }
+        }
+    }
 }
 
 enum SSECommerceSessionEvent: String, CaseIterable {
     case created = "commerce_session.created"
-    case updated = "commerce_session.updated"
+    case requiresTransaction = "commerce_session.requires_transaction"
+    case requiresApproval = "commerce_session.requires_approval"
+    case closed = "commerce_session.closed"
     case completed = "commerce_session.completed"
 
     func commerceSessionEvent(_ session: CommerceSession) -> CommerceSessionEvent {
         switch self {
         case .created:
             return .created(session)
-        case .updated:
-            return .updated(session)
+        case .requiresTransaction:
+            return .requiresTransaction(session)
+        case .requiresApproval:
+            return .requiresApproval(session)
         case .completed:
             return .completed(session)
+        case .closed:
+            return .closed(session)
         }
     }
 }

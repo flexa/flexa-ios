@@ -39,7 +39,7 @@ extension Models {
 
 extension Models.Account {
     struct Balance: FlexaModelProtocol {
-        var amount, asset, label: String
+        var amount, asset, label: String?
     }
 }
 

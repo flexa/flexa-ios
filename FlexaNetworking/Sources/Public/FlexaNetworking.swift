@@ -18,9 +18,9 @@ public enum NetworkError: Error {
     case invalidStatus(status: Int, resource: APIResource, request: URLRequest?, data: Data?)
     case unknown(URLRequest?)
 
-    static let unauthorizedStatusCode = 401
-    static let notFoundStatusCode = 404
-    static let forbiddenStatusCode = 403
+    public static let unauthorizedStatusCode = 401
+    public static let notFoundStatusCode = 404
+    public static let forbiddenStatusCode = 403
 
     public var isUnauthorized: Bool {
         isStatusCode(Self.unauthorizedStatusCode)

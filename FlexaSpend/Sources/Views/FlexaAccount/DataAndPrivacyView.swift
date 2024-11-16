@@ -119,12 +119,6 @@ struct DataAndPrivacyView: View {
                 Text(viewModel.sdkVersion)
                     .foregroundStyle(.secondary)
             }
-            Button {
-
-            } label: {
-                Label(Strings.Sections.Advanced.Cells.exportDebugData, systemImage: "ladybug")
-                    .foregroundStyle(Color.purple)
-            }
         } header: {
             Text(Strings.Sections.Advanced.Header.title)
         }

@@ -39,11 +39,14 @@ extension TransactionAmountView {
 
     class ViewModel: ObservableObject {
         @Published var isLoading = false
+        @Published var loadingTitle = ""
+        @Published var isPaymentDone = false
         @Published var amountText = "$0"
         @Published var error: Error?
         @Published var commerceSessionCreated = false
         @Published var showConfirmationButtonTitle = false
         @Published var showAmountMessage = false
+        @Published var account: Account?
 
         @Published var selectedAsset: AssetWrapper? {
             didSet {
@@ -57,10 +60,12 @@ extension TransactionAmountView {
 
         @Injected(\.commerceSessionRepository) var commerceSessionRepository
         @Injected(\.assetConfig) var assetConfig
+        @Injected(\.accountRepository) var accountRepository
         private var digitsAdded = false
 
         let usdAssetId = FlexaConstants.usdAssetId
         let locale = Locale(identifier: "en-US")
+        var cancelledByUser = false
 
         var commerceSession: CommerceSession?
         var brand: Brand?
@@ -151,19 +156,23 @@ extension TransactionAmountView {
         }
 
         var payButtonTitle: String {
+            if isPaymentDone {
+                return L10n.Common.done
+            }
+
             if isLoading {
-                return ""
+                return loadingTitle
             }
 
             if !showConfirmationButtonTitle {
-                return Strings.Buttons.EnterAmount.title
+                return Strings.Buttons.Payment.EnterAmount.title
             }
 
-            if !isBalanceAvailable && !paymentButtonEnabled {
+            if !isBalanceAvailable && !paymentButtonEnabled && !accountBalanceCoversFullAmount {
                 return " "
             }
 
-            return Strings.Buttons.PayNow.title
+            return Strings.Buttons.Payment.Confirm.title
         }
 
         var hasAmount: Bool {
@@ -205,12 +214,13 @@ extension TransactionAmountView {
                     selectedAsset?.availableBalanceInLocalCurrency ?? selectedAsset?.balanceInLocalCurrency else {
                 return false
             }
-            return balance >= amount && amount >= minimumAmount
+            return balance + accountBalance >= amount - promotionDiscount && amount >= minimumAmount
         }
 
         var showNoBalanceButton: Bool {
             !isLoading &&
             !paymentButtonEnabled &&
+            !accountBalanceCoversFullAmount &&
             hasAmount &&
             !isBalanceAvailable &&
             showConfirmationButtonTitle
@@ -238,7 +248,7 @@ extension TransactionAmountView {
 
             var label = promotion.label
             if promotionApplies {
-                label = L10n.LegacyFlexcode.Promotions.Labels.saving( promotionDiscount.asCurrency)
+                label = L10n.LegacyFlexcode.Promotions.Labels.saving(promotionDiscount.asCurrency)
             }
 
             guard let url = promotion.url else {
@@ -264,20 +274,47 @@ extension TransactionAmountView {
             return brand?.promotions.applyingTo(amount: decimalAmount).first
         }
 
+        var hasAccountBalance: Bool {
+            guard let account else {
+                return false
+            }
+            return account.hasBalance
+        }
+
+        var accountBalance: Decimal {
+            account?.balance?.amount?.decimalValue ?? 0
+        }
+
+        var accountBalanceCoversFullAmount: Bool {
+            hasAmount && hasAccountBalance && accountBalance >= decimalAmount - promotionDiscount
+        }
+
+        var assetSwitcherTitle: String {
+            if hasAmount && isAmountHigherThanMin && accountBalanceCoversFullAmount {
+                return L10n.AssetSwitcher.UsingFlexaAccount.title
+            }
+            return L10n.Payment.UsingTicker.subtitle(selectedAsset?.assetSymbol ?? "")
+        }
+
         init(brand: Brand?) {
             self.brand = brand
         }
 
         func clear() {
+            cancelledByUser = false
             amountText = "$0"
             isLoading = false
             commerceSession = nil
+            loadingTitle = ""
+            isPaymentDone = false
             commerceSessionCreated = false
             showMaximumAmountMessage = false
             showMinimumAmountMessage = false
+            showConfirmationButtonTitle = false
             selectedAsset = AssetWrapper(
                 accountHash: assetConfig.selectedAssetAccountHash,
                 assetId: assetConfig.selectedAssetId)
+            account = accountRepository.account
         }
 
         func keyPressed(_ key: KeyType) {
@@ -349,7 +386,6 @@ extension TransactionAmountView {
             clear()
             self.commerceSession = commerceSession
             brand = commerceSession.brand
-            isLoading = true
             amountText = commerceSession.amount.asCurrency
         }
 
@@ -365,6 +401,46 @@ extension TransactionAmountView {
             self.commerceSessionCreated = commerceSession != nil
             self.isLoading = error == nil
             self.error = error
+
+            if isLoading {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+                    guard let self, self.loadingTitle.isEmpty else {
+                        return
+                    }
+                    setLoadingButtonTitle(L10n.Common.signing)
+                }
+            }
+        }
+
+        func transactionSent() {
+            Task {
+                await setLoadingButtonTitle(L10n.Common.sending)
+            }
+        }
+
+        @MainActor
+        func setLoadingButtonTitle(_ title: String) {
+            self.loadingTitle = title
+        }
+
+        func loadAccount() {
+            Task {
+                if let account = accountRepository.account {
+                    await handleAccountUpdate(account)
+                }
+                do {
+                    let account = try await accountRepository.getAccount()
+                    await handleAccountUpdate(account)
+                } catch let error {
+                    FlexaLogger.error(error)
+                    await handleAccountUpdate(nil)
+                }
+            }
+        }
+
+        @MainActor
+        private func handleAccountUpdate(_ account: Account?) {
+            self.account = account
         }
     }
 }

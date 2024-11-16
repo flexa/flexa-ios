@@ -27,48 +27,54 @@ public class FlexaLogger {
         }
     }
 
-    private static let oslog = OSLog(
-        subsystem: Bundle.main.bundleIdentifier ?? "Flexa",
-        category: "default"
-    )
+    public enum LoggerType {
+        case `default`, commerceSession
+    }
+
+    private static let subsystem = (Bundle.main.bundleIdentifier ?? "") + "-Flexa"
+
+    public static let commerceSessionLogger = Logger(subsystem: subsystem, category: "commerce_session")
+    public static let defaultLogger = Logger(subsystem: subsystem, category: "flexa-default")
 
     public static func log(
         _ message: Any,
         type: MessageType = .default,
-        function: String = #function,
-        file: String = #file,
-        line: Int = #line) {
-
-            os_log(
-                "[Flexa][%{public}@/%{public}@:%{public}@] %{public}@",
-                log: oslog,
-                type: type.logType,
-                (file as NSString).lastPathComponent,
-                function,
-                "\(line)",
-                String(describing: message)
-            )
+        logger: LoggerType = .default) {
+            getLogger(logger).log(level: type.logType, "\(String(describing: message))")
         }
 
-    public static func info(_ message: Any,
-                            function: String = #function,
-                            file: String = #file,
-                            line: Int = #line) {
-
-        log(message, type: .info, function: function, file: file, line: line)
+    public static func info(_ message: Any, logger: LoggerType = .default) {
+        log(message, type: .info, logger: logger)
     }
 
-    public static func debug(_ message: Any,
-                             function: String = #function,
-                             file: String = #file,
-                             line: Int = #line) {
-        log(message, type: .debug, function: function, file: file, line: line)
+    public static func debug(_ message: Any, logger: LoggerType = .default) {
+        log(message, type: .debug, logger: logger)
     }
 
-    public static func error(_ error: Any,
-                             function: String = #function,
-                             file: String = #file,
-                             line: Int = #line) {
-        log(error, type: .error, function: function, file: file, line: line)
+    public static func error(_ error: Any, logger: LoggerType = .default) {
+        log(error, type: .error, logger: logger)
+    }
+
+    private static func getLogger(_ availableLogger: LoggerType) -> Logger {
+        switch availableLogger {
+        case .commerceSession:
+            return commerceSessionLogger
+        default:
+            return defaultLogger
+        }
+    }
+}
+
+public extension Logger {
+    public func info(_ message: Any) {
+        self.log(level: .info, "\(String(describing: message))")
+    }
+
+    public func debug(_ message: Any) {
+        self.log(level: .debug, "\(String(describing: message))")
+    }
+
+    public func error(_ error: Any) {
+        self.log(level: .error, "\(String(describing: error))")
     }
 }

@@ -487,9 +487,10 @@ final class FlexaNetworkServiceTests: AsyncSpec {
 
             context("user is not logged in (token cannot refreshed)") {
                 beforeEach {
+                    let authError = NetworkError.unauthorizedError(for: resource)
                     Container.shared.authStore.register { TestAuthStore(token: .expiredToken, state: .none) }
                     subject = ObserveSendRequestNetworkService()
-                    responseTuple = await subject.refreshTokenAndSendRequest(resource: resource, error: error)
+                    responseTuple = await subject.refreshTokenAndSendRequest(resource: resource, error: authError)
                 }
 
                 it("calls AuthStore.refreshToken") {
@@ -540,6 +541,9 @@ private extension Models.Token {
 }
 
 private struct TestAPIResource: APIResource, Equatable {
+    var authHeader: String? {
+        "Basic user:password"
+    }
 }
 
 private class TestAuthStore: AuthStoreProtocol {
