@@ -16,6 +16,7 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
     @Injected(\.keychainHelper) private var keychain
     @Injected(\.authStore) private var authStore
 
+    private let notificationCenter = NotificationCenter.default
     private let timeoutInterval: TimeInterval = 3000
     private var onEvent: ((Result<CommerceSessionEvent, Error>) -> Void)?
     private var sseClient: SSEClientProtocol?
@@ -30,8 +31,26 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
         }
     }
 
+    private var watchAPIResource: FlexaAPIResource {
+        CommerceSessionResource.watch(SSECommerceSessionEvent.allCases.map({ $0.rawValue }))
+    }
+
     init() {
         current = keychain.value(forKey: .currentCommerceSession)
+
+        notificationCenter.addObserver(
+            self,
+            selector: #selector(appDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
+
+        notificationCenter.addObserver(
+            self,
+            selector: #selector(appDidEnterBackground),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
     }
 
     func create(
@@ -112,9 +131,8 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
 
     func watch(currentOnly: Bool, onEvent: @escaping (Result<CommerceSessionEvent, Error>) -> Void) {
         watchCurrentOnly = currentOnly
-        let resource = CommerceSessionResource.watch(SSECommerceSessionEvent.allCases.map({ $0.rawValue }))
-        guard var sseClient = Container.shared.sseClient((resource, timeoutInterval)) else {
-            FlexaLogger.commerceSessionLogger.error("Cannot create an SSEClient for \(resource)")
+        guard var sseClient = Container.shared.sseClient((watchAPIResource, timeoutInterval)) else {
+            FlexaLogger.commerceSessionLogger.error("Cannot create an SSEClient for \(watchAPIResource)")
             return
         }
 
@@ -126,7 +144,6 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
         }
 
         sseClient.onComplete = { [weak self] status, shouldRetry, error in
-            FlexaLogger.commerceSessionLogger.debug("SSEClient.oncComplete(status: \(status), shouldRetry: \(shouldRetry), error: \(error))")
             guard let self, shouldRetry == true else {
                 return
             }
@@ -211,11 +228,11 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
     private func refreshTokenAndRetry() {
         Task {
             do {
-                guard let onEvent else {
+                guard onEvent != nil else {
                     return
                 }
                 try await authStore.refreshToken()
-                if let request = CommerceSessionResource.watch(SSECommerceSessionEvent.allCases.map({ $0.rawValue })).request {
+                if let request = watchAPIResource.request {
                     sseClient?.connect(request: request, lastEventId: lastEventId)
                 }
             } catch let error {
@@ -223,6 +240,26 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
                 FlexaLogger.error(error)
             }
         }
+    }
+
+    @objc func appDidBecomeActive() {
+        guard let sseClient else {
+            return
+        }
+        FlexaLogger.commerceSessionLogger.debug("Resuming event watching")
+        if let request = watchAPIResource.request {
+            sseClient.connect(request: request, lastEventId: lastEventId)
+        } else {
+            sseClient.connect(lastEventId: lastEventId)
+        }
+    }
+
+    @objc func appDidEnterBackground() {
+        guard let sseClient else {
+            return
+        }
+        FlexaLogger.commerceSessionLogger.debug("Pausing event watching")
+        sseClient.disconnect()
     }
 }
 

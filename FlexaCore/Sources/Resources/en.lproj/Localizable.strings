@@ -65,6 +65,10 @@ Flexa Account";
 "auth.magic_code.alerts.signed_in.title" = "Success!";
 "auth.magic_code.alerts.signed_in.message" = "You are signed in.";
 
+// Restricted Region
+"auth.restricted_region.header.title" = "Pay with Flexa is not available in your region.";
+"auth.restricted_region.header.subtitle" = "Federal law prevents Flexa from making its services available in some regions. For more information, please contact Flexa support.";
+
 // Web View
 "webview.errors.load.title" = "Cannot load page";
 "webview.buttons.retry.title" = "Retry";

@@ -59,6 +59,7 @@ class SSEClient: NSObject, SSEClientProtocol {
     var eventsParser = SSE.Parser()
     let customHeaders = ["Accept", "Cache-Control", "Last-Event-ID"]
     let logger = Logger(subsystem: ((Bundle.main.bundleIdentifier ?? "") + "-Flexa"), category: "SSE")
+    let dispatchQueue = DispatchQueue(label: "co.flexa.sdk-SSE")
 
     required init(request: URLRequest, timeoutInterval: TimeInterval) {
         self.request = request
@@ -144,21 +145,22 @@ extension SSEClient: URLSessionDataDelegate {
         task: URLSessionTask,
         didCompleteWithError error: Error?
     ) {
+        dispatchQueue.async { [self] in
+            var shouldReconnect = false
+            var statusCode: Int?
 
-        var shouldReconnect = false
-        var statusCode: Int?
-
-        if let responseStatusCode = (task.response as? HTTPURLResponse)?.statusCode {
-            statusCode = responseStatusCode
-            if responseStatusCode == 204 || responseStatusCode == 200 && readyState == .closed {
-                // Server indicates to close the connection, or the connection was closed by the client
-                shouldReconnect = false
-            } else {
-                shouldReconnect = true
+            if let responseStatusCode = (task.response as? HTTPURLResponse)?.statusCode {
+                statusCode = responseStatusCode
+                if responseStatusCode == 204 || responseStatusCode == 200 && readyState == .closed {
+                    // Server indicates to close the connection, or the connection was closed by the client
+                    shouldReconnect = false
+                } else {
+                    shouldReconnect = true
+                }
             }
-        }
 
-        send(notification: .complete(responseStatus: statusCode, shouldReconnect: shouldReconnect, error: error))
+            send(notification: .complete(responseStatus: statusCode, shouldReconnect: shouldReconnect, error: error))
+        }
     }
 
     func urlSession(
@@ -167,9 +169,11 @@ extension SSEClient: URLSessionDataDelegate {
         didReceive response: URLResponse,
         completionHandler: @escaping (URLSession.ResponseDisposition) -> Void
     ) {
-        readyState = .open
-        send(notification: .open)
-        completionHandler(.allow)
+        dispatchQueue.async { [self] in
+            readyState = .open
+            send(notification: .open)
+            completionHandler(.allow)
+        }
     }
 
     func urlSession(
@@ -177,22 +181,24 @@ extension SSEClient: URLSessionDataDelegate {
         dataTask: URLSessionDataTask,
         didReceive data: Data
     ) {
-        guard readyState == .open else {
-            return
-        }
-
-        if let string = String(data: data, encoding: .utf8) {
-            if string.hasPrefix("data: keep-alive") {
-                logger.debug("SSE Event\n\(string, privacy: .public)")
+        dispatchQueue.async { [self] in
+            guard readyState == .open else {
+                return
             }
-            for event in listeners.keys {
-                let prefix = "event: \(event)"
-                if string.hasPrefix(prefix) {
-                    logger.debug("SSE Event\n\(prefix, privacy: .public)")
+
+            if let string = String(data: data, encoding: .utf8) {
+                if string.hasPrefix("data: keep-alive") {
+                    logger.debug("SSE Event\n\(string, privacy: .public)")
+                }
+                for event in listeners.keys {
+                    let prefix = "event: \(event)"
+                    if string.hasPrefix(prefix) {
+                        logger.debug("SSE Event\n\(prefix, privacy: .public)")
+                    }
                 }
             }
+            let events = self.eventsParser.append(data: data)
+            send(notifications: events)
         }
-        let events = eventsParser.append(data: data)
-        send(notifications: events)
     }
 }

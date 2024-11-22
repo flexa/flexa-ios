@@ -33,14 +33,15 @@ public class FlexaLogger {
 
     private static let subsystem = (Bundle.main.bundleIdentifier ?? "") + "-Flexa"
 
-    public static let commerceSessionLogger = Logger(subsystem: subsystem, category: "commerce_session")
+    public static let commerceSessionLogger = Logger(subsystem: subsystem, category: "commerce-session")
+    public static let authLogger = Logger(subsystem: subsystem, category: "flexa-auth")
     public static let defaultLogger = Logger(subsystem: subsystem, category: "flexa-default")
 
     public static func log(
         _ message: Any,
         type: MessageType = .default,
         logger: LoggerType = .default) {
-            getLogger(logger).log(level: type.logType, "\(String(describing: message))")
+            getLogger(logger).log(level: type.logType, "\(String(describing: message), privacy: .public)")
         }
 
     public static func info(_ message: Any, logger: LoggerType = .default) {
@@ -66,15 +67,15 @@ public class FlexaLogger {
 }
 
 public extension Logger {
-    public func info(_ message: Any) {
-        self.log(level: .info, "\(String(describing: message))")
+    func info(_ message: Any) {
+        self.log(level: .info, "\(String(describing: message), privacy: .public)")
     }
 
-    public func debug(_ message: Any) {
-        self.log(level: .debug, "\(String(describing: message))")
+    func debug(_ message: Any) {
+        self.log(level: .debug, "\(String(describing: message), privacy: .public)")
     }
 
-    public func error(_ error: Any) {
-        self.log(level: .error, "\(String(describing: error))")
+    func error(_ error: Any) {
+        self.log(level: .error, "\(String(describing: error), privacy: .public)")
     }
 }

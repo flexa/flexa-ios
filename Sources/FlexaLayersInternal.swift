@@ -59,6 +59,7 @@ final class FlexaInternal: Flexa {
     public func openMain() {
         guard Flexa.canSpend else {
             FlexaLogger.error("Flexa is running on a restricted region and spends are disabled. Please check Flexa.canSpend")
+            FlexaIdentity.showRestrictedRegionView()
             return
         }
         Flexa
@@ -84,6 +85,7 @@ final class FlexaInternal: Flexa {
     private func showMainOrAuth(result: ConnectResult, allowSignIn: Bool = true) {
         guard Flexa.canSpend else {
             FlexaLogger.error("Flexa is running on a restricted region and spends are disabled. Please check Flexa.canSpend")
+            FlexaIdentity.showRestrictedRegionView()
             return
         }
         DispatchQueue.main.async { [self] in

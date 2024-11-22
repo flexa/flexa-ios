@@ -46,6 +46,10 @@ struct PersonalInformationView: View {
                         footer
                     }.frame(minHeight: proxy.size.height)
                         .padding(.horizontal, 24)
+                        .contentShape(Rectangle())
+                        .onTapGesture(perform: endEditing)
+                        .simultaneousGesture(TapGesture().onEnded {
+                        })
                 }
                 alerts
             }
@@ -55,7 +59,6 @@ struct PersonalInformationView: View {
             .onChange(of: proxy.size) { size in
                 datePickerHeight = size.width - 40
             }
-            .onTapGesture(perform: endEditing)
             .onSubmit(focusNextField)
         }
         .background(.thinMaterial)
@@ -117,17 +120,19 @@ struct PersonalInformationView: View {
                         }
                         viewModel.givenName = $0
                     }))
-                    .textContentType(.name)
-                    .autocorrectionDisabled(true)
-                    .focused($focusedField, equals: .givenName)
-                    .listRowBackground(formBackgroundColor)
-                    .listRowSeparatorTint(separatorColor)
+                .textContentType(.givenName)
+                .autocorrectionDisabled(true)
+                .focused($focusedField, equals: .givenName)
+                .submitLabel(.next)
+                .listRowBackground(formBackgroundColor)
+                .listRowSeparatorTint(separatorColor)
 
                 if focusedField != nil {
                     TextField(Strings.Textfields.FamilyName.placeholder, text: $viewModel.familyName)
-                        .textContentType(.name)
+                        .textContentType(.familyName)
                         .autocorrectionDisabled(true)
                         .focused($focusedField, equals: .familyName)
+                        .submitLabel(.next)
                         .listRowBackground(formBackgroundColor)
                         .listRowSeparatorTint(separatorColor)
                 }
@@ -137,21 +142,16 @@ struct PersonalInformationView: View {
                         .listRowBackground(formBackgroundColor)
                         .listRowSeparatorTint(separatorColor)
             }
-            .onTapGesture {
-
-            }
 
             Section {
                 termsSection.listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets())
-            }.onTapGesture(perform: endEditing)
+            }
         }
         .tint(.purple)
         .animation(.default, value: focusedField)
         .scrollContentBackgroundHidden(true)
         .disableScroll()
-        .onTapGesture {
-        }
     }
 
     private var termsSection: some View {
@@ -189,23 +189,27 @@ struct PersonalInformationView: View {
 
     @ViewBuilder
     private var datePicker: some View {
-        Text(viewModel.birthDateText)
-            .sheet(isPresented: $showPicker) {
-                DatePicker(
-                    "",
-                    selection: $viewModel.dateOfBirth,
-                    in: ...Date.now,
-                    displayedComponents: .date
-                )
+        ZStack(alignment: .leading) {
+            formBackgroundColor
+            Text(viewModel.birthDateText)
+        }
+        .onTapGesture {
+            focusedField = nil
+            showPicker = true
+        }
+        .contentShape(Rectangle())
+        .sheet(isPresented: $showPicker) {
+            DatePicker(
+                "",
+                selection: $viewModel.dateOfBirth,
+                in: ...Date.now,
+                displayedComponents: .date
+            )
 
-                .datePickerStyle(.graphical)
-                .padding()
-                .pickerDetents(datePickerHeight)
-            }
-            .onTapGesture {
-                focusedField = nil
-                showPicker = true
-            }
+            .datePickerStyle(.graphical)
+            .padding()
+            .pickerDetents(datePickerHeight)
+        }
     }
 
     @ViewBuilder

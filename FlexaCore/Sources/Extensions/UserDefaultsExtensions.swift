@@ -21,6 +21,7 @@ public extension UserDefaults {
         case exchangeRates = "exchange_rates"
         case transactionFees = "transaction_fees"
         case apiHost = "flexa_api_host"
+        case hasRunBefore = "has_run_before"
     }
 
     static let flexaStore = UserDefaults(suiteName: Storage.name) ?? UserDefaults.standard

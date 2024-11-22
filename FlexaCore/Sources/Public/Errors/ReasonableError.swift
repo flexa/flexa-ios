@@ -198,15 +198,15 @@ extension ReasonableError {
 extension Error {
     public var isUnauthorized: Bool {
         if let networkError = self as? FlexaNetworking.NetworkError,
-           networkError.isUnauthorized {
-            return true
+           networkError.isUnauthorized, let apiError = networkError.apiError {
+            return apiError.isInvalidTokenError
         }
 
         if let reasonableError = self as? ReasonableError,
            let error = reasonableError.reason.error,
            let networkError = error as? FlexaNetworking.NetworkError,
-           networkError.isUnauthorized || networkError.isForbidden {
-            return true
+           networkError.isUnauthorized, let apiError = networkError.apiError {
+            return apiError.isInvalidTokenError
         }
 
         return false
@@ -224,6 +224,22 @@ extension Error {
            let apiError = networkError.apiError {
             return apiError.isRestrictedRegion
         }
+        return false
+    }
+
+    public var isExpiredToken: Bool {
+        if let networkError = self as? FlexaNetworking.NetworkError,
+           let apiError = networkError.apiError {
+            return apiError.isExpiredTokenError
+        }
+
+        if let reasonableError = self as? ReasonableError,
+           let error = reasonableError.reason.error,
+           let networkError = error as? FlexaNetworking.NetworkError,
+           let apiError = networkError.apiError {
+            return apiError.isExpiredTokenError
+        }
+
         return false
     }
 }

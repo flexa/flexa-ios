@@ -19,6 +19,20 @@ final class FlexaNetworkServiceTests: AsyncSpec {
     override class func spec() {
         let resource = TestAPIResource()
         var error = NetworkError.unknown(nil)
+        var expiredTokenError: NetworkError {
+            NetworkError.invalidStatus(
+                status: 401,
+                resource: resource,
+                request: resource.request,
+                data: try? APIErrorWrapper(
+                        error: APIError(
+                            code: "token_expired",
+                            message: nil,
+                            type: nil
+                        )
+                ).jsonData()
+            )
+        }
         let faker = Faker()
         var responseTuple: FlexaNetworkService.ResponseTuple<String> = (nil, nil, nil)
 
@@ -135,7 +149,7 @@ final class FlexaNetworkServiceTests: AsyncSpec {
                         var subject: ObserveRefreshAndRetryNetworkService!
                         beforeEach {
                             Container.shared.networkClient.register {
-                                MockNetworkService(error: error)
+                                MockNetworkService(error: expiredTokenError)
                             }
                         }
 
@@ -154,7 +168,7 @@ final class FlexaNetworkServiceTests: AsyncSpec {
                             }
 
                             it("calls refreshAndRetry(resource:error:) with the original error") {
-                                expect(subject.error as? NetworkError).to(equal(error))
+                                expect(subject.error as? NetworkError).to(equal(expiredTokenError))
                             }
                         }
 
@@ -177,7 +191,8 @@ final class FlexaNetworkServiceTests: AsyncSpec {
                             }
 
                             it("returns the original error") {
-                                expect(responseTuple.2 as? NetworkError).to(equal(error))
+                                let error = (responseTuple.2 as? ReasonableError)?.reason.error as? NetworkError
+                                expect(error).to(equal(expiredTokenError))
                             }
                         }
                     }
@@ -188,7 +203,7 @@ final class FlexaNetworkServiceTests: AsyncSpec {
                         var subject: ObserveRefreshAndRetryNetworkService!
                         beforeEach {
                             Container.shared.networkClient.register {
-                                MockNetworkService(error: error)
+                                MockNetworkService(error: expiredTokenError)
                             }
                         }
 
@@ -207,7 +222,7 @@ final class FlexaNetworkServiceTests: AsyncSpec {
                             }
 
                             it("calls refreshAndRetry(resource:error:) with the original error") {
-                                expect(subject.error as? NetworkError).to(equal(error))
+                                expect(subject.error as? NetworkError).to(equal(expiredTokenError))
                             }
                         }
 
@@ -230,7 +245,8 @@ final class FlexaNetworkServiceTests: AsyncSpec {
                             }
 
                             it("returns the original error") {
-                                expect(responseTuple.2 as? NetworkError).to(equal(error))
+                                let error = (responseTuple.2 as? ReasonableError)?.reason.error as? NetworkError
+                                expect(error).to(equal(expiredTokenError))
                             }
                         }
                     }
@@ -278,7 +294,7 @@ final class FlexaNetworkServiceTests: AsyncSpec {
                     var subject: ObserveRefreshAndRetryNetworkService!
                     beforeEach {
                         Container.shared.networkClient.register {
-                            MockNetworkService(error: error)
+                            MockNetworkService(error: expiredTokenError)
                         }
                     }
 
@@ -297,7 +313,7 @@ final class FlexaNetworkServiceTests: AsyncSpec {
                         }
 
                         it("calls refreshAndRetry(resource:error:) with the original error") {
-                            expect(subject.error as? NetworkError).to(equal(error))
+                            expect(subject.error as? NetworkError).to(equal(expiredTokenError))
                         }
                     }
 
@@ -320,7 +336,8 @@ final class FlexaNetworkServiceTests: AsyncSpec {
                         }
 
                         it("returns the original error") {
-                            expect(responseTuple.2 as? NetworkError).to(equal(error))
+                            let error = (responseTuple.2 as? ReasonableError)?.reason.error as? NetworkError
+                            expect(error).to(equal(expiredTokenError))
                         }
                     }
                 }
@@ -556,6 +573,13 @@ private class TestAuthStore: AuthStoreProtocol {
         state == .loggedIn
     }
 
+    var isAuthenticated: Bool {
+        guard let token, isSignedIn, token.isActive, !token.isExpired else {
+            return false
+        }
+        return true
+    }
+
     init(token: Models.Token? = .nonExpiredToken, state: AuthStoreState = .loggedIn) {
         self.token = token
         self.state = state
@@ -620,14 +644,18 @@ private class ObserveSendRequestNetworkService: FlexaNetworkService {
     var sendRequestCalled: Bool?
     var resource: APIResource?
     var refreshTokenOnFailure: Bool?
+    var retryOnInvalidtoken: Bool?
 
-    override func sendRequest<T>(resource: APIResource,
-                                 refreshTokenOnFailure: Bool
-    ) async -> FlexaNetworkService.ResponseTuple<T> where T: Decodable {
+    override func sendRequest<T>(
+        resource: APIResource,
+        retryOnInvalidtoken: Bool,
+        refreshTokenOnFailure: Bool
+    )  async -> FlexaNetworkService.ResponseTuple<T> where T: Decodable {
 
         self.sendRequestCalled = true
         self.resource = resource
         self.refreshTokenOnFailure = refreshTokenOnFailure
+        self.retryOnInvalidtoken = retryOnInvalidtoken
         return (nil, nil, nil)
     }
 }

@@ -77,7 +77,6 @@ class AssetsRepository: AssetsRepositoryProtocol {
         Task {
             do {
                 let assets = try await refresh()
-                imageLoader.loadImages(fromUrls: assets.compactMap { $0.iconUrl })
             } catch let error {
                 FlexaLogger.error(error)
             }

@@ -42,6 +42,7 @@ public final class FlexaSpend {
     public func open() {
         guard Flexa.canSpend else {
             FlexaLogger.error(L10n.Errors.RestrictedRegion.message)
+            FlexaIdentity.showRestrictedRegionView()
             return
         }
         auth.collect { result in
@@ -86,8 +87,8 @@ public final class FlexaSpend {
             )
     }
 
-    public static func onTransactionFailed(commerceSessionId: String) {
-        FlexaLogger.commerceSessionLogger.debug("Flexa.onTransactionFailed(cs: \(commerceSessionId))")
+    public static func transactionFailed(commerceSessionId: String) {
+        FlexaLogger.commerceSessionLogger.debug("Flexa.transactionFailed(cs: \(commerceSessionId))")
         Container
             .shared
             .appStateManager()
@@ -202,8 +203,8 @@ public extension Flexa {
         FlexaSpend.transactionSent(commerceSessionId: commerceSessionId, signature: signature)
     }
 
-    static func onTransactionFailed(commerceSessionId: String) {
-        FlexaSpend.onTransactionFailed(commerceSessionId: commerceSessionId)
+    static func transactionFailed(commerceSessionId: String) {
+        FlexaSpend.transactionFailed(commerceSessionId: commerceSessionId)
     }
 }
 

@@ -240,8 +240,8 @@ func onTransactionRequest(result: Result<FXTransaction, Error>) {
             let signature = try ...
             Flexa.transactionSent(commerceSessionId: transaction.commerceSessionId, signature: signature)
         } catch let error {
-            // An error happened while singning/sending the transaction. Calling Flexa.onTransactionFailed instructs the SDK to cancel the ongoing commerce session.
-            Flexa.onTransactonFailed(commerceSessionId: transaction.commerceSessionId)
+            // An error happened while singning/sending the transaction. Calling Flexa.transactionFailed instructs the SDK to cancel the ongoing commerce session.
+            Flexa.transactionFailed(commerceSessionId: transaction.commerceSessionId)
         }
     default:
         break

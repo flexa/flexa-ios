@@ -40,6 +40,10 @@ public final class FlexaIdentity {
             .onLoginResult(onResultCallback)
     }
 
+    public static func showRestrictedRegionView() {
+        UIViewController.showViewOnTop(RestrictedRegionView(), showGrabber: true)
+    }
+
     /// Queries the login state into Flexa network.
     /// - parameter completion: The block that will handle the result of the query
     ///

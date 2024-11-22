@@ -18,4 +18,12 @@ struct APIError: FlexaModelProtocol {
     var isRestrictedRegion: Bool {
         code == "region_not_supported"
     }
+
+    var isInvalidTokenError: Bool {
+        code == "token_invalid"
+    }
+
+    var isExpiredTokenError: Bool {
+        code == "token_expired"
+    }
 }

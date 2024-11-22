@@ -26,14 +26,15 @@ public extension UIViewController {
         return rootViewController.topPresentedViewController()
     }
 
-    class func showViewOnTop<T: View>(_ view: T) {
+    class func showViewOnTop<T: View>(_ view: T, showGrabber: Bool = false) {
         let uiHostingController = UIHostingController(rootView: view)
         uiHostingController.view.backgroundColor = .clear
-        showOnTop(uiHostingController)
+        showOnTop(uiHostingController, showGrabber: showGrabber)
     }
 
-    class func showOnTop(_ viewController: UIViewController) {
+    class func showOnTop(_ viewController: UIViewController, showGrabber: Bool = false) {
         viewController.sheetPresentationController?.preferredCornerRadius = 30
+        viewController.sheetPresentationController?.prefersGrabberVisible = showGrabber
         topMostViewController?
             .topPresentedViewController()
             .present(viewController, animated: true)

@@ -138,6 +138,14 @@ internal enum CoreStrings {
         }
       }
     }
+    internal enum RestrictedRegion {
+      internal enum Header {
+        /// Federal law prevents Flexa from making its services available in some regions. For more information, please contact Flexa support.
+        internal static let subtitle = CoreStrings.tr("Localizable", "auth.restricted_region.header.subtitle", fallback: "Federal law prevents Flexa from making its services available in some regions. For more information, please contact Flexa support.")
+        /// Pay with Flexa is not available in your region.
+        internal static let title = CoreStrings.tr("Localizable", "auth.restricted_region.header.title", fallback: "Pay with Flexa is not available in your region.")
+      }
+    }
     internal enum VerifyEmail {
       internal enum Buttons {
         internal enum OpenEmail {

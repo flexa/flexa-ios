@@ -49,7 +49,6 @@ struct AuthMainView: View {
                 }
             }.background(.thinMaterial)
                 .tint(nil)
-                .dragIndicator(true)
                 .ignoresSafeArea(.all, edges: .top)
         }
         .navigationViewStyle(.stack)

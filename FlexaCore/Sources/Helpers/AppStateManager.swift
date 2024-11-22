@@ -21,6 +21,7 @@ class AppStateManager: AppStateManagerProtocol {
     @Injected(\.authStore) var authStore
     @Injected(\.eventNotifier) var eventNotifier
     @Injected(\.flexaClient) var flexaClient
+    @Injected(\.userDefaults) var userDefaults
 
     private let notificationCenter = NotificationCenter.default
     private let queue = DispatchQueue(label: "refreshTokenQueue")
@@ -29,6 +30,8 @@ class AppStateManager: AppStateManagerProtocol {
     private var timer: DispatchSourceTimer?
     // Use a cache with expiring entries here
     private var unsignedTransactions: [String: String] = [:]
+    @Synchronized private var backgroundRefreshAsyncTask: Task<Void, Never>?
+    @Synchronized private var isRefreshing = false
 
     init() {
         notificationCenter.addObserver(
@@ -60,26 +63,18 @@ class AppStateManager: AppStateManagerProtocol {
 
     func backgroundRefresh() {
         Task {
-            await refreshAccessToken(force: true)
-            guard authStore.isSignedIn else {
-                return
-            }
-
-            accountsRepository.backgroundRefresh()
-            assetsRepository.backgroundRefresh()
-            brandsRepository.backgroundRefresh()
-
-            if !flexaClient.assetAccounts.isEmpty {
-                oneTimeKeysRepository.backgroundRefresh()
-                exchangeRateRepository.backgroundRefresh()
+            if !isRefreshing {
+                isRefreshing = true
+                await backgroundRefreshTask()
+                backgroundRefreshAsyncTask = nil
+                isRefreshing = false
             }
         }
-
         startTimer()
     }
 
     func refresh() async {
-        guard authStore.isSignedIn else {
+        guard authStore.isAuthenticated else {
             return
         }
         do {
@@ -129,6 +124,27 @@ class AppStateManager: AppStateManagerProtocol {
             }
         }
     }
+
+    func refreshAccessToken(force: Bool = false) async {
+        if shouldRefreshAccessToken || force {
+            do {
+                try await authStore.refreshToken()
+            } catch let error {
+                if error.isUnauthorized || error.isRestrictedRegion {
+                    eventNotifier.post(name: .flexaAuthorizationError)
+                    FlexaIdentity.disconnect()
+                }
+                FlexaLogger.error(error)
+            }
+        }
+    }
+
+    func purgeIfNeeded() {
+        if !userDefaults.bool(forKey: UserDefaults.Key.hasRunBefore.rawValue) {
+            FlexaIdentity.disconnect()
+            userDefaults.setValue(true, forKey: .hasRunBefore)
+        }
+    }
 }
 
 private extension AppStateManager {
@@ -169,17 +185,26 @@ private extension AppStateManager {
         timer = nil
     }
 
-    func refreshAccessToken(force: Bool = false) async {
-        if shouldRefreshAccessToken || force {
-            do {
-                try await authStore.refreshToken()
-            } catch let error {
-                if error.isUnauthorized || error.isRestrictedRegion {
-                    eventNotifier.post(name: .flexaAuthorizationError)
-                    FlexaIdentity.disconnect()
-                }
-                FlexaLogger.error(error)
+    func backgroundRefreshTask() async {
+        backgroundRefreshAsyncTask = Task.detached { [weak self] in
+            guard let self else {
+                return
+            }
+
+            await refreshAccessToken()
+            guard authStore.isAuthenticated else {
+                return
+            }
+
+            accountsRepository.backgroundRefresh()
+            assetsRepository.backgroundRefresh()
+            brandsRepository.backgroundRefresh()
+
+            if !flexaClient.assetAccounts.isEmpty {
+                oneTimeKeysRepository.backgroundRefresh()
+                exchangeRateRepository.backgroundRefresh()
             }
         }
+        await backgroundRefreshAsyncTask?.value
     }
 }

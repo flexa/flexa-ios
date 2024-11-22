@@ -21,6 +21,7 @@ protocol AuthStoreProtocol {
     var token: Models.Token? { get }
     var state: AuthStoreState { get }
     var isSignedIn: Bool { get }
+    var isAuthenticated: Bool { get }
 
     func signIn(with email: String) async throws -> AuthStoreState
     func verify(code: String?, link: String?) async throws -> AuthStoreState
@@ -44,8 +45,14 @@ final class AuthStore: AuthStoreProtocol {
     @Injected(\.tokensRepository) private var tokensRepository
     @Injected(\.pkceHelper) private var pkceHelper
 
-    private(set) var state: AuthStoreState = .none
     @Synchronized private var refreshTokenAsyncTask: Task<AuthStoreState, Error>?
+    @Synchronized private var refreshingToken = false
+    @Synchronized private var tokenData: TokenData!
+
+    private(set) var state: AuthStoreState = .none
+    private let logger = FlexaLogger.authLogger
+    private let serialQueue = DispatchQueue(label: "co.flexa.sdk-refreshTokenQueue")
+    private let refreshSemaphore = DispatchSemaphore(value: 1)
 
     var isSignedIn: Bool {
         switch state {
@@ -56,6 +63,13 @@ final class AuthStore: AuthStoreProtocol {
         }
     }
 
+    var isAuthenticated: Bool {
+        guard let token, isSignedIn, token.isActive, !token.isExpired else {
+            return false
+        }
+        return true
+    }
+
     var token: Models.Token? {
         tokenData.token
     }
@@ -63,8 +77,6 @@ final class AuthStore: AuthStoreProtocol {
     var email: String? {
         tokenData.email
     }
-
-    @Synchronized private var tokenData: TokenData!
 
     init() {
         tokenData = keychainHelper.value(forKey: .authToken) ?? TokenData()
@@ -110,13 +122,16 @@ final class AuthStore: AuthStoreProtocol {
     }
 
     func refreshToken() async throws -> AuthStoreState {
-        if refreshTokenAsyncTask == nil {
+        if !refreshingToken {
+            refreshingToken = true
             do {
                 let result = try await refreshTokenTask()
                 refreshTokenAsyncTask = nil
+                refreshingToken = false
                 return result ?? self.state
             } catch let error {
                 refreshTokenAsyncTask = nil
+                refreshingToken = false
                 throw error
             }
         }
@@ -137,7 +152,7 @@ final class AuthStore: AuthStoreProtocol {
                 do {
                     try await tokensRepository.delete(tokenId: tokenId)
                 } catch let error {
-                    FlexaLogger.error(error)
+                    logger.error(error)
                 }
             }
 
@@ -161,21 +176,33 @@ final class AuthStore: AuthStoreProtocol {
                 return state
             }
 
-            let verifier = try pkceHelper.generateVerifier()
-            let challenge = try pkceHelper.generateChallenge(for: verifier)
+            return try await withCheckedThrowingContinuation { continuation in
+                serialQueue.async {
+                    self.refreshSemaphore.wait()
+                    Task {
+                        do {
+                            let verifier = try self.pkceHelper.generateVerifier()
+                            let challenge = try self.pkceHelper.generateChallenge(for: verifier)
 
-            var tokenData = self.tokenData ?? TokenData()
-            tokenData.token = try await tokensRepository.refresh(
-                tokenId: tokenData.token?.id ?? "",
-                verifier: tokenData.verifier,
-                challenge: challenge
-            )
-            tokenData.verifier = verifier
+                            var tokenData = self.tokenData ?? TokenData()
+                            tokenData.token = try await self.tokensRepository.refresh(
+                                tokenId: tokenData.token?.id ?? "",
+                                verifier: tokenData.verifier,
+                                challenge: challenge
+                            )
+                            tokenData.verifier = verifier
 
-            self.tokenData = tokenData
-            saveTokenData()
-            state = .loggedIn
-            return state
+                            self.tokenData = tokenData
+                            self.saveTokenData()
+                            self.state = .loggedIn
+                            continuation.resume(returning: self.state)
+                        } catch let error {
+                            continuation.resume(throwing: error)
+                        }
+                        self.refreshSemaphore.signal()
+                    }
+                }
+            }
         }
         return try await refreshTokenAsyncTask?.value
     }

@@ -34,6 +34,11 @@ class OneTimeKeysRepository: OneTimeKeysRepositoryProtocol {
         }
     }
 
+    private var shouldSync: Bool {
+        let clientAssets = assetsRepository.availableClientAssets
+        return clientAssets.contains { find(by: $0.id, orLivemode: $0.livemode) == nil }
+    }
+
     init() {
         let savedKeys: [Models.OneTimeKey] = keychainHelper.value(forKey: .oneTimeKeys) ?? []
         storedKeys = savedKeys.reduce(into: [String: Models.OneTimeKey]()) { $0[$1.id] = $1 }
@@ -42,14 +47,18 @@ class OneTimeKeysRepository: OneTimeKeysRepositoryProtocol {
 
     @discardableResult
     func refresh() async throws -> [String: OneTimeKey] {
+        guard shouldSync else {
+            return storedKeys
+        }
+
         var output: PaginatedOutput<Models.OneTimeKey>?
         var response: HTTPURLResponse?
         var error: Error?
-        let asssets = assetsRepository.availableClientAssets.map { $0.id }
+        let assets = assetsRepository.availableClientAssets.map { $0.id }
 
         (output, response, error) = await networkClient.sendRequest(
             resource: OneTimeKeysResource.sync(
-                SyncOneTimeKeysInput(assets: asssets)
+                SyncOneTimeKeysInput(assets: assets)
             )
         )
 
