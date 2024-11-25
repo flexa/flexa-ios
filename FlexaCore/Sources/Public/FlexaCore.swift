@@ -25,7 +25,7 @@ open class Flexa {
     @Injected(\.eventNotifier) private static var eventNotifier
     private static var isInitialized = false
 
-    @Synchronized public static internal(set) var canSpend = false {
+    @Synchronized public static internal(set) var canSpend = true {
         didSet {
             if !canSpend {
                 eventNotifier.post(name: .flexaAuthorizationError)

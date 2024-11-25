@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FlexaUICore"
-  s.version      = "1.0.7"
+  s.version      = "1.0.8"
   s.summary      = "Spend UI"
   s.description  = "Spend UI module by Flexa"
   s.homepage     = "https://github.com/flexa/flexa-ios"
