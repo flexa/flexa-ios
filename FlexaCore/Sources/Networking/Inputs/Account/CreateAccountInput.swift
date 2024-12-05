@@ -29,8 +29,8 @@ struct CreateAccountInput: FlexaModelProtocol {
          dateOfBirth: Date,
          countryCode: String) {
         self.email = email
-        self.givenName = givenName
-        self.familyName = familyName
+        self.givenName = givenName.trims()
+        self.familyName = familyName.trims()
         self.dateOfBirth = dateOfBirth.apiFormatted
         self.countryCode = countryCode
     }

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FlexaCore"
-  s.version      = "1.0.8"
+  s.version      = "1.0.9"
   s.summary      = "Flexa Core"
   s.description  = "Flexa Core module by Flexa"
   s.homepage     = "https://github.com/flexa/flexa-ios"
@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/flexa/flexa-ios", :tag => s.version }
   s.source_files = 'FlexaCore/Sources/**/*.{swift}'
 
-  s.dependency 'Factory', '~> 2.3.0'
+  s.dependency 'Factory', '~> 2.4.3'
   s.dependency 'DeviceKit', '~> 5.0.0'
   s.dependency 'KeychainAccess', '~> 4.2.2'
   s.dependency 'SwiftUIIntrospect', "~> 0.12.0"

@@ -34,7 +34,7 @@ extension PersonalInformationView {
         }
 
         var fullName: String {
-            "\(givenName) \(familyName)".trimmingCharacters(in: .whitespacesAndNewlines)
+            "\(givenName) \(familyName)".trims()
         }
 
         var birthDateText: String {
@@ -75,8 +75,8 @@ extension PersonalInformationView {
                 do {
                     try await accountRepository.create(
                         email: emailAddress,
-                        givenName: givenName,
-                        familyName: familyName,
+                        givenName: givenName.trims(),
+                        familyName: familyName.trims(),
                         dateOfBirth: dateOfBirth,
                         countryCode: countryCode
                     )

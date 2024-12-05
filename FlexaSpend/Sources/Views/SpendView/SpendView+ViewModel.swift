@@ -475,6 +475,7 @@ extension SpendView.ViewModel {
             }
 
             eventNotifier.addObserver(self, selector: #selector(handleAccountsDidUpdate), name: .oneTimeKeysDidUpdate)
+            eventNotifier.addObserver(self, selector: #selector(handleAccountsDidUpdate), name: .assetAccountsDidChange)
             commerceSessionRepository.watch(currentOnly: true) { [weak self] result in
                 DispatchQueue.main.async { [weak self] in
                     switch result {
@@ -617,11 +618,16 @@ private extension SpendView.ViewModel {
     }
 
     func updateCommerceSessionAsset() {
-        guard let id = commerceSession?.id,
-              let assetId = selectedAsset?.assetId,
-              let paymentAssetId = commerceSession?.preferences.paymentAsset,
+        guard let commerceSession else {
+            return
+        }
+
+        let paymentAssetId = commerceSession.preferences.paymentAsset
+
+        guard let assetId = selectedAsset?.assetId,
               assetId != paymentAssetId,
               paymentButtonEnabled,
+              !commerceSession.requiresApproval,
               !legacyMode else {
             return
         }
@@ -631,7 +637,10 @@ private extension SpendView.ViewModel {
 
         Task {
             do {
-                try await commerceSessionRepository.setPaymentAsset(commerceSessionId: id, assetId: assetId)
+                try await commerceSessionRepository.setPaymentAsset(
+                    commerceSessionId: commerceSession.id,
+                    assetId: assetId
+                )
                 await MainActor.run {
                     isUpdatingPaymentAsset = false
                     paymentButtonEnabled = true

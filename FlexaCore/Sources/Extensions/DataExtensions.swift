@@ -14,6 +14,6 @@ extension Data {
             .replacingOccurrences(of: "=", with: "")
             .replacingOccurrences(of: "+", with: "-")
             .replacingOccurrences(of: "/", with: "_")
-            .trimmingCharacters(in: .whitespaces)
+            .trims()
     }
 }

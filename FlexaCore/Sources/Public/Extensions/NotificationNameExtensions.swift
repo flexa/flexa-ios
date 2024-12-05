@@ -15,6 +15,8 @@ public extension Notification.Name {
         .nameWithPrefix("oneTimeKeysDidUpdate")
     static let transactionSent: Notification.Name =
         .nameWithPrefix("transactionSent")
+    static let assetAccountsDidChange: Notification.Name =
+        .nameWithPrefix("assetAccountsDidChange")
 
     private static func nameWithPrefix(_ name: String) -> Notification.Name {
         .init(rawValue: "\(prefix).\(name)")

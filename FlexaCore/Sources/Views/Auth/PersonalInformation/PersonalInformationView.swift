@@ -21,12 +21,12 @@ struct PersonalInformationView: View {
     @StateObject var viewModel: ViewModel
     @FocusState var focusedField: FocusableField?
     @State var showPicker: Bool = false
-    @State var datePickerHeight: CGFloat = 0
     @State var showingPrivacyAlert: Bool = false
 
+    let datePickerHeight = UIScreen.main.bounds.width - 40
     let formBackgroundColor = Color(
         lightColor: UIColor(hex: "#dfdfdf"),
-        darkColor: UIColor.secondaryLabel.withAlphaComponent(0.2)
+        darkColor: UIColor(hex: "#3A3A3A")
     )
 
     let separatorColor = Color(
@@ -44,20 +44,13 @@ struct PersonalInformationView: View {
                             .offset(y: -24)
                         Spacer()
                         footer
+
                     }.frame(minHeight: proxy.size.height)
                         .padding(.horizontal, 24)
                         .contentShape(Rectangle())
                         .onTapGesture(perform: endEditing)
-                        .simultaneousGesture(TapGesture().onEnded {
-                        })
                 }
                 alerts
-            }
-            .onAppear {
-                datePickerHeight = proxy.size.width - 40
-            }
-            .onChange(of: proxy.size) { size in
-                datePickerHeight = size.width - 40
             }
             .onSubmit(focusNextField)
         }
@@ -78,6 +71,18 @@ struct PersonalInformationView: View {
                     }
                 }.offset(x: -8)
             }
+        }
+        .sheet(isPresented: $showPicker) {
+            DatePicker(
+                "",
+                selection: $viewModel.dateOfBirth,
+                in: ...Date.now,
+                displayedComponents: .date
+            )
+
+            .datePickerStyle(.graphical)
+            .padding()
+            .pickerDetents(datePickerHeight)
         }
         NavigationLink(
             destination: VerifyEmailView(
@@ -113,12 +118,11 @@ struct PersonalInformationView: View {
                 TextField(givenNamePlaceholder, text: .init(
                     get: {
                         focusedField == nil ? viewModel.fullName : viewModel.givenName
-
                     }, set: {
                         guard focusedField == .givenName else {
                             return
                         }
-                        viewModel.givenName = $0
+                        viewModel.givenName = $0.trims()
                     }))
                 .textContentType(.givenName)
                 .autocorrectionDisabled(true)
@@ -137,21 +141,24 @@ struct PersonalInformationView: View {
                         .listRowSeparatorTint(separatorColor)
                 }
 
-                    datePicker
-                        .foregroundStyle(viewModel.birthDateForegroundColor)
-                        .listRowBackground(formBackgroundColor)
-                        .listRowSeparatorTint(separatorColor)
+                datePicker
+                    .foregroundStyle(viewModel.birthDateForegroundColor)
+                    .listRowBackground(formBackgroundColor)
+                    .listRowSeparatorTint(separatorColor)
             }
 
             Section {
                 termsSection.listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets())
+                    .onTapGesture(perform: endEditing)
             }
         }
         .tint(.purple)
         .animation(.default, value: focusedField)
         .scrollContentBackgroundHidden(true)
         .disableScroll()
+        .simultaneousGesture(TapGesture().onEnded {
+        })
     }
 
     private var termsSection: some View {
@@ -193,23 +200,11 @@ struct PersonalInformationView: View {
             formBackgroundColor
             Text(viewModel.birthDateText)
         }
-        .onTapGesture {
+        .highPriorityGesture(TapGesture().onEnded {
             focusedField = nil
             showPicker = true
-        }
+        })
         .contentShape(Rectangle())
-        .sheet(isPresented: $showPicker) {
-            DatePicker(
-                "",
-                selection: $viewModel.dateOfBirth,
-                in: ...Date.now,
-                displayedComponents: .date
-            )
-
-            .datePickerStyle(.graphical)
-            .padding()
-            .pickerDetents(datePickerHeight)
-        }
     }
 
     @ViewBuilder

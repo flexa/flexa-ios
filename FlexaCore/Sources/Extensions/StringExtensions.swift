@@ -95,6 +95,10 @@ public extension String {
         }
         return String(self.dropFirst(prefix.count))
     }
+
+    func trims() -> String {
+        return trimmingCharacters(in: .whitespaces)
+    }
 }
 
 extension StringProtocol {

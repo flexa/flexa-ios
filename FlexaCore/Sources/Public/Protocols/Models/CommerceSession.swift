@@ -60,4 +60,12 @@ public extension CommerceSession {
     var isCompleted: Bool {
         status == .completed
     }
+
+    var requiresApproval: Bool {
+        status == .requiresApproval
+    }
+
+    var requiresTransaction: Bool {
+        status == .requiresTransaction
+    }
 }

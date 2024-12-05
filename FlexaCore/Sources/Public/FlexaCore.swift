@@ -57,6 +57,7 @@ open class Flexa {
     /// - parameter assetAccounts: A set of assets and their respective balances for each of the wallet accounts from which your user can sign transactions using your app
     public static func updateAssetAccounts(_ assetAccounts: [FXAssetAccount]) {
         flexaClient.assetAccounts = assetAccounts
+        eventNotifier.post(name: .assetAccountsDidChange)
         if authStore.isAuthenticated {
             oneTimeKeysRepository.backgroundRefresh()
         } else {

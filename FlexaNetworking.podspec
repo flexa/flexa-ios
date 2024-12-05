@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FlexaNetworking"
-  s.version      = "1.0.8"
+  s.version      = "1.0.9"
   s.summary      = "Spend Networking"
   s.description  = "Spend Networking module by Flexa"
   s.homepage     = "https://github.com/flexa/flexa-ios"
@@ -15,5 +15,5 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/flexa/flexa-ios", :tag => s.version }
   s.source_files = 'FlexaNetworking/Sources/**/*.{swift}'
 
-  s.dependency 'Factory', '~> 2.3.0'
+  s.dependency 'Factory', '~> 2.4.3'
 end
