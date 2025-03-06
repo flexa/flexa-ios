@@ -9,7 +9,7 @@
 import Foundation
 
 public protocol EventNotifierProtocol {
-    func post(name: Notification.Name, object: Any?)
+    func post(name: Notification.Name, userInfo: [AnyHashable: Any])
     func addObserver(
         _ observer: Any,
         selector: Selector,
@@ -20,6 +20,6 @@ public protocol EventNotifierProtocol {
 
 public extension EventNotifierProtocol {
     func post(name: Notification.Name) {
-        post(name: name, object: nil)
+        post(name: name, userInfo: [:])
     }
 }

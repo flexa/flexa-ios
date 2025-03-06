@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-enum TabBarItem: Hashable {
+enum TabBarItem: Int {
     case scan, load, spend
 
     var title: String {

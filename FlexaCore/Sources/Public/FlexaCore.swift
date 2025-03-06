@@ -7,6 +7,7 @@
 //
 
 import Factory
+import UIKit
 
 /// The entry point of Flexa SDK.
 ///
@@ -79,6 +80,23 @@ open class Flexa {
     /// - parameter theme: A theme description used for customizing the Flexa user interface to integrate harmoniously with the rest of your app.
     public static func updateTheme(_ theme: FXTheme) {
         Self.flexaClient.theme = theme
+    }
+
+    /// Dismisses the SDK.
+    ///
+    ///  - parameter closeCommerceSessions: Indicates to the SDK if the ongoing Commerce Sessions should be closed alongside the screens. If it's `false` and there was an ongoing Commerce Session, the next time the user opens the SDK it will try to resume the Commerce Session.
+    ///  - parameter callback: A callback to be invoked once the SDK is dismissed.
+    public static func close(_ closeCommerceSessions: Bool = true, callback: (() -> Void)? = nil) {
+        DispatchQueue.main.async {
+            appStateManager.closeCommerceSessionOnDismissal = closeCommerceSessions
+            UIApplication
+                .shared
+                .connectedScenes
+                .compactMap { ($0 as? UIWindowScene)?.keyWindow }
+                .last?.rootViewController?.dismiss(animated: true) {
+                    callback?()
+                }
+        }
     }
 
     public init() {

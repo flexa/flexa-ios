@@ -43,7 +43,6 @@ extension MerchantSorter {
         func unpinBrand(_ brand: Brand) {
             pinnedBrands.removeAll { $0.id == brand.id }
             brandsRepository.unpinBrand(brand)
-
         }
 
         func togglePinState(brand: Brand, pinned: Bool) {

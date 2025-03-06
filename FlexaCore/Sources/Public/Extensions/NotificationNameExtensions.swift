@@ -17,6 +17,14 @@ public extension Notification.Name {
         .nameWithPrefix("transactionSent")
     static let assetAccountsDidChange: Notification.Name =
         .nameWithPrefix("assetAccountsDidChange")
+    static let flexaComponentScanSelected: Notification.Name =
+        .nameWithPrefix("flexaComponentScanSelected")
+    static let flexaComponentLoadSelected: Notification.Name =
+        .nameWithPrefix("flexaComponentLoadSelected")
+    static let flexaComponentSpendSelected: Notification.Name =
+        .nameWithPrefix("flexaComponentSpendSelected")
+    static let paymentLinkDetected: Notification.Name =
+        .nameWithPrefix("paymentLinkDetected")
 
     private static func nameWithPrefix(_ name: String) -> Notification.Name {
         .init(rawValue: "\(prefix).\(name)")

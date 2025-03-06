@@ -23,6 +23,7 @@ class AppStateManager: AppStateManagerProtocol {
     @Injected(\.flexaClient) var flexaClient
     @Injected(\.userDefaults) var userDefaults
 
+    @Synchronized var closeCommerceSessionOnDismissal: Bool = true
     private let notificationCenter = NotificationCenter.default
     private let queue = DispatchQueue(label: "refreshTokenQueue")
     private let accessTokenRefreshthreshold = 5 * 60
@@ -98,7 +99,7 @@ class AppStateManager: AppStateManagerProtocol {
 
     func signTransaction(commerceSessionId: String, signature: String) {
         DispatchQueue.main.async {
-            self.eventNotifier.post(name: .transactionSent, object: commerceSessionId)
+            self.eventNotifier.post(name: .transactionSent)
         }
 
         guard let transactionId = unsignedTransactions[commerceSessionId] else {

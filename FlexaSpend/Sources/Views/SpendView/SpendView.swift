@@ -16,6 +16,7 @@ import Combine
 struct SpendView: View {
     @Injected(\.flexaClient) var flexaClient
     @EnvironmentObject var modalState: SpendModalState
+    @EnvironmentObject var linkData: UniversalLinkData
     @Environment(\.theme) var mainTheme
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.presentationMode) var presentationMode
@@ -25,7 +26,6 @@ struct SpendView: View {
     @StateObject private var transactionAmountViewModel: TransactionAmountView.ViewModel
 
     @State private var showNotification = true
-    @State private var showBrandDirectory = false
     @State private var selectedAssetIndex: Int
     @State private var selectedBrand: Brand?
     @State private var timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -87,7 +87,6 @@ struct SpendView: View {
                 }
             }
             .background(mainBackgroundColor).ignoresSafeArea()
-            .sheet(isPresented: $showBrandDirectory) { BrandView().ignoresSafeArea() }
             .onChange(of: selectedAssetIndex, perform: flexcodeIndexDidChange)
             .onChange(of: viewModel.selectedAsset, perform: assetDidChange)
             .onReceive(viewModel.$isShowingModal, perform: showPaymentModalDidChange)
@@ -97,10 +96,9 @@ struct SpendView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 8) {
-                        NavigationMenu(
-                            showBrandDirectory: $showBrandDirectory,
-                            showManageFlexaIDModal: $viewModel.showManageFlexaAccountSheet
-                        )
+                        NavigationMenu {
+                            FlexaRoundedButton(.settings)
+                        }
                         FlexaRoundedButton(.close, buttonAction: dismiss)
                     }
                 }
@@ -122,11 +120,8 @@ struct SpendView: View {
             viewModel.clear()
             viewModel.stopWatching()
             timer.upstream.connect().cancel()
-        }.environment(\.openURL, OpenURLAction { url in
-            viewModel.handleUrl(url: url) ? .handled : .systemAction(viewModel.url ?? url)
-        }).sheet(isPresented: $viewModel.isShowingWebView) {
-            FlexaWebView(url: viewModel.url)
-        }.onReceive(timer) { _ in
+        }
+        .onReceive(timer) { _ in
             viewModel.refreshFlexcodes()
         }.onTransactionSent {
             viewModel.transactionSentHandler()
@@ -137,7 +132,7 @@ struct SpendView: View {
         } else {
             assetSwitcherCard
         }
-        accountSettingsSheet
+
         legacyFlexcodeCard
         legacyFlexcodeInputAmountSheet
         paymentCard
@@ -273,16 +268,9 @@ private extension SpendView {
 }
 
 // MARK: Cards and Sheets
-// We use sheets for iOS 16 and higher for Account Settings and Asset Switcher. On older versions we use cards instead for both of them
+// We use sheets for iOS 16 and higher for the Asset Switcher. On older versions we use cards instead
 // We use cards for the Payment Card and the Legacy Flexcode cards (on all versions)
 private extension SpendView {
-    var accountSettingsSheet: some View {
-        ZStack {}
-            .sheet(isPresented: $viewModel.showManageFlexaAccountSheet) {
-                AccountView(viewModel: AccountView.ViewModel())
-            }
-    }
-
     @available(iOS 16.0, *)
     @ViewBuilder
     var assetsSwitcherSheet: some View {
@@ -364,7 +352,7 @@ private extension SpendView {
     @ViewBuilder
     var paymentCard: some View {
         if let selectedAsset = viewModel.selectedAsset {
-            PayNowModal(isShowing: $viewModel.showPaymentModal,
+            PaymentClip(isShowing: $viewModel.showPaymentModal,
                         value: viewModel.amountLabel,
                         baseAmount: viewModel.baseAmountLabel,
                         wallet: "\(viewModel.assetConfig.selectedAssetId)",

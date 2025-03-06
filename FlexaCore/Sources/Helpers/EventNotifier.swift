@@ -12,8 +12,8 @@ import Factory
 struct EventNotifier: EventNotifierProtocol {
     @Injected(\.flexaNotificationCenter) var notificationCenter
 
-    func post(name: Notification.Name, object: Any?) {
-        notificationCenter.post(name: name, object: object)
+    func post(name: Notification.Name, userInfo: [AnyHashable: Any]) {
+        notificationCenter.post(name: name, object: nil, userInfo: userInfo)
     }
 
     func addObserver(_ observer: Any, selector: Selector, name: Notification.Name) {

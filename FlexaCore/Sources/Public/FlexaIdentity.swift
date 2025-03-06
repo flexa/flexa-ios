@@ -12,8 +12,8 @@ import UIKit
 import SwiftUI
 
 /// The entry point of the FlexaIdentity module.
-public final class FlexaIdentity {
-    private static var linkData: UniversalLinkData = UniversalLinkData()
+public final class FlexaIdentity: UniversalLinkHandlerProtocol {
+    private static var linkData: UniversalLinkData = Container.shared.universalLinkData()
     private static let universalLinkDomain = FlexaConstants.Routing.flexaLinkDomain
     private var onResultCallback: ((ConnectResult) -> Void)?
     private var delayCallbacks = true

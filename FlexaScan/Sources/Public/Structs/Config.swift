@@ -18,7 +18,7 @@ public extension FlexaScan {
 
         public init(
             allowedSymbols: [VNBarcodeSymbology] = [.qr, .pdf417, .code128],
-            minConfidence: VNConfidence = 0.9
+            minConfidence: VNConfidence = 0.5
         ) {
             self.allowedSymbols = allowedSymbols
             self.minConfidence = minConfidence

@@ -18,4 +18,12 @@ public extension Container {
     var eventNotifier: Factory<EventNotifierProtocol> {
         self { EventNotifier() }.singleton
     }
+
+    var urlRouter: Factory<URLRouterProtocol> {
+        self { URLRouter() }
+    }
+
+    var universalLinkData: Factory<UniversalLinkData> {
+        self { UniversalLinkData() }.singleton
+    }
 }

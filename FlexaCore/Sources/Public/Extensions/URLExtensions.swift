@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Factory
 
 public extension URL {
     var components: URLComponents? {
@@ -20,6 +21,14 @@ public extension URL {
     // Second Level Domain
     var sld: String {
         components?.host?.components(separatedBy: ".").suffix(2).joined(separator: ".") ?? ""
+    }
+
+    var flexaLink: FlexaLink? {
+        Container.shared.urlRouter().getLink(from: self)
+    }
+
+    func matches(regex: String) -> Bool {
+        absoluteString.range(of: regex, options: .regularExpression) != nil
     }
 }
 

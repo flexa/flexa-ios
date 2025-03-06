@@ -17,6 +17,7 @@ struct LegacyFlexcodeList: View {
     @State var showMerchantSorter: Bool = false
     @State var animate: Bool = false
     @Environment(\.theme) var theme
+    @EnvironmentObject var linkData: UniversalLinkData
 
     public var didSelect: Closure?
 
@@ -95,6 +96,11 @@ struct LegacyFlexcodeList: View {
             })
         }.onAppear {
             viewModel.loadBrands()
+        }.onChange(of: linkData.url) { url in
+            if case .pinnedBrands = url?.flexaLink {
+                showMerchantSorter = true
+                linkData.url = nil
+            }
         }
     }
 }

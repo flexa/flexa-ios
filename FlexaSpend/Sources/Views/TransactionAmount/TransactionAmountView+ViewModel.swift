@@ -382,15 +382,17 @@ extension TransactionAmountView {
             }
         }
 
-        func setCommerceSession(_ commerceSession: CommerceSession) {
+        func setCommerceSession(_ commerceSession: CommerceSession, transactionSent: Bool = false) {
             clear()
-            self.commerceSession = commerceSession
             brand = commerceSession.brand
             amountText = commerceSession.amount.asCurrency
+            Task {
+                await handleCommerceSessionCreation(commerceSession: commerceSession, transactionSent: transactionSent)
+            }
         }
 
         @MainActor
-        func handleCommerceSessionCreation(commerceSession: CommerceSession? = nil, error: Error? = nil) {
+        func handleCommerceSessionCreation(commerceSession: CommerceSession? = nil, error: Error? = nil, transactionSent: Bool = false) {
             commerceSessionRepository.setCurrent(
                 commerceSession,
                 isLegacy: true,
@@ -398,11 +400,16 @@ extension TransactionAmountView {
             )
 
             self.commerceSession = commerceSession
-            self.commerceSessionCreated = commerceSession != nil
             self.isLoading = error == nil
             self.error = error
 
-            if isLoading {
+            if !transactionSent {
+                self.commerceSessionCreated = commerceSession != nil
+            }
+
+            if transactionSent {
+                self.transactionSent()
+            } else if isLoading {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
                     guard let self, self.loadingTitle.isEmpty else {
                         return

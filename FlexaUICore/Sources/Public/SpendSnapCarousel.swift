@@ -20,6 +20,7 @@ public struct SpendSnapCarousel<Content: View, T: Identifiable & Hashable>: View
     private var items: [T] = []
 
     @Binding var selectedIndex: Int
+    @State private var activeCardIndex: Int?
 
     public init(items: [T],
                 selectedIndex: Binding<Int>,
@@ -35,24 +36,55 @@ public struct SpendSnapCarousel<Content: View, T: Identifiable & Hashable>: View
         self.content = content
         self.items = items
         self._selectedIndex = selectedIndex
+        self.activeCardIndex = selectedIndex.wrappedValue
     }
 
     public var body: some View {
-        PagedScrollView(
-            itemsCount: items.count,
-            selectedIndex: $selectedIndex,
-            itemSize: itemSize,
-            spacing: spacing
-        ) {
-            LazyHStack(spacing: spacing) {
-                ForEach(items, id: \.self) { item in
-                    content(item)
-                        .frame(width: itemSize.width, height: itemSize.height)
+        if #available(iOS 17.0, *) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: spacing) {
+                    ForEach(items) { item in
+                        content(item)
+                            .frame(width: itemSize.width, height: itemSize.height)
+                            .id(items.firstIndex(of: item))
+                    }
                 }
-            }.frame(height: itemSize.height)
+                .frame(height: itemSize.height)
                 .padding(.horizontal, spacing / 2)
+                .scrollTargetLayout()
+            }
+            .frame(height: itemSize.height)
+            .padding(.horizontal, horizontalPadding - spacing / 2)
+            .scrollTargetBehavior(.paging)
+            .scrollClipDisabled()
+            .scrollPosition(id: $activeCardIndex, anchor: .center)
+            .onChange(of: activeCardIndex) {
+                withAnimation {
+                    selectedIndex = activeCardIndex ?? 0
+                }
+            }
+            .onChange(of: selectedIndex) {
+                withAnimation {
+                    activeCardIndex = selectedIndex
+                }
+            }
+        } else {
+            PagedScrollView(
+                itemsCount: items.count,
+                selectedIndex: $selectedIndex,
+                itemSize: itemSize,
+                spacing: spacing
+            ) {
+                LazyHStack(spacing: spacing) {
+                    ForEach(items, id: \.self) { item in
+                        content(item)
+                            .frame(width: itemSize.width, height: itemSize.height)
+                    }
+                }.frame(height: itemSize.height)
+                    .padding(.horizontal, spacing / 2)
+            }
+            .frame(height: itemSize.height)
+            .padding(.horizontal, horizontalPadding - spacing / 2)
         }
-        .frame(height: itemSize.height)
-        .padding(.horizontal, horizontalPadding - spacing / 2)
     }
 }

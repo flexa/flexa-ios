@@ -11,7 +11,6 @@ import Factory
 
 class AssetsRepository: AssetsRepositoryProtocol {
     @Injected(\.flexaNetworkClient) private var networkClient
-    @Injected(\.imageLoader) private var imageLoader
     @Injected(\.userDefaults) private var userDefaults
     @Injected(\.flexaClient) private var flexaClient
 

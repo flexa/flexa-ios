@@ -9,10 +9,16 @@
 import Foundation
 
 struct CreateCommerceSessionInput: FlexaModelProtocol {
-    var brand: String
-    var amount: String
-    var asset: String
-    var preferences: Preference
+    var brand: String?
+    var amount: String?
+    var asset: String?
+    var preferences: Preference?
+    var paymentLink: URL?
+
+    enum CodingKeys: String, CodingKey {
+        case brand, amount, asset, preferences
+        case paymentLink = "from_link"
+    }
 
     init(brand: String, amount: Decimal, asset: String, preferences: Preference) {
         self.brand = brand
@@ -26,6 +32,20 @@ struct CreateCommerceSessionInput: FlexaModelProtocol {
          self.amount = amount.apiFormatted
          self.asset = asset
          self.preferences = Preference(paymentAsset: paymentAsset)
+    }
+
+    init(paymentLink: URL?, paymentAsset: String) {
+        self.paymentLink = paymentLink
+        self.preferences = Preference(paymentAsset: paymentAsset)
+    }
+
+    var dictionary: [String: Any]? {
+        do {
+            return (try JSONSerialization.jsonObject(with: jsonData()) as? [String: Any?])?.compactMapValues { $0 }
+        } catch let error {
+            FlexaLogger.error(error)
+        }
+        return nil
     }
 }
 

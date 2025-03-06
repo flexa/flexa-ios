@@ -1,6 +1,8 @@
 // Global
 "global.ok" = "OK";
 "global.back" = "Back";
+"global.cancel" = "Cancel";
+"global.done" = "Done";
 
 // Log
 "log.hidden.text" = "[hidden value]";
@@ -19,6 +21,13 @@
 // Privacy
 "auth.privacy.alerts.about.title" = "Email Address Privacy";
 "auth.privacy.alerts.about.message" = "Flexa uses your email address to sign you in and send you receipts for your payments. Your email address is never shared with %s or any other business.";
+
+// Navigation Menu
+"navigation_menu.settings.items.find_places_to_pay.title" = "Find Places to Pay";
+"navigation_menu.settings.items.manage_flexa_id.title" = "Manage Flexa Account";
+"navigation_menu.settings.items.help.title" = "Help";
+"navigation_menu.settings.items.help.items.how_to_pay.title" = "Learn How to Pay";
+"navigation_menu.settings.items.help.items.report_issue.title" = "Report an Issue";
 
 // Main
 "auth.main.header.title" = "%s invites you to";
@@ -72,3 +81,85 @@ Flexa Account";
 // Web View
 "webview.errors.load.title" = "Cannot load page";
 "webview.buttons.retry.title" = "Retry";
+
+// Updating balance
+"updating_balance.title" = "Balance Updating...";
+"updating_balance.text" = "Your recent transaction is still mining.\nYou can spend up to **%s** now, or wait for your full balance to become available.";
+
+// Payment Card
+"payment.pay_merchant" = "Pay %s";
+"payment.done" = "Done";
+"payment.pay_now" = "Pay Now";
+"payment.balance_unavailable.title" = "Balance Not Yet Available";
+"payment.using" = "Using";
+"payment.your_flexa_account.title" = "Your Flexa Account";
+"payment.not_enough" = "Not enough %s for this payment";
+
+// Payment Primary View
+"payment.pay_using.title" = "Pay Using";
+"payment.balance.title" = "%s Balance";
+"payment.currency_avaliable.title" = "%s Available";
+"payment.hide_short_balances.title" = "Hide Short Balances";
+
+//Transaction Details
+"payment.transaction_details.footer" = "Flexa automatically selects the best exchange rate and network fee for your payments. [Learn more...](https://flexa.co)";
+"payment.transaction_details.title" = "Details";
+
+// Exchange Rate
+"payment.asset.exchange_rate.value" = "1 %s = %s";
+"payment.asset.exchange_rate.cannot_load_network_fee" = "Network fee cannot be loaded";
+"payment.asset.exchange_rate.network_fee" = "%s network fee";
+"payment.asset.exchange_rate.less_than_min_network_fee" = "Less than %s network fee";
+"payment.asset.exchange_rate.free" = "Free";
+"payment.asset.exchange_rate.amount" = "%s %s";
+
+// Account balance
+"account_balance.title" = "%s in your Flexa Account";
+"account_balance.next_payment.text" = "Applied to your next payment";
+"account_balance.current_payment.text" = "Applied to this payment";
+"account_balance.full_amount.text" = "The balance of your Flexa Account\nwill cover this payment. You don’t\nneed to send anything else.";
+"account_balance.pay_remaining.title" = "PAY REMAINING %s USING";
+
+// Web Links
+"web_links.how_to_pay" = "https://flexa.co/guides/how-to-pay";
+"web_links.report_issue" = "https://flexa.co/report-an-issue";
+"web_links.merchant_list" = "https://flexa.network/directory";
+"web_links.merchant_locations" = "%@/%@/locations";
+
+// Flexa Account
+"account.navigation.title" = "Account";
+"account.alerts.sign_out.title" = "Sign Out of Flexa?";
+"account.alerts.sign_out.message" = "Signing out will remove all Flexa data that is stored with %s on this device. Your wallet and your transaction history will not be affected.";
+"account.alerts.sign_out.buttons.sign_out.title" = "Sign Out";
+"account.header.labels.joined_in" = "Joined in %s";
+"account.sections.limit.header.title" = "Your Flexa Account";
+"account.sections.limit.footer.title" = "Limits reset on %s at %s.";
+"account.sections.data_and_privacy.cells.data_and_privacy.title" = "Data & Privacy";
+"account.sections.sign_out.cells.sign_out.title" = "Sign Out of Flexa";
+
+// Data and Privacy
+"data_and_privacy.navigation.title" = "Data & Privacy";
+"data_and_privacy.sections.header.title" = "Your Data & Privacy";
+"data_and_privacy.sections.header.description" = "Flexa is carefully designed to use only the data that’s directly necessary to process your payments. [Learn more…](https://flexa.co/legal/privacy)";
+"data_and_privacy.sections.header.account_email" = "Account Email";
+"data_and_privacy.sections.delete_account.cells.delete_account" = "Delete Your Flexa Account";
+"data_and_privacy.sections.delete_account.cells.deletion_pending.title" = "Account Deletion Pending";
+"data_and_privacy.sections.delete_account.cells.deletion_pending.subtitle" = "Please check your inbox to confirm the deletion of your Flexa Account";
+"data_and_privacy.sections.advanced.header.title" = "Advanced";
+"data_and_privacy.sections.advanced.cells.sdk_version" = "SDK Version";
+"data_and_privacy.sections.advanced.cells.export_debug_data" = "Export Debug Data";
+"data_and_privacy.sections.advanced.cells.reset_local_storage" = "Reset Local Flexa Storage";
+
+// Delete account
+"delete_account.header.title" = "Delete Your Flexa Account";
+"delete_account.header.subtitle" = "Deleting your Flexa Account will permanently erase your account and associated data from all Flexa systems and apps where you are signed in.\n\nAfter your account is deleted, you will no longer be able to receive refunds back to your wallet, and any active subscriptions will be canceled.\n\nDepending on where you live, we may not be permitted to delete all of your account data right away. We will, however, delete all of your account data as quickly as permitted by law.";
+"delete_account.buttons.cancel.title" = "Not Now";
+"delete_account.buttons.next.title" = "Continue";
+
+// Confirm Account Deletion
+"confirm_account_deletion.header.title" = "Confirm Deletion";
+"confirm_account_deletion.header.subtitle" = "Because we won’t be able to contact you after your account is deleted, we just sent you an email with important details about how and when your deletion request will be processed.\n\nPlease check your inbox now to review this important information and to confirm the final and permanent deletion of your Flexa Account.";
+"confirm_account_deletion.table.rows.email.company" = "Flexa";
+"confirm_account_deletion.table.rows.email.to" = "To: ";
+"confirm_account_deletion.table.rows.delete.title" = "Delete your Flexa Account";
+"confirm_account_deletion.buttons.open_email.title" = "Open \"Mail\"";

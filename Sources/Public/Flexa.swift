@@ -83,62 +83,62 @@ public extension Flexa {
         FlexaInternal.uiSections(sections)
     }
 
+    /// Opens the main screen
+    ///
+    /// If the user is already signed in then it will open the screens specified by the ``Flexa/sections`` method. If the user is not signed in the it will open the sign in/sign up screens.
+    func open() {
+        (self as? FlexaInternal)?.openMain()
+    }
+}
+
+extension Flexa: @retroactive UniversalLinkHandlerProtocol {
     /**
      Handles universal links received by the parent application. Currently allows you to use universal links to speed up the sign in/sign up process.
 
      - parameter url: The url to be processed
      - returns: true if the SDK recongizes and is able to handle the url, and false otherwise
 
-    For SwiftUI based applications this methos should be called on the main App body:
-    ```swift
-    struct SPMApp: App {
+     For SwiftUI based applications this methos should be called on the main App body:
+     ```swift
+     struct SPMApp: App {
         init() {
-        Flexa.initialize(...)
-    }
+            Flexa.initialize(...)
+        }
 
-    var body: some Scene {
+        var body: some Scene {
         WindowGroup {
             ExampleView()
-                .onOpenURL { url in
-                    Flexa.processUniversalLink(url: url)
-                            }
-            }
+               .onOpenURL { url in
+                   Flexa.processUniversalLink(url: url)
+               }
         }
-    }
-    ```
+     }
+     ```
 
-    For UIKit based applications this method should be called on the application's `AppDelegate`:
-    ```swift
+     For UIKit based applications this method should be called on the application's `AppDelegate`:
+     ```swift
      func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-         return handle(url: userActivity.webpageURL)
+        return handle(url: userActivity.webpageURL)
      }
 
      func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
-         return handle(url: url)
+        return handle(url: url)
      }
 
      func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
-         return handle(url: url)
+        return handle(url: url)
      }
 
      private func handle(url: URL?) -> Bool {
-         guard let url = url, let presenter = window?.rootViewController else {
-             return false
-         }
-
-         return Flexa.processUniversalLink(url: url)
+        guard let url = url {
+            return false
+        }
+        return Flexa.processUniversalLink(url: url)
      }
      ```
      */
     @discardableResult
-    static func processUniversalLink(url: URL) -> Bool {
+    public static func processUniversalLink(url: URL) -> Bool {
         FlexaInternal.handleUniversalLink(url: url)
-    }
-
-    /// Opens the main screen
-    ///
-    /// If the user is already signed in then it will open the screens specified by the ``Flexa/sections`` method. If the user is not signed in the it will open the sign in/sign up screens.
-    func open() {
-        (self as? FlexaInternal)?.openMain()
     }
 }

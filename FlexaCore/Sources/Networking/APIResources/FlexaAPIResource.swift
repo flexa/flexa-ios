@@ -82,6 +82,7 @@ extension FlexaAPIResource {
         let osVersion = Device.current.systemVersion ?? "unknown"
         return "iOS/\(osVersion) Flexa/\(Flexa.version) \(Bundle.applicationBundleId)/\(Bundle.applicationVersion)"
     }
+
 }
 
 protocol PublishableKeyAuthenticable: Authenticable {

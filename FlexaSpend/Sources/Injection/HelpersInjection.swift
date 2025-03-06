@@ -19,12 +19,4 @@ extension Container {
     var flexcodeGenerator: Factory<FlexcodeGeneratorProtocol> {
         self { FlexcodeGenerator() }.singleton
     }
-
-    var assetsHelper: Factory<AssetHelperProtocol> {
-        self { AssetHelper() }.singleton
-    }
-
-    var urlRouter: Factory<URLRouterProtocol> {
-        self { URLRouter() }
-    }
 }

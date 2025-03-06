@@ -12,6 +12,7 @@ import Factory
 
 public final class FlexaScan {
     @Injected(\.scanConfig) private var config
+    @Injected(\.appStateManager) private var appStateManager
 
     public typealias BrowseHandoff = (FlexaScan.Code) -> Void
 
@@ -23,7 +24,15 @@ public final class FlexaScan {
     }
 
     public func open() {
+        appStateManager.closeCommerceSessionOnDismissal = true
+        // TODO: we are gonna show a payment clip, but this is gonna be done on a different issue. For now just let the system open the URL
+        @StateObject var linkData: UniversalLinkData = Container.shared.universalLinkData()
         let view = createView()
+            .onPaymentLink { url in
+                UIApplication.shared.open(url)
+            }
+            .flexaHandleUniversalLink()
+            .environmentObject(linkData)
         UIViewController.showViewOnTop(view)
     }
 

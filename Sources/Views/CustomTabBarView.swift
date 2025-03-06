@@ -7,14 +7,45 @@
 //
 
 import SwiftUI
+import Factory
 
 struct CustomTabBarView: View {
     let tabs: [TabBarItem]
     @Binding var selection: TabBarItem
     @Namespace private var namespace
+    @EnvironmentObject var linkData: UniversalLinkData
 
     var body: some View {
-        tabBarVersion
+        ZStack {
+            HStack {
+                ForEach(tabs, id: \.self) { tab in
+                    tabView(tab: tab)
+                        .onTapGesture {
+                            switchToTab(tab: tab)
+                        }
+                }
+            }
+            .padding(1)
+            .frame(maxWidth: .infinity, maxHeight: 50)
+            .background(Color.gray.opacity(0.6))
+            .cornerRadius(14)
+            .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 30)
+        .onPaymentLink { _ in
+            switchToTab(tab: .spend)
+        }
+        .onChange(of: linkData.url) { url in
+            switch url?.flexaLink {
+            case .scan:
+                switchToTab(tab: .scan)
+            case .pay, .paymentLink, .pinnedBrands:
+                switchToTab(tab: .spend)
+            default:
+                break
+            }
+        }
     }
 }
 
@@ -39,29 +70,29 @@ extension CustomTabBarView {
         )
     }
 
+    @MainActor
     private func switchToTab(tab: TabBarItem) {
+        guard selection != tab else {
+            return
+        }
+        sendComponentChangeNotification(tab)
         withAnimation(.easeIn) {
             selection = tab
         }
     }
 
-    private var tabBarVersion: some View {
-        ZStack {
-            HStack {
-                ForEach(tabs, id: \.self) { tab in
-                    tabView(tab: tab)
-                        .onTapGesture {
-                            switchToTab(tab: tab)
-                        }
-                }
+    private func sendComponentChangeNotification(_ tab: TabBarItem) {
+        let notificationName: Notification.Name = {
+            switch tab {
+            case.scan:
+                return .flexaComponentScanSelected
+            case.load:
+                return .flexaComponentLoadSelected
+            case.spend:
+                return .flexaComponentSpendSelected
             }
-            .padding(1)
-            .frame(maxWidth: .infinity, maxHeight: 50)
-            .background(Color.gray.opacity(0.6))
-            .cornerRadius(14)
-            .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
-        }
-        .padding(.horizontal, 24)
-        .padding(.bottom, 30)
+        }()
+
+        Container.shared.eventNotifier().post(name: notificationName)
     }
 }

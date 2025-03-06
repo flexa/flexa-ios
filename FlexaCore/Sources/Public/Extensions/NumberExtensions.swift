@@ -15,13 +15,20 @@ public extension Decimal {
 
 public extension NSNumber {
     var asCurrency: String {
+        asCurrency()
+    }
+
+    func asCurrency(usesGroupingSeparator: Bool = false,
+                    locale: Locale = Locale(identifier: "en-US"),
+                    minimumFractionDigits: Int = 2,
+                    maximumFractionDigits: Int = 2) -> String {
         let formatter = NumberFormatter()
-        formatter.usesGroupingSeparator = true
+        formatter.usesGroupingSeparator = usesGroupingSeparator
         formatter.numberStyle = .currency
-        formatter.locale = Locale.current
-        formatter.minimumFractionDigits = 0
-        formatter.maximumFractionDigits = 2
-        return formatter.string(from: self) ?? ""
+        formatter.locale = locale
+        formatter.minimumFractionDigits = minimumFractionDigits
+        formatter.maximumFractionDigits = maximumFractionDigits
+        return formatter.string(from: self as NSNumber) ?? ""
     }
 }
 
@@ -38,8 +45,8 @@ public extension Float {
 }
 
 public extension Decimal {
-    var asCurrency: String {
-        (self as NSDecimalNumber).asCurrency
+    private var nsNumber: NSNumber {
+        NSDecimalNumber(decimal: self)
     }
 
     func rounded(places: Int) -> Decimal {
@@ -47,5 +54,37 @@ public extension Decimal {
         var rounded: Decimal = 0
         NSDecimalRound(&rounded, &decimal, places, .down)
         return rounded
+    }
+
+    var doubleValue: Double {
+        NSDecimalNumber(decimal: self).doubleValue
+    }
+
+    var asCurrency: String {
+        asCurrency()
+    }
+
+    func asCurrency(usesGroupingSeparator: Bool = false,
+                    locale: Locale = Locale(identifier: "en-US"),
+                    minimumFractionDigits: Int = 2,
+                    maximumFractionDigits: Int = 2) -> String {
+        nsNumber.asCurrency(
+            usesGroupingSeparator: usesGroupingSeparator,
+            locale: locale,
+            minimumFractionDigits: minimumFractionDigits,
+            maximumFractionDigits: maximumFractionDigits
+        )
+    }
+
+    func formatted(usesGroupingSeparator: Bool = false,
+                   locale: Locale = Locale(identifier: "en-US"),
+                   minimumFractionDigits: Int = 0,
+                   maximumFractionDigits: Int = 2) -> String {
+        let formatter = NumberFormatter()
+        formatter.usesGroupingSeparator = usesGroupingSeparator
+        formatter.locale = locale
+        formatter.minimumFractionDigits = minimumFractionDigits
+        formatter.maximumFractionDigits = maximumFractionDigits
+        return formatter.string(from: self as NSNumber) ?? ""
     }
 }

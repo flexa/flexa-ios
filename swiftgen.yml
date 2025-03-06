@@ -6,6 +6,13 @@ strings:
         params:
             bundle: Bundle.coreBundle.stringsBundle
             enumName: CoreStrings
+  - inputs: FlexaScan/Sources/Resources/en.lproj/Localizable.strings
+    outputs:
+      - templateName: structured-swift5
+        output: FlexaScan/Sources/Commons/ScanStrings+Generated.swift
+        params:
+            bundle: Bundle.scanBundle.stringsBundle
+            enumName: ScanStrings
   - inputs: FlexaSpend/Sources/Resources/en.lproj/Localizable.strings
     outputs:
       - templateName: structured-swift5

@@ -73,6 +73,14 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
         return commerceSession
     }
 
+    func create(paymentLink: URL, paymentAssetId: String) async throws -> CommerceSession {
+        let input = CreateCommerceSessionInput(paymentLink: paymentLink, paymentAsset: paymentAssetId)
+        let commerceSession: Models.CommerceSession = try await networkClient.sendRequest(
+            resource: CommerceSessionResource.create(input)
+        )
+        return commerceSession
+    }
+
     func get(_ id: String) async throws -> CommerceSession {
         let commerceSession: Models.CommerceSession = try await networkClient.sendRequest(
             resource: CommerceSessionResource.get(id)

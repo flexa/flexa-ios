@@ -33,12 +33,13 @@ extension MagicCodeView {
                 .endEditing(true)
         }
 
-        func validateWithUrl(_ url: URL?) {
-            guard let url else {
-                return
+        func validateWithUrl(_ url: URL?) -> Bool {
+            guard case .verify = url?.flexaLink else {
+                return false
             }
 
             validate(url: url)
+            return true
         }
 
         private func validateWithCode() {

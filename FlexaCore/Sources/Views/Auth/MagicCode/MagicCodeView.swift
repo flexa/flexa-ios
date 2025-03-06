@@ -56,9 +56,8 @@ struct MagicCodeView: View {
                 .onTapGesture(perform: viewModel.endEditing)
         )
         .tint(nil)
-        .onChange(of: linkData.url) { url in
+        .flexaHandleUniversalLink { url in
             viewModel.validateWithUrl(url)
-            linkData.url = nil
         }.onChange(of: viewModel.validated) { value in
             if value {
                 dismissAll?()

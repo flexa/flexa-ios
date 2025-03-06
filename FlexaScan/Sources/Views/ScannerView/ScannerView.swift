@@ -27,6 +27,18 @@ struct ScannerView: View {
         return .black.opacity(0.3)
     }
 
+    private var flashlightButtonColor: Color {
+        viewModel.isFlashlightOn ? .black : navigationButtonColor
+    }
+
+    private var flashlightButtonBackgroundColor: Color {
+        viewModel.isFlashlightOn ? .white : navigationButtonBackgroundColor
+    }
+
+    private var flashlightImageName: String {
+        viewModel.isFlashlightOn ? "flashlight.on.fill" : "flashlight.off.fill"
+    }
+
     init(onTransactionRequest: Flexa.TransactionRequestCallback? = nil,
          onSend: Flexa.SendHandoff? = nil) {
 
@@ -43,7 +55,7 @@ struct ScannerView: View {
         NavigationView {
             ZStack(alignment: .center) {
                 ZStack {
-                    Color.black.ignoresSafeArea()
+                    backgroundView
                 }
                 CameraPreview(session: viewModel.captureSession).ignoresSafeArea()
                 HStack(alignment: .center) {
@@ -51,15 +63,15 @@ struct ScannerView: View {
                         RoundedRectangle(cornerRadius: 36)
                             .stroke(Color.white, lineWidth: 3)
                             .aspectRatio(1, contentMode: .fit)
-                        Text("Send, pay, or connect to a desktop website") // FIXME: use localized texts
+                        Text(ScanStrings.Scan.title)
                             .foregroundColor(.white)
                             .multilineTextAlignment(.center)
-                            .font(.system(size: 15, weight: .regular)) // FIXME: use native font sizes
+                            .font(.system(size: 15, weight: .regular))
                             .frame(width: 178)
                             .shadow(color: .black.opacity(0.3), radius: 3, x: 0, y: 1)
                         if viewModel.showSettingAlert {
                             Button(action: openSettings) {
-                                Text("Enable camera Access")
+                                Text(ScanStrings.Scan.Buttons.EnableCamera.title)
                                     .foregroundColor(.white)
                                     .font(.system(size: 17, weight: .bold))
                                     .shadow(color: .black.opacity(0.3), radius: 3, x: 0, y: 1)
@@ -68,21 +80,49 @@ struct ScannerView: View {
                     }.opacity(0.75)
                 }.padding([.bottom, .horizontal], 58)
             }.toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .topBarLeading) {
+                    if viewModel.isFlashlightAvailable {
+                        FlexaRoundedButton(.custom(Image(systemName: flashlightImageName)),
+                                           color: flashlightButtonColor,
+                                           backgroundColor: flashlightButtonBackgroundColor
+                        ) {
+                            withAnimation {
+                                viewModel.toggleFlashlight()
+                            }
+                        }
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
                     HStack(spacing: 8) {
-                        FlexaRoundedButton(.settings,
-                                         color: navigationButtonColor,
-                                         backgroundColor: navigationButtonBackgroundColor)
+                        NavigationMenu {
+                            FlexaRoundedButton(.settings,
+                                               color: navigationButtonColor,
+                                               backgroundColor: navigationButtonBackgroundColor
+                            )
+                        }
                         FlexaRoundedButton(.close,
                                          color: navigationButtonColor,
                                          backgroundColor: navigationButtonBackgroundColor,
-                                         buttonAction: dismiss)
+                                         buttonAction: dismiss
+                        )
                     }
                 }
             }.onAppear {
-                viewModel.checkForCameraPermission()
-            }.errorAlert(error: $cameraManager.error)
+                viewModel.setup()
+            }.onDisappear {
+                viewModel.stopCapturing()
+            }
+            .errorAlert(error: $cameraManager.error)
         }
+    }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        #if targetEnvironment(simulator)
+        Color.purple.opacity(0.8).ignoresSafeArea()
+        #else
+        Color.black.ignoresSafeArea()
+        #endif
     }
 
     private func openSettings() {
@@ -96,6 +136,5 @@ struct ScannerView: View {
 
     private func dismiss() {
         presentationMode.wrappedValue.dismiss()
-        UIViewController.topMostViewController?.dismiss(animated: true)
     }
 }

@@ -8,13 +8,14 @@
 
 import SwiftUI
 import FlexaUICore
+import Factory
 
 struct CustomTabBarContainerView<Content: View>: View {
     // MARK: - Instance properties
     @EnvironmentObject var modalState: SpendModalState
     @Binding var selection: TabBarItem
-    let content: Content
     @State private var tabs: [TabBarItem] = []
+    let content: Content
 
     // MARK: - Initialization
 

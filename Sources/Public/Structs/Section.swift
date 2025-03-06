@@ -10,7 +10,7 @@
 ///
 /// When the parent application configures Flexa SDK prior to call ``Flexa/open()``, it may specify the different sections to be shown.
 extension Flexa {
-    public enum Section: Int {
+    public enum Section: String {
         case scan, load, spend
     }
 }

@@ -14,7 +14,7 @@ extension Bundle {
         Bundle(for: Flexa.self)
     }
 
-    var stringsBundle: Bundle {
+    public var stringsBundle: Bundle {
         let bundleUrl = bundleURL.appendingPathComponent("Strings.bundle")
         return Bundle(url: bundleUrl) ?? self
     }

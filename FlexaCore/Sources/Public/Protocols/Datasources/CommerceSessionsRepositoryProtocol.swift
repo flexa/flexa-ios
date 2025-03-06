@@ -43,4 +43,5 @@ public protocol CommerceSessionsRepositoryProtocol {
     func setPaymentAsset(commerceSessionId: String, assetId: String) async throws
     func stopWatching()
     func create(brand: Brand, amount: Decimal, assetId: String, paymentAssetId: String) async throws -> CommerceSession
+    func create(paymentLink: URL, paymentAssetId: String) async throws -> CommerceSession
 }

@@ -20,9 +20,14 @@ extension CameraManager {
 class CameraManager: NSObject, ObservableObject {
     @Published var status = Status.unconfigured
     @Published var error: Error?
+
     let captureSession = AVCaptureSession()
     let queue = DispatchQueue(label: "com.flexa.FlexaScan")
     weak var outputSampleBufferDelegate: AVCaptureVideoDataOutputSampleBufferDelegate?
+
+    var device: AVCaptureDevice? {
+        AVCaptureDevice.default(for: .video)
+    }
 
     func setupCaptureSession() {
         queue.async {
@@ -34,22 +39,38 @@ class CameraManager: NSObject, ObservableObject {
             self.setupInput()
             self.setupOutput()
             self.captureSession.commitConfiguration()
-            self.captureSession.startRunning()
+
+            DispatchQueue.global(qos: .background).async {
+                self.captureSession.startRunning()
+            }
+
+            DispatchQueue.main.async {
+                self.status = .configured
+            }
+
         }
     }
 
     func startCapturing() {
+        guard status == .configured else {
+            return
+        }
         queue.async { [weak self] in
             guard let self else {
                 return
             }
             if !captureSession.isRunning {
-                captureSession.startRunning()
+                DispatchQueue.global(qos: .background).async {
+                    self.captureSession.startRunning()
+                }
             }
         }
     }
 
     func stopCapturing() {
+        guard status == .configured else {
+            return
+        }
         queue.async { [weak self] in
             guard let self else {
                 return
@@ -62,7 +83,7 @@ class CameraManager: NSObject, ObservableObject {
     }
 
     private func setupInput() {
-        guard let camera = AVCaptureDevice.default(for: .video) else {
+        guard let device else {
             setError(withStatus: .unconfigured)
             FlexaLogger.error("Video device is unavailable")
             return
@@ -71,7 +92,7 @@ class CameraManager: NSObject, ObservableObject {
         let input: AVCaptureDeviceInput
 
         do {
-            input = try AVCaptureDeviceInput(device: camera)
+            input = try AVCaptureDeviceInput(device: device)
         } catch {
             setError()
             FlexaLogger.error("Cannot create video device input")
@@ -83,7 +104,6 @@ class CameraManager: NSObject, ObservableObject {
             FlexaLogger.error("Cannot add input to capture session")
             return
         }
-        status = .configured
         captureSession.addInput(input)
     }
 
@@ -103,8 +123,8 @@ class CameraManager: NSObject, ObservableObject {
     private func setError(withStatus status: Status = .failed) {
         DispatchQueue.main.async {
             self.error = ReasonableError.custom(
-                title: "Camera error",
-                message: "There was an error getting the video device"
+                title: ScanStrings.Errors.CameraAccess.title,
+                message: ScanStrings.Errors.CameraAccess.message
             )
             self.status = status
         }

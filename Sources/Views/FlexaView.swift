@@ -16,6 +16,7 @@ struct FlexaView<ScanView: View, PaymentView: View>: View {
     @State private var tabSelection: TabBarItem = .scan
 
     @StateObject var modalState = SpendModalState()
+    @StateObject var linkData: UniversalLinkData = Container.shared.universalLinkData()
     @Injected(\.flexaClient) var flexaClient
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismiss
@@ -48,6 +49,8 @@ struct FlexaView<ScanView: View, PaymentView: View>: View {
             }
         }.environment(\.colorScheme, flexaClient.theme.interfaceStyle.colorSheme ?? colorScheme)
             .environmentObject(modalState)
+            .flexaHandleUniversalLink()
+            .environmentObject(linkData)
             .environment(\.dismissAll, dismiss)
             .theme(flexaClient.theme)
     }

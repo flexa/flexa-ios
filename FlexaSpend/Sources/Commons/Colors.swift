@@ -22,7 +22,6 @@ internal typealias AssetColorTypeAlias = ColorAsset.Color
 
 // swiftlint:disable identifier_name line_length nesting type_body_length type_name
 internal enum Asset {
-  internal static let brandDirectoryCloseButtonFloatingTint = ColorAsset(name: "BrandDirectoryCloseButtonFloatingTint")
   internal static let commonCloseButton = ColorAsset(name: "CommonCloseButton")
   internal static let commonGrabber = ColorAsset(name: "CommonGrabber")
   internal static let commonLink = ColorAsset(name: "CommonLink")

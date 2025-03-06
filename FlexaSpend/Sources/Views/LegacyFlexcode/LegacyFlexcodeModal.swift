@@ -5,12 +5,12 @@ import FlexaUICore
 struct LegacyFlexcodeModal: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.theme) var theme
+    @Environment(\.openURL) private var openURL
 
     public typealias Closure = () -> Void
 
     @Binding private var isShowing: Bool
     @State var showTransactionDetails: Bool = false
-    @State var showInfo: Bool = false
     @StateObject private var viewModel: LegacyFlexcodeViewModel
 
     public var didConfirm: Closure?
@@ -69,7 +69,7 @@ struct LegacyFlexcodeModal: View {
                 didConfirm: didConfirm,
                 viewModel: viewModel
             )
-        ).sheet(isPresented: $showInfo) { BrandView(brand).ignoresSafeArea() }
+        )
     }
 
     @ViewBuilder
@@ -95,7 +95,9 @@ struct LegacyFlexcodeModal: View {
     var rightHeaderView: some View {
         if viewModel.showInfoButton {
             FlexaRoundedButton(.info) {
-                showInfo = true
+                if let url = FlexaLink.merchantList.url {
+                    openURL(url)
+                }
             }
         }
     }
@@ -165,12 +167,12 @@ struct LegacyFlexcodeContentView: View {
                     .frame(maxWidth: .infinity)
                 }.frame(width: .flexCodeWidth, height: .flexCodeHeight)
 
-            Text(viewModel.instructions)
+            Text(.init(viewModel.instructions))
                 .font(.footnote.weight(.medium))
                 .multilineTextAlignment(.center)
                 .foregroundColor(.primary.opacity(.colorOpacity))
                 .padding(.top, .listItemSpacing)
-            Text(viewModel.details)
+            Text(.init(viewModel.details))
                 .foregroundColor(viewModel.brandColor)
                 .bold()
         }.background(Color.clear)

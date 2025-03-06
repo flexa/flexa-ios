@@ -14,15 +14,44 @@ import Vision
 extension ScannerView {
     class ViewModel: NSObject, ObservableObject {
         private let config = Container.shared.scanConfig()
+        @Injected(\.eventNotifier) var eventNotifier
         @Published var cameraManager = CameraManager()
         @Published var showSettingAlert = false
         @Published var isPermissionGranted: Bool = false
+        @Published var isFlashlightOn: Bool = false {
+            didSet {
+                updateDeviceFlashlight()
+            }
+        }
 
         var captureSession = AVCaptureSession()
         var onTransactionRequest: Flexa.TransactionRequestCallback?
         var onSend: Flexa.SendHandoff?
 
+        var isFlashlightAvailable: Bool {
+            guard isPermissionGranted else {
+                return false
+            }
+
+            return device?.hasTorch == true
+        }
+
+        private var device: AVCaptureDevice? {
+            cameraManager.device
+        }
+
         private lazy var detectCodeRequest = { VNDetectBarcodesRequest(completionHandler: processCodeRequest) }()
+
+        private let resumeCapturingNotifications: [Notification.Name] = [
+            UIApplication.didBecomeActiveNotification,
+            .flexaComponentScanSelected
+        ]
+
+        private let stopCapturingNotifications: [Notification.Name] = [
+            UIApplication.didEnterBackgroundNotification,
+            .flexaComponentLoadSelected,
+            .flexaComponentSpendSelected
+        ]
 
         init(onTransactionRequest: Flexa.TransactionRequestCallback? = nil,
              onSend: Flexa.SendHandoff? = nil) {
@@ -34,10 +63,12 @@ extension ScannerView {
         }
 
         deinit {
+            eventNotifier.removeObserver(self)
             cameraManager.stopCapturing()
         }
 
-        func checkForCameraPermission() {
+        func setup() {
+            setupSubscriptions()
             let videoStatus = AVCaptureDevice.authorizationStatus(for: AVMediaType.video)
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else {
@@ -52,6 +83,40 @@ extension ScannerView {
                     isPermissionGranted = false
                     showSettingAlert = true
                 }
+            }
+        }
+
+        @objc func resumeCapturing() {
+            FlexaLogger.debug("Resume capturing")
+            guard isPermissionGranted else {
+                return
+            }
+            cameraManager.startCapturing()
+        }
+
+        @objc func stopCapturing() {
+            FlexaLogger.debug("Stop capturing")
+            guard isPermissionGranted else {
+                return
+            }
+            cameraManager.stopCapturing()
+            isFlashlightOn = false
+        }
+
+        func toggleFlashlight() {
+            isFlashlightOn.toggle()
+        }
+
+        func updateDeviceFlashlight() {
+            guard let device, isFlashlightAvailable else {
+                return
+            }
+            do {
+                try device.lockForConfiguration()
+                device.torchMode = isFlashlightOn ? .on : .off
+                device.unlockForConfiguration()
+            } catch let error {
+                FlexaLogger.error(error)
             }
         }
     }
@@ -106,8 +171,13 @@ private extension ScannerView.ViewModel {
             return
         }
 
-        DispatchQueue.main.async {
-            // Process code and make callbacks
+        if let url = data.first?.url, case .paymentLink = url.flexaLink {
+            eventNotifier.post(name: .paymentLinkDetected, userInfo: ["paymentLink": url])
+        } else {
+            DispatchQueue.main.async {
+                FlexaLogger.debug(data)
+                // Process code and make callbacks
+            }
         }
     }
 
@@ -124,6 +194,16 @@ private extension ScannerView.ViewModel {
                 isPermissionGranted = false
                 showSettingAlert = true
             }
+        }
+    }
+
+    func setupSubscriptions() {
+        resumeCapturingNotifications.forEach {
+            eventNotifier.addObserver(self, selector: #selector(resumeCapturing), name: $0)
+        }
+
+        stopCapturingNotifications.forEach {
+            eventNotifier.addObserver(self, selector: #selector(stopCapturing), name: $0)
         }
     }
 }

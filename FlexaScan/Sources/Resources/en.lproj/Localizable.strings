@@ -1,0 +1,7 @@
+// Scanner
+"scan.title" = "Send, pay, or connect to a desktop website";
+"scan.buttons.enable_camera.title" = "Enable camera Access";
+
+// Errors
+"errors.camera_access.title" = "Camera error";
+"errors.camera_access.message" = "There was an error getting the video device";

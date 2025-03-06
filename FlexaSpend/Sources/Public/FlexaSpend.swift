@@ -12,7 +12,8 @@ import SwiftUI
 import Factory
 
 /// The entry point of FlexaSpend
-public final class FlexaSpend {
+public final class FlexaSpend: UniversalLinkHandlerProtocol {
+    @Injected(\.appStateManager) private var appStateManager
     private var auth: FlexaIdentity!
     private var viewModel = Container.shared.spendViewViewModel(nil)
 
@@ -40,6 +41,7 @@ public final class FlexaSpend {
     /// If the user is already signed in then it will open the payment screen.
     /// If the user is not signed in the it will open the sign in/sign up screens.
     public func open() {
+        appStateManager.closeCommerceSessionOnDismissal = true
         guard Flexa.canSpend else {
             FlexaLogger.error(L10n.Errors.RestrictedRegion.message)
             FlexaIdentity.showRestrictedRegionView()
@@ -54,26 +56,7 @@ public final class FlexaSpend {
     ///
     /// The returned view could be embedded inside other views.
     public func createView() -> some View {
-        guard Flexa.canSpend else {
-            FlexaLogger.error(L10n.Errors.RestrictedRegion.message)
-            return AnyView(EmptyView())
-        }
-        return AnyView(
-            ZStack(alignment: .center) {
-                MainViewWrapper(spend: self) {
-                    SpendView(viewModel: self.viewModel)
-                }
-            }
-                .ignoresSafeArea()
-                .navigationBarHidden(true)
-                .frame(
-                    minWidth: 0,
-                    maxWidth: .infinity,
-                    minHeight: 0,
-                    maxHeight: .infinity,
-                    alignment: .center
-                )
-        )
+        createView(addModalHandling: false)
     }
 
     public static func transactionSent(commerceSessionId: String, signature: String) {
@@ -108,7 +91,9 @@ public final class FlexaSpend {
         DispatchQueue.main.async {
             switch result {
                 case .connected:
-                    UIViewController.showViewOnTop(self.createView())
+                UIViewController.showViewOnTop(
+                    self.createView(addModalHandling: true)
+                )
                 case .notConnected:
                     self.auth.open()
             }
@@ -210,11 +195,60 @@ public extension Flexa {
 
 // MARK: View Wrappers and Environment Objects
 private extension FlexaSpend {
+    private func createView(addModalHandling: Bool) -> some View {
+        guard Flexa.canSpend else {
+            FlexaLogger.error(L10n.Errors.RestrictedRegion.message)
+            return AnyView(EmptyView())
+        }
+        return AnyView(
+            ZStack(alignment: .center) {
+                if addModalHandling {
+                    MainViewWrapperWithModalHandling(spend: self) {
+                        SpendView(viewModel: self.viewModel)
+                    }
+                } else {
+                    MainViewWrapper(spend: self) {
+                        SpendView(viewModel: self.viewModel)
+                    }
+                }
+            }
+                .ignoresSafeArea()
+                .navigationBarHidden(true)
+                .frame(
+                    minWidth: 0,
+                    maxWidth: .infinity,
+                    minHeight: 0,
+                    maxHeight: .infinity,
+                    alignment: .center
+                )
+        )
+    }
+
+    struct MainViewWrapperWithModalHandling<Content: View>: View {
+        @StateObject var modalState = SpendModalState()
+        @StateObject var linkData: UniversalLinkData = Container.shared.universalLinkData()
+
+        var spend: FlexaSpend
+        var content: () -> Content
+
+        init(spend: FlexaSpend, @ViewBuilder content: @escaping () -> Content) {
+            self.spend = spend
+            self.content = content
+        }
+
+        var body: some View {
+            MainViewWrapper(spend: spend, content: content)
+                .environmentObject(modalState)
+                .flexaHandleUniversalLink()
+                .environmentObject(linkData)
+        }
+
+    }
+
     struct MainViewWrapper<Content: View>: View {
         @Injected(\.flexaClient) var flexaClient
         @Environment(\.colorScheme) var colorScheme
         @Environment(\.dismiss) var dismiss
-        @StateObject var modalState = SpendModalState()
 
         var spend: FlexaSpend
         var content: () -> Content
@@ -223,7 +257,6 @@ private extension FlexaSpend {
             content()
                 .ignoresSafeArea()
                 .environment(\.colorScheme, flexaClient.theme.interfaceStyle.colorSheme ?? colorScheme)
-                .environmentObject(modalState)
                 .environment(\.dismissAll, dismiss)
                 .theme(flexaClient.theme)
                 .cornerRadius(flexaClient.theme.views.primary.borderRadius, corners: [.topLeft, .topRight])

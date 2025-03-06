@@ -50,8 +50,6 @@ And then add the `Flexa` dependency to the relevant targets:
 Add the following to your Podfile:
 
 ```ruby
-source 'git@github.com:flexa/flexa-cocoapods.git'
-
 pod 'Flexa'
 ```
 

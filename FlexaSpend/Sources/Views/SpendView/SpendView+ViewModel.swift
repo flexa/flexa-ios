@@ -57,7 +57,6 @@ extension SpendView {
         @Injected(\.eventNotifier) var eventNotifier
         @Injected(\.exchangeRatesRepository) var exchangeRatesRepository
         @Injected(\.oneTimeKeysRepository) var oneTimeKeysRepository
-        @Injected(\.urlRouter) var urlRouter
         @Injected(\.accountRepository) var accountRepository
 
         @Published var activeSheet: ActiveSheet?
@@ -419,7 +418,10 @@ extension SpendView.ViewModel {
         if canceled && (!legacyMode && !paymentCompleted || legacyMode) {
             signTransaction?(.failure(FXError.transactionCanceledByUser))
         }
-        closeCommerceSession()
+        if appStateManager.closeCommerceSessionOnDismissal ||
+            canceled {
+            closeCommerceSession()
+        }
         legacyMode = false
         showInputAmountView = false
         sendTransactionWhenAvailable = false
@@ -476,6 +478,7 @@ extension SpendView.ViewModel {
 
             eventNotifier.addObserver(self, selector: #selector(handleAccountsDidUpdate), name: .oneTimeKeysDidUpdate)
             eventNotifier.addObserver(self, selector: #selector(handleAccountsDidUpdate), name: .assetAccountsDidChange)
+            eventNotifier.addObserver(self, selector: #selector(handlePaymentLink), name: .paymentLinkDetected)
             commerceSessionRepository.watch(currentOnly: true) { [weak self] result in
                 DispatchQueue.main.async { [weak self] in
                     switch result {
@@ -492,25 +495,6 @@ extension SpendView.ViewModel {
     func stopWatching() {
         eventNotifier.removeObserver(self)
         commerceSessionRepository.stopWatching()
-    }
-
-    func handleUrl(url: URL) -> Bool {
-        let link = urlRouter.getLink(from: url)
-        switch link {
-        case .account:
-            showManageFlexaAccountSheet = true
-            return true
-        case .webView(let url):
-            self.url = url
-            isShowingWebView = true
-            return true
-        case .systemBrowser(let url):
-            self.url = url
-            return false
-        default:
-            self.url = url
-            return false
-        }
     }
 
     func refreshFlexcodes() {
@@ -530,6 +514,38 @@ extension SpendView.ViewModel {
 }
 
 private extension SpendView.ViewModel {
+    func createCommerceSession(_ url: URL) {
+        guard !showInputAmountView, !showPaymentModal, !showLegacyFlexcode else {
+            FlexaLogger.info("Discarding payment link because there is a commerce session going on")
+            return
+        }
+
+        guard let paymentAsset = selectedAsset?.assetId else {
+            FlexaLogger.info("Discarding payment link because there is a not a selected asset")
+            return
+        }
+        Task {
+            do {
+                DispatchQueue.main.async {
+                    self.clear()
+                }
+                let commerceSession = try await commerceSessionRepository.create(
+                    paymentLink: url,
+                    paymentAssetId: paymentAsset
+                )
+                let event = CommerceSessionEvent.created(commerceSession)
+                DispatchQueue.main.async {
+                    self.handleNextGenFlexcodeCommerceSessionEvent(event)
+                }
+            } catch let error {
+                FlexaLogger.commerceSessionLogger.error(error)
+                DispatchQueue.main.async {
+                    self.error = error
+                }
+            }
+        }
+    }
+
     func approveTransaction(_ commerceSession: CommerceSession) {
         guard commerceSession.status == .requiresApproval else {
             return
@@ -614,6 +630,13 @@ private extension SpendView.ViewModel {
             await MainActor.run {
                 updateAccounts()
             }
+        }
+    }
+
+    @objc func handlePaymentLink(_ notification: Notification) {
+        if let url = notification.userInfo?.values.first as? URL,
+           case .paymentLink(let url) = url.flexaLink {
+            createCommerceSession(url)
         }
     }
 
@@ -728,7 +751,7 @@ private extension SpendView.ViewModel {
                 }
             } else {
                 self.commerceSession = commerceSession
-                transactionAmountViewModel.setCommerceSession(commerceSession)
+                transactionAmountViewModel.setCommerceSession(commerceSession, transactionSent: state == .transactionSent)
                 showInputAmountView = commerceSession.authorization == nil
             }
 

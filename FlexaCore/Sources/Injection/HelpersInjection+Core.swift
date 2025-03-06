@@ -22,4 +22,8 @@ extension Container {
     var keychainHelper: Factory<KeychainHelperProtocol> {
         self { KeychainHelper() }.singleton
     }
+
+    var assetsHelper: Factory<AssetHelperProtocol> {
+        self { AssetHelper() }.singleton
+    }
 }
