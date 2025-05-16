@@ -30,7 +30,7 @@ public struct CircularProgressView<Content: View>: View {
     public static func gauge(
         progress: Double,
         strokeWidth: CGFloat = 6,
-        progressRingStrokeColor: Color = .purple,
+        progressRingStrokeColor: Color = .flexaTintColor,
         trimming: Double = 0.15,
         @ViewBuilder content: @escaping () -> Content) -> Self {
             CircularProgressView(
@@ -49,7 +49,7 @@ public struct CircularProgressView<Content: View>: View {
                 strokeWidth: CGFloat = 4,
                 trimming: CGFloat = 0,
                 backgroundRingStrokeColor: Color = .black.opacity(0.1),
-                progressRingStrokeColor: Color = .purple,
+                progressRingStrokeColor: Color = .flexaTintColor,
                 animationDuration: TimeInterval = 1,
                 warningProgress: Double = 0.75,
                 warningColor: Color = .red,

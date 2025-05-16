@@ -26,4 +26,18 @@ public extension Container {
     var universalLinkData: Factory<UniversalLinkData> {
         self { UniversalLinkData() }.singleton
     }
+
+    var flexaState: Factory<FlexaState> {
+        self { FlexaState() }.singleton
+    }
+
+    var totpGenerator: ParameterFactory<(Data, Int), TOTPGeneratorProtocol> {
+        self { data, digits in
+            TOTPGenerator(secret: data, digits: digits)
+        }
+    }
+
+    var flexcodeGenerator: Factory<FlexcodeGeneratorProtocol> {
+        self { FlexcodeGenerator() }.singleton
+    }
 }

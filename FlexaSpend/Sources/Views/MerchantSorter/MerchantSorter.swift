@@ -13,7 +13,9 @@ import Factory
 struct MerchantSorter: View {
     private typealias Strings = L10n.MerchantSorter
 
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) var colorScheme
+    @Injected(\.flexaClient) var flexaClient
     @StateObject var viewModel = Container.shared.merchantSorterViewModel()
 
     var body: some View {
@@ -50,14 +52,15 @@ struct MerchantSorter: View {
             .navigationBarItems(
                 trailing:
                     Button(action: {
-                        presentationMode.wrappedValue.dismiss()
+                        dismiss()
                     }, label: {
                         Text(L10n.Common.done)
                             .font(.headline)
-                            .foregroundColor(.purple)
+                            .foregroundColor(.flexaTintColor)
                     })
             )
         }
+        .environment(\.colorScheme, flexaClient.theme.interfaceStyle.colorSheme ?? colorScheme)
         .dragIndicator(true, backgroundColor: Color(UIColor.systemGroupedBackground))
 
     }

@@ -10,7 +10,16 @@ import Foundation
 import Factory
 
 extension Container {
-    var authMainViewModel: Factory<AuthMainView.ViewModel> {
-        self { AuthMainView.ViewModel() }
+    var authMainViewModel: ParameterFactory<(Bool), AuthMainView.ViewModel> {
+        self { allowToDisablePayWithFlexa in
+            AuthMainView.ViewModel(allowToDisablePayWithFlexa: allowToDisablePayWithFlexa)
+        }
+    }
+
+    var commerceSessionViewModel: ParameterFactory<(Flexa.TransactionRequestCallback?),
+                                                    CommerceSessionView.ViewModel> {
+        self { signTransaction in
+            CommerceSessionView.ViewModel(signTransaction: signTransaction)
+        }
     }
 }

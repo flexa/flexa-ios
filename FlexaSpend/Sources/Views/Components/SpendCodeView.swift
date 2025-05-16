@@ -28,7 +28,7 @@ extension SpendCodeView {
         var asset: AssetWrapper
 
         var gradientMiddleColor: Color {
-            asset.assetColor ?? .purple
+            asset.assetColor ?? .flexaTintColor
         }
 
         var accountBalance: Decimal {

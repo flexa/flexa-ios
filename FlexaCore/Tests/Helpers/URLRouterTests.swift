@@ -22,7 +22,14 @@ final class URLRouterTests: QuickSpec {
                 static let explore = URL(string: "https://flexa.co/explore/how-to-pay")!
                 static let reportIssue = URL(string: "https://flexa.co/report-issue")!
                 static let account = URL(string: "https://flexa.co/account")!
-                static let payment = URL(string: "https://pay.flexa.co")!
+                static let accountData = URL(string: "https://flexa.co/account/data")!
+                static let accountDeletion = URL(string: "https://flexa.co/account/delete")!
+                static let paymentLink = URL(string: "https://flexa.co/pay/1234")!
+                static let spend = URL(string: "https://flexa.co/pay")!
+                static let scan = URL(string: "https://flexa.co/scan")!
+                static let pinned = URL(string: "https://flexa.co/pinned")!
+                static let verify = URL(string: "https://flexa.co/verify")!
+                static let merchants = URL(string: "https://flexa.co/directory")!
             }
 
             struct Link {
@@ -30,7 +37,14 @@ final class URLRouterTests: QuickSpec {
                 static let explore = URL(string: "https://flexa.link/explore/how-to-pay")!
                 static let reportIssue = URL(string: "https://flexa.link/report-issue")!
                 static let account = URL(string: "https://flexa.link/account")!
-                static let payment = URL(string: "https://pay.flexa.link")!
+                static let accountData = URL(string: "https://flexa.link/account/data")!
+                static let accountDeletion = URL(string: "https://flexa.link/account/delete")!
+                static let paymentLink = URL(string: "https://flexa.link/pay/1234")!
+                static let spend = URL(string: "https://flexa.link/pay")!
+                static let scan = URL(string: "https://flexa.link/scan")!
+                static let pinned = URL(string: "https://flexa.link/pinned")!
+                static let verify = URL(string: "https://flexa.link/verify")!
+                static let merchants = URL(string: "https://flexa.link/directory")!
             }
         }
 
@@ -161,28 +175,126 @@ final class URLRouterTests: QuickSpec {
                 }
             }
 
-            context("url is a flexa url (flexa.co/flexa.link)") {
+            context("url is a flexa url on flexa.co") {
                 context("path is account") {
                     it("returns .account") {
                         expect(subject.getLink(from: Links.Flexa.Main.account)).to(equal(.account))
                     }
                 }
 
-                context("is a payment link on flexa.co") {
-                    it("returns .paymentLink with the same url") {
-                        expect(subject.getLink(from: Links.Flexa.Main.payment)).to(equal(FlexaLink.paymentLink(Links.Flexa.Main.payment)))
+                context("path is account/data") {
+                    it("returns .accountData") {
+                        expect(subject.getLink(from: Links.Flexa.Main.accountData)).to(equal(.accountData))
                     }
                 }
 
-                context("is a payment link on flexa.link") {
-                    it("returns .paymentLink with the same url") {
-                        expect(subject.getLink(from: Links.Flexa.Link.payment)).to(equal(FlexaLink.paymentLink(Links.Flexa.Link.payment)))
+                context("path is account/delete") {
+                    it("returns .accountData") {
+                        expect(subject.getLink(from: Links.Flexa.Main.accountDeletion)).to(equal(.accountDeletion))
                     }
                 }
 
-                context("path is not account and is not a paymentLink") {
+                context("path is pay") {
+                    it("returns .pay") {
+                        expect(subject.getLink(from: Links.Flexa.Main.spend)).to(equal(.pay))
+                    }
+                }
+
+                context("path is scan") {
+                    it("returns .scan") {
+                        expect(subject.getLink(from: Links.Flexa.Main.scan)).to(equal(.scan))
+                    }
+                }
+
+                context("path is pinned") {
+                    it("returns .pinnedBrands") {
+                        expect(subject.getLink(from: Links.Flexa.Main.pinned)).to(equal(.pinnedBrands))
+                    }
+                }
+
+                context("path is verify") {
+                    it("returns .verify(\(Links.Flexa.Main.verify)") {
+                        expect(subject.getLink(from: Links.Flexa.Main.verify)).to(equal(.verify( Links.Flexa.Main.verify)))
+                    }
+                }
+
+                context("path is directory") {
+                    it("returns .brandWebView(\(Links.Flexa.Main.merchants)") {
+                        expect(subject.getLink(from: Links.Flexa.Main.merchants)).to(equal(.brandWebView( Links.Flexa.Main.merchants)))
+                    }
+                }
+
+                context("is a payment link") {
+                    it("returns .paymentLink with the same url") {
+                        expect(subject.getLink(from: Links.Flexa.Main.paymentLink)).to(equal(FlexaLink.paymentLink(Links.Flexa.Main.paymentLink)))
+                    }
+                }
+
+                context("path is not any of the processable urls") {
                     it("returns .webView with the same url") {
                         expect(subject.getLink(from: Links.Flexa.Main.reportIssue)).to(equal(.webView(Links.Flexa.Main.reportIssue)))
+                    }
+                }
+            }
+
+            context("url is a flexa url on flexa.link") {
+                context("path is account") {
+                    it("returns .account") {
+                        expect(subject.getLink(from: Links.Flexa.Link.account)).to(equal(.account))
+                    }
+                }
+
+                context("path is account/data") {
+                    it("returns .accountData") {
+                        expect(subject.getLink(from: Links.Flexa.Link.accountData)).to(equal(.accountData))
+                    }
+                }
+
+                context("path is account/delete") {
+                    it("returns .accountData") {
+                        expect(subject.getLink(from: Links.Flexa.Link.accountDeletion)).to(equal(.accountDeletion))
+                    }
+                }
+
+                context("path is pay") {
+                    it("returns .pay") {
+                        expect(subject.getLink(from: Links.Flexa.Link.spend)).to(equal(.pay))
+                    }
+                }
+
+                context("path is scan") {
+                    it("returns .scan") {
+                        expect(subject.getLink(from: Links.Flexa.Link.scan)).to(equal(.scan))
+                    }
+                }
+
+                context("path is pinned") {
+                    it("returns .pinnedBrands") {
+                        expect(subject.getLink(from: Links.Flexa.Link.pinned)).to(equal(.pinnedBrands))
+                    }
+                }
+
+                context("path is verify") {
+                    it("returns .verify(\(Links.Flexa.Main.verify)") {
+                        expect(subject.getLink(from: Links.Flexa.Link.verify)).to(equal(.verify(Links.Flexa.Link.verify)))
+                    }
+                }
+
+                context("path is directory") {
+                    it("returns .brandWebView(\(Links.Flexa.Link.merchants)") {
+                        expect(subject.getLink(from: Links.Flexa.Link.merchants)).to(equal(.brandWebView( Links.Flexa.Link.merchants)))
+                    }
+                }
+
+                context("is a payment link") {
+                    it("returns .paymentLink with the same url") {
+                        expect(subject.getLink(from: Links.Flexa.Link.paymentLink)).to(equal(FlexaLink.paymentLink(Links.Flexa.Link.paymentLink)))
+                    }
+                }
+
+                context("path is not any of the processable urls") {
+                    it("returns .webView with the same url") {
+                        expect(subject.getLink(from: Links.Flexa.Link.reportIssue)).to(equal(.webView(Links.Flexa.Link.reportIssue)))
                     }
                 }
             }

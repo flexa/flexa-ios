@@ -1,7 +1,7 @@
 import SwiftUI
 
 public struct TransactionAssetDetailsView: View {
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.theme.tables) var tablesTheme
     @Binding var showView: Bool
@@ -14,7 +14,7 @@ public struct TransactionAssetDetailsView: View {
     public var tintColor: Color
 
     public init(showView: Binding<Bool>,
-                tintColor: Color = .purple,
+                tintColor: Color = .flexaTintColor,
                 viewModel: TransactionAssetDetailsViewModel) {
         _showView = showView
         self.viewModel = viewModel
@@ -40,7 +40,7 @@ private extension TransactionAssetDetailsView {
     var leftHeaderView: some View {
         if viewModel.displayMode == .asset && !viewModel.isStandAlone {
             Button {
-                presentationMode.wrappedValue.dismiss()
+                dismiss()
             } label: {
                 HStack(spacing: 5) {
                     Image(systemName: "chevron.backward")

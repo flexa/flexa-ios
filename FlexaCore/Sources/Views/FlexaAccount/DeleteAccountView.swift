@@ -42,7 +42,7 @@ struct DeleteAccountView: View {
         Image(systemName: "person.fill.badge.minus")
             .font(.system(size: 48, weight: .bold))
             .symbolRenderingMode(.multicolor)
-            .foregroundStyle(Color.purple)
+            .foregroundStyle(Color.flexaTintColor)
             .frame(width: 68)
             .padding(.top, 50)
             .offset(y: 10)
@@ -74,7 +74,7 @@ struct DeleteAccountView: View {
                 dismiss()
             } label: {
                 Text(Strings.Buttons.Cancel.title)
-                    .tint(.purple)
+                    .tint(.flexaTintColor)
                     .font(.body.weight(.semibold))
             }
         }.padding(.bottom, 20)

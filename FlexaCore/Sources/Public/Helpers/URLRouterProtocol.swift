@@ -23,7 +23,11 @@ public enum FlexaLink: Equatable {
 
     public static let howToPay = FlexaLink.webView(URL(string: CoreStrings.WebLinks.howToPay))
     public static let reportIssue = FlexaLink.webView(URL(string: CoreStrings.WebLinks.reportIssue))
-    public static let merchantList = FlexaLink.brandWebView(URL(string: CoreStrings.WebLinks.merchantList))
+    public static let merchantList = FlexaLink.brandWebView(
+        URL(string: CoreStrings.WebLinks.merchantList(
+            FlexaConstants.Routing.flexaNetworkDomain
+        ))
+    )
 
     var path: String? {
         switch self {
@@ -62,7 +66,10 @@ public enum FlexaLink: Equatable {
 
     public static func merchantLocations(_ slug: String) -> FlexaLink {
         .brandWebView(
-            URL(string: CoreStrings.WebLinks.merchantLocations(CoreStrings.WebLinks.merchantList, slug))
+            URL(string: CoreStrings.WebLinks.merchantLocations(
+                CoreStrings.WebLinks.merchantList(FlexaConstants.Routing.flexaNetworkDomain),
+                slug)
+            )
         )
     }
 }

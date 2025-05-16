@@ -1,8 +1,9 @@
 import Foundation
 import SwiftUI
 import FlexaUICore
+import SVGView
 
-struct LegacyFlexcodeModal: View {
+public struct LegacyFlexcodeModal: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.theme) var theme
     @Environment(\.openURL) private var openURL
@@ -18,25 +19,21 @@ struct LegacyFlexcodeModal: View {
     private var value: String
     private var brand: Brand?
 
-    private var gradientStops: [Gradient.Stop] {
-        [
-            Gradient.Stop(color: viewModel.brandColor, location: 0.0),
-            Gradient.Stop(color: viewModel.brandColor, location: 0.5),
-            Gradient.Stop(color: viewModel.brandColor.opacity(0), location: 0.5),
-            Gradient.Stop(color: viewModel.brandColor.shiftingHue(by: 10).opacity(0.53), location: 1)
-        ]
-    }
-
     private var backgroundColor: Color {
         theme.views.sheet.backgroundColor
     }
 
-    init(isShowing: Binding<Bool>,
-         authorization: CommerceSessionAuthorization,
-         value: String,
-         brand: Brand?,
-         didConfirm: Closure?,
-         didCancel: Closure?
+    private var flexaSvgUrl: URL? {
+        let svgName = colorScheme == .dark ? "flexa-white" : "flexa"
+        return Bundle.coreBundle.svgBundle.url(forResource: svgName, withExtension: "svg")
+    }
+
+    public init(isShowing: Binding<Bool>,
+                authorization: CommerceSessionAuthorization,
+                value: String,
+                brand: Brand?,
+                didConfirm: Closure?,
+                didCancel: Closure?
     ) {
         _isShowing = isShowing
         _viewModel = StateObject(
@@ -51,11 +48,8 @@ struct LegacyFlexcodeModal: View {
         self.brand = brand
     }
 
-    var body: some View {
+    public var body: some View {
         SpendDragModalView(
-            titleColor: Asset.flexaIdTitle.swiftUIColor,
-            grabberColor: Asset.commonGrabber.swiftUIColor,
-            closeButtonColor: Asset.commonCloseButton.swiftUIColor,
             isShowing: $isShowing,
             minHeight: 568,
             enableBlur: true,
@@ -76,19 +70,16 @@ struct LegacyFlexcodeModal: View {
     var leftHeaderView: some View {
         HStack(spacing: 8) {
             RoundedRectangle(cornerRadius: 4.6)
-                .fill(
-                    AngularGradient(
-                        stops: gradientStops,
-                        center: .center,
-                        startAngle: .degrees(-180),
-                        endAngle: .degrees(540)
-                    )
-                )
+                .fill(AngularGradient(colors: [.white, viewModel.brandColor], center: .center, angle: .degrees(180)))
                 .frame(width: 24, height: 24)
-            Text(L10n.Common.flexa)
-                .font(.title2.weight(.bold))
+            if let flexaSvgUrl {
+                SVGView(contentsOf: flexaSvgUrl)
+                    .frame(width: 52, height: 17)
+            } else {
+                Text(CoreStrings.Global.flexa)
+                    .font(.title2.bold())
+            }
         }
-
     }
 
     @ViewBuilder
@@ -103,8 +94,9 @@ struct LegacyFlexcodeModal: View {
     }
 }
 
-struct LegacyFlexcodeContentView: View {
+public struct LegacyFlexcodeContentView: View {
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.theme) var theme
 
     public typealias Closure = () -> Void
     public var didSelect: Closure?
@@ -115,7 +107,21 @@ struct LegacyFlexcodeContentView: View {
     @State private var shouldCreateFlexcode = true
     @State private var showHelp = false
 
-    var body: some View {
+    public init(didSelect: Closure? = nil,
+                value: String,
+                didConfirm: Closure? = nil,
+                viewModel: LegacyFlexcodeViewModel,
+                shouldCreateFlexcode: Bool = true,
+                showHelp: Bool = false) {
+        self.didSelect = didSelect
+        self.value = value
+        self.didConfirm = didConfirm
+        self._viewModel = StateObject(wrappedValue: viewModel)
+        self.shouldCreateFlexcode = shouldCreateFlexcode
+        self.showHelp = showHelp
+    }
+
+    public var body: some View {
         VStack(spacing: .stackSpacing) {
                 ZStack(alignment: .center) {
                     RemoteImageView(
@@ -134,13 +140,13 @@ struct LegacyFlexcodeContentView: View {
                         }
                     )
                 }.padding(.bottom, .listItemSpacing)
-                Text(L10n.Payment.payMerchant(viewModel.brandName))
+                Text(CoreStrings.Payment.payMerchant(viewModel.brandName))
                     .multilineTextAlignment(.center)
                     .font(.title3.weight(.semibold))
                     .foregroundColor(.primary.opacity(.colorOpacity))
                 Text(value)
                     .multilineTextAlignment(.center)
-                    .font(.system(size: .titleExtra, weight: .bold))
+                    .font(.system(size: .titleExtra, weight: .bold, design: .rounded))
                     .foregroundColor(.primary)
                     .padding(.bottom, .listItemSpacing)
                 VStack {
@@ -150,7 +156,13 @@ struct LegacyFlexcodeContentView: View {
                                 pdf417Image: $viewModel.pdf417Image,
                                 code128Image: $viewModel.code128Image,
                                 gradientMiddleColor: viewModel.brandColor
-                            )
+                            ).preventScreenshot(backgroundColor: theme.views.sheet.backgroundColor) {
+                                FlexcodeView(
+                                    pdf417Image: $viewModel.privatePdf417Image,
+                                    code128Image: $viewModel.privateCode128Image,
+                                    gradientMiddleColor: viewModel.brandColor
+                                ).offset(x: 0, y: 0)
+                            }.offset(x: 0, y: 4)
                         } else {
                             FlexcodeView.placeholder
                             Button {

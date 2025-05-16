@@ -26,10 +26,19 @@ public final class FlexaSpend: UniversalLinkHandlerProtocol {
         }
     }
 
+    /// Block that will be called when an update on a payment authorization happens
+    ///
+    /// This block/callback will be used by FlexaSpend to notify the parent application about the authorization change
+    public var onPaymentAuthorizationCallback: Flexa.PaymentAuthorizationCallback? {
+        didSet {
+            viewModel.onPaymentAuthorization = onPaymentAuthorizationCallback
+        }
+    }
+
     private init() {
         auth = Flexa
             .buildIdentity()
-            .delayCallbacks(false)
+            .delayCallbacks(true)
             .onResult { result in
                 self.showPaymentOrAuth(result: result, allowSignIn: false)
             }
@@ -41,7 +50,7 @@ public final class FlexaSpend: UniversalLinkHandlerProtocol {
     /// If the user is already signed in then it will open the payment screen.
     /// If the user is not signed in the it will open the sign in/sign up screens.
     public func open() {
-        appStateManager.closeCommerceSessionOnDismissal = true
+        appStateManager.resetState()
         guard Flexa.canSpend else {
             FlexaLogger.error(L10n.Errors.RestrictedRegion.message)
             FlexaIdentity.showRestrictedRegionView()
@@ -56,26 +65,8 @@ public final class FlexaSpend: UniversalLinkHandlerProtocol {
     ///
     /// The returned view could be embedded inside other views.
     public func createView() -> some View {
-        createView(addModalHandling: false)
-    }
-
-    public static func transactionSent(commerceSessionId: String, signature: String) {
-        FlexaLogger.commerceSessionLogger.debug("Flexa.transactionSent(cs: \(commerceSessionId), hash: \(signature))")
-        Container
-            .shared
-            .appStateManager()
-            .signTransaction(
-                commerceSessionId: commerceSessionId,
-                signature: signature
-            )
-    }
-
-    public static func transactionFailed(commerceSessionId: String) {
-        FlexaLogger.commerceSessionLogger.debug("Flexa.transactionFailed(cs: \(commerceSessionId))")
-        Container
-            .shared
-            .appStateManager()
-            .closeCommerceSession(commerceSessionId: commerceSessionId)
+        viewModel.isStandAlone = false
+        return createView(addModalHandling: false, isStandAlone: false)
     }
 
     /// Opens FlexaSpend's main screen, if the user is already signed in, or the sign in/sign up screen otherwise
@@ -92,7 +83,7 @@ public final class FlexaSpend: UniversalLinkHandlerProtocol {
             switch result {
                 case .connected:
                 UIViewController.showViewOnTop(
-                    self.createView(addModalHandling: true)
+                    self.createView(addModalHandling: true, isStandAlone: true)
                 )
                 case .notConnected:
                     self.auth.open()
@@ -153,6 +144,15 @@ public extension FlexaSpend {
             return self
         }
 
+        /// Specifies the callback to be called by FlexaSpend when an update happens on a payment authorization
+        /// - parameter callback: Will be invoked by FlexaSpend when an update on the payment authrization is detected
+        /// - returns self instance in order to chain other methods
+        @discardableResult
+        public func onPaymentAuthorization(_ callback: @escaping Flexa.PaymentAuthorizationCallback) -> Self {
+            self.safeSpend.onPaymentAuthorizationCallback = callback
+            return self
+        }
+
         /// Builds a new instance of FlexaSpend based on the configuration specified by the other builder methods (`assetConfig`, `themeConfig`, callbacks)
         public func build() -> FlexaSpend {
             assetsRepository.backgroundRefresh()
@@ -183,19 +183,11 @@ public extension Flexa {
     static func buildSpend() -> FlexaSpend.Builder {
         return FlexaSpend.Builder()
     }
-
-    static func transactionSent(commerceSessionId: String, signature: String) {
-        FlexaSpend.transactionSent(commerceSessionId: commerceSessionId, signature: signature)
-    }
-
-    static func transactionFailed(commerceSessionId: String) {
-        FlexaSpend.transactionFailed(commerceSessionId: commerceSessionId)
-    }
 }
 
 // MARK: View Wrappers and Environment Objects
 private extension FlexaSpend {
-    private func createView(addModalHandling: Bool) -> some View {
+    private func createView(addModalHandling: Bool, isStandAlone: Bool) -> some View {
         guard Flexa.canSpend else {
             FlexaLogger.error(L10n.Errors.RestrictedRegion.message)
             return AnyView(EmptyView())
@@ -203,11 +195,14 @@ private extension FlexaSpend {
         return AnyView(
             ZStack(alignment: .center) {
                 if addModalHandling {
-                    MainViewWrapperWithModalHandling(spend: self) {
+                    MainViewWrapperWithModalHandling(isStandAlone: isStandAlone) {
                         SpendView(viewModel: self.viewModel)
+                            .onAppear {
+                                self.viewModel.startWatchingEvents()
+                            }
                     }
                 } else {
-                    MainViewWrapper(spend: self) {
+                    MainViewWrapper(isStandAlone: isStandAlone) {
                         SpendView(viewModel: self.viewModel)
                     }
                 }
@@ -225,20 +220,20 @@ private extension FlexaSpend {
     }
 
     struct MainViewWrapperWithModalHandling<Content: View>: View {
-        @StateObject var modalState = SpendModalState()
+        @StateObject var flexaState = Container.shared.flexaState()
         @StateObject var linkData: UniversalLinkData = Container.shared.universalLinkData()
+        private var isStandalone: Bool
 
-        var spend: FlexaSpend
         var content: () -> Content
 
-        init(spend: FlexaSpend, @ViewBuilder content: @escaping () -> Content) {
-            self.spend = spend
+        init(isStandAlone: Bool, @ViewBuilder content: @escaping () -> Content) {
+            self.isStandalone = isStandAlone
             self.content = content
         }
 
         var body: some View {
-            MainViewWrapper(spend: spend, content: content)
-                .environmentObject(modalState)
+            MainViewWrapper(isStandAlone: isStandalone, content: content)
+                .environmentObject(flexaState)
                 .flexaHandleUniversalLink()
                 .environmentObject(linkData)
         }
@@ -249,8 +244,8 @@ private extension FlexaSpend {
         @Injected(\.flexaClient) var flexaClient
         @Environment(\.colorScheme) var colorScheme
         @Environment(\.dismiss) var dismiss
+        private var isStandalone: Bool
 
-        var spend: FlexaSpend
         var content: () -> Content
 
         var body: some View {
@@ -261,13 +256,15 @@ private extension FlexaSpend {
                 .theme(flexaClient.theme)
                 .cornerRadius(flexaClient.theme.views.primary.borderRadius, corners: [.topLeft, .topRight])
                 .onAuthorizationError {
-                    FlexaIdentity.disconnect()
-                    dismiss()
+                    if isStandalone {
+                        FlexaIdentity.disconnect()
+                        dismiss()
+                    }
                 }
         }
 
-        init(spend: FlexaSpend, @ViewBuilder content: @escaping () -> Content) {
-            self.spend = spend
+        init(isStandAlone: Bool, @ViewBuilder content: @escaping () -> Content) {
+            self.isStandalone = isStandAlone
             self.content = content
         }
     }

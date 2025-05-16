@@ -22,6 +22,7 @@ class AppStateManager: AppStateManagerProtocol {
     @Injected(\.eventNotifier) var eventNotifier
     @Injected(\.flexaClient) var flexaClient
     @Injected(\.userDefaults) var userDefaults
+    @Injected(\.flexaState) var flexaState
 
     @Synchronized var closeCommerceSessionOnDismissal: Bool = true
     private let notificationCenter = NotificationCenter.default
@@ -48,10 +49,13 @@ class AppStateManager: AppStateManagerProtocol {
             name: UIApplication.didEnterBackgroundNotification,
             object: nil
         )
+
+        eventNotifier.addObserver(self, selector: #selector(appDidEnterBackground), name: .assetAccountsDidChange)
     }
 
     deinit {
         notificationCenter.removeObserver(self)
+        eventNotifier.removeObserver(self)
     }
 
     @objc func appDidBecomeActive() {
@@ -60,6 +64,21 @@ class AppStateManager: AppStateManagerProtocol {
 
     @objc func appDidEnterBackground() {
         stopTimer()
+    }
+
+    @objc func handleAccountsDidUpdate() {
+        Task {
+            do {
+                try await exchangeRateRepository.refresh()
+            } catch let error {
+                FlexaLogger.error(error)
+            }
+        }
+    }
+
+    func resetState() {
+        closeCommerceSessionOnDismissal = true
+        flexaState.reset()
     }
 
     func backgroundRefresh() {
@@ -98,9 +117,7 @@ class AppStateManager: AppStateManagerProtocol {
     }
 
     func signTransaction(commerceSessionId: String, signature: String) {
-        DispatchQueue.main.async {
-            self.eventNotifier.post(name: .transactionSent)
-        }
+        self.eventNotifier.post(name: .transactionSent)
 
         guard let transactionId = unsignedTransactions[commerceSessionId] else {
             return

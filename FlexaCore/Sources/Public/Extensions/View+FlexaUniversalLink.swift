@@ -18,6 +18,8 @@ public extension View {
 public struct FlexaUniversalLinkHandlerModifier: ViewModifier {
     @EnvironmentObject var linkData: UniversalLinkData
     @Environment(\.openURL) private var openURL
+    @Environment(\.colorScheme) var colorScheme
+    @Injected(\.flexaClient) private var flexaClient
     @Injected(\.urlRouter) var urlRouter
     @State var isShowingWebView: Bool = false
     @State var isShowingFlexaAccountSheet = false
@@ -33,13 +35,17 @@ public struct FlexaUniversalLinkHandlerModifier: ViewModifier {
     public func body(content: Content) -> some View {
         content
             .sheet(isPresented: $isShowingWebView) {
-                FlexaWebView(url: url).ignoresSafeArea()
+                FlexaWebView(url: url)
+                    .colorScheme(flexaClient.theme.interfaceStyle.colorSheme ?? colorScheme)
+                    .ignoresSafeArea()
             }
             .sheet(isPresented: $isShowingFlexaAccountSheet) {
-                AccountView()
+                AccountView().colorScheme(flexaClient.theme.interfaceStyle.colorSheme ?? colorScheme)
             }
             .sheet(isPresented: $isShowingBrandDirectory) {
-                BrandView().ignoresSafeArea()
+                BrandView()
+                    .colorScheme(flexaClient.theme.interfaceStyle.colorSheme ?? colorScheme)
+                    .ignoresSafeArea()
             }
             .environment(\.openURL, OpenURLAction { url in
                 handleUrl(url) ? .handled : .systemAction(url)

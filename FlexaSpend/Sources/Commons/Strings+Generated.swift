@@ -10,12 +10,6 @@ import Foundation
 // swiftlint:disable explicit_type_interface function_parameter_count identifier_name line_length
 // swiftlint:disable nesting type_body_length type_name vertical_whitespace_opening_braces
 internal enum L10n {
-  internal enum AssetSwitcher {
-    internal enum UsingFlexaAccount {
-      /// Using your Flexa Account
-      internal static let title = L10n.tr("Localizable", "asset_switcher.using_flexa_account.title", fallback: "Using your Flexa Account")
-    }
-  }
   internal enum Common {
     /// Cancel
     internal static let cancel = L10n.tr("Localizable", "common.cancel", fallback: "Cancel")
@@ -46,42 +40,6 @@ internal enum L10n {
         /// Tips for Using Flexcodes at %@
         internal static func title(_ p1: Any) -> String {
           return L10n.tr("Localizable", "legacy_flexcode.alerts.scan_help.title", String(describing: p1), fallback: "Tips for Using Flexcodes at %@")
-        }
-      }
-    }
-    internal enum AmountEntry {
-      internal enum Buttons {
-        internal enum BalanceUnavailable {
-          /// Balance Not Yet Available
-          internal static let title = L10n.tr("Localizable", "legacy_flexcode.amount_entry.buttons.balance_unavailable.title", fallback: "Balance Not Yet Available")
-        }
-        internal enum Payment {
-          internal enum Confirm {
-            /// Confirm
-            internal static let title = L10n.tr("Localizable", "legacy_flexcode.amount_entry.buttons.payment.confirm.title", fallback: "Confirm")
-          }
-          internal enum EnterAmount {
-            /// Enter Amount
-            internal static let title = L10n.tr("Localizable", "legacy_flexcode.amount_entry.buttons.payment.enter_amount.title", fallback: "Enter Amount")
-          }
-        }
-      }
-      internal enum Labels {
-        /// Maximum Amount: %s
-        internal static func maximumAmount(_ p1: UnsafePointer<CChar>) -> String {
-          return L10n.tr("Localizable", "legacy_flexcode.amount_entry.labels.maximum_amount", p1, fallback: "Maximum Amount: %s")
-        }
-        /// Minimum Amount: %s
-        internal static func minimumAmount(_ p1: UnsafePointer<CChar>) -> String {
-          return L10n.tr("Localizable", "legacy_flexcode.amount_entry.labels.minimum_amount", p1, fallback: "Minimum Amount: %s")
-        }
-      }
-    }
-    internal enum Promotions {
-      internal enum Labels {
-        /// Saving %s
-        internal static func saving(_ p1: UnsafePointer<CChar>) -> String {
-          return L10n.tr("Localizable", "legacy_flexcode.promotions.labels.saving", p1, fallback: "Saving %s")
         }
       }
     }
@@ -155,10 +113,6 @@ internal enum L10n {
     internal static let done = L10n.tr("Localizable", "payment.done", fallback: "Done")
     /// Login to authorize the transaction.
     internal static let errorLoginToAuthorize = L10n.tr("Localizable", "payment.error_login_to_authorize", fallback: "Login to authorize the transaction.")
-    /// Pay %s
-    internal static func payMerchant(_ p1: UnsafePointer<CChar>) -> String {
-      return L10n.tr("Localizable", "payment.pay_merchant", p1, fallback: "Pay %s")
-    }
     internal enum Asset {
       internal enum ExchangeRate {
         /// %s %s

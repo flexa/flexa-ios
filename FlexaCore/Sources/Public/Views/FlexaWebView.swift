@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FlexaUICore
 
 public struct FlexaWebView: View {
     let url: URL?
@@ -25,7 +26,7 @@ public struct FlexaWebView: View {
                     WebViewWrapper(url: url, isLoading: $isLoading, error: $error)
                 }
                 if isLoading {
-                    ProgressView().tint(.purple)
+                    ProgressView().tint(.flexaTintColor)
                 } else if error != nil {
                     VStack(spacing: 20) {
                         Text(CoreStrings.Webview.Errors.Load.title)
@@ -37,7 +38,7 @@ public struct FlexaWebView: View {
                                 Text(CoreStrings.Webview.Buttons.Retry.title)
                             } icon: {
                                 Image(systemName: "arrow.clockwise")
-                            }.foregroundColor(.purple)
+                            }.foregroundColor(.flexaTintColor)
                         }
                     }
                 }

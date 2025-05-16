@@ -8,7 +8,6 @@
 
 import Foundation
 import SwiftUI
-import FlexaCore
 
 public struct SpendModalView<Content: View>: View {
     public typealias CloseClosure = () -> Void

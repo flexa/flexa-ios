@@ -157,6 +157,7 @@ class BrandViewController: UIViewController {
         activityIndicator = UIActivityIndicatorView(style: .medium)
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         activityIndicator.hidesWhenStopped = true
+        activityIndicator.color = UIColor(flexaClient.theme.tintColor)
 
         view.addSubview(activityIndicator)
 

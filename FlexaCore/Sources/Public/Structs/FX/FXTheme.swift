@@ -39,8 +39,11 @@ public struct FXTheme: FlexaThemable {
         case webView = "webViewThemeConfig"
     }
 
+    private static let defaultTintColor = Color.purple
+
     /// Indicates the interface style the sdk will display (`light`, `dark` or `automatic`)
     public var interfaceStyle: InterfaceStyle
+    public var tintColor: Color
     public var views: Views
     public var webView: FXTheme.WebView = WebView()
     public var containers: Containers
@@ -93,11 +96,17 @@ public struct FXTheme: FlexaThemable {
             theme.colors = newColors
         }
 
+        if let tintColorString = dictionary["tintColor"] as? String, let tintColor = UIColor(string: tintColorString) {
+            theme.tintColor = Color(uiColor: tintColor)
+        } else {
+            theme.tintColor = theme.colorBy(name: "tintColor", fallbackColor: Self.defaultTintColor)
+        }
         return theme
     }
 
     init() {
         interfaceStyle = .automatic
+        tintColor = Self.defaultTintColor
         views = .default
         containers = .default
         tables = .default
@@ -106,6 +115,7 @@ public struct FXTheme: FlexaThemable {
     }
 
     public init(interfaceStyle: InterfaceStyle = .automatic,
+                tintColor: Color? = nil,
                 views: Views = .default,
                 containers: Containers = .default,
                 tables: Tables = .default,
@@ -116,6 +126,7 @@ public struct FXTheme: FlexaThemable {
         self.tables = tables
         self.webView = FXTheme.WebView()
         self.colors = colors
+        self.tintColor = tintColor ?? colors["tintColor"] ?? Self.defaultTintColor
     }
 
     // swiftlint:disable line_length
@@ -126,6 +137,17 @@ public struct FXTheme: FlexaThemable {
         self.containers = try container.decodeIfPresent(Containers.self, forKey: CodingKeys.containers) ?? Self.default.containers
         self.tables = try container.decodeIfPresent(Tables.self, forKey: CodingKeys.tables) ?? Self.default.tables
         self.colors = [:]
+        self.tintColor = Self.defaultTintColor
+    }
+
+    public mutating func loadFrom(_ theme: FXTheme) {
+        self.interfaceStyle = theme.interfaceStyle
+        self.tintColor = theme.tintColor
+        self.views = theme.views
+        self.containers = theme.containers
+        self.tables = theme.tables
+        self.colors = theme.colors
+        self.webView = theme.webView
     }
 
     // swiftlint:enable line_length

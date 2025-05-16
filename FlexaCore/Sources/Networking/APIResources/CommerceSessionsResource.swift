@@ -15,16 +15,18 @@ enum CommerceSessionResource: FlexaAPIResource, JWTAuthenticable {
     case get(String)
     case watch([String])
     case setPaymentAsset(String, SetPaymentAssetInput)
+    case setAmount(String, SetAmountInput)
     case close(String)
     case approve(String)
 
     private static let idUrlParameter = ":id"
+    private static let resourcePath = "/commerce_sessions"
 
     var method: RequestMethod {
         switch self {
         case .watch, .get:
             return .get
-        case .setPaymentAsset:
+        case .setPaymentAsset, .setAmount:
             return .patch
         default:
             return .post
@@ -49,13 +51,13 @@ enum CommerceSessionResource: FlexaAPIResource, JWTAuthenticable {
         case .watch:
             return "/events"
         case .create:
-            return "/commerce_sessions"
-        case .setPaymentAsset, .get:
-            return "/commerce_sessions/\(Self.idUrlParameter)"
+            return Self.resourcePath
+        case .setPaymentAsset, .get, .setAmount:
+            return "\(Self.resourcePath)/\(Self.idUrlParameter)"
         case .close:
-            return "/commerce_sessions/\(Self.idUrlParameter)/close"
+            return "\(Self.resourcePath)/\(Self.idUrlParameter)/close"
         case .approve:
-            return "/commerce_sessions/\(Self.idUrlParameter)/approve"
+            return "\(Self.resourcePath)/\(Self.idUrlParameter)/approve"
         }
     }
 
@@ -79,12 +81,14 @@ enum CommerceSessionResource: FlexaAPIResource, JWTAuthenticable {
             return input.dictionary
         case .setPaymentAsset(_, let input):
             return input.dictionary
+        case .setAmount(_, let input):
+            return input.dictionary
         }
     }
 
     var pathParams: [String: String]? {
         switch self {
-        case .close(let id), .setPaymentAsset(let id, _), .get(let id), .approve(let id):
+        case .close(let id), .setPaymentAsset(let id, _), .get(let id), .approve(let id), .setAmount(let id, _):
             return [Self.idUrlParameter: id]
         default:
             return nil
@@ -105,6 +109,8 @@ enum CommerceSessionResource: FlexaAPIResource, JWTAuthenticable {
             ReasonableError(reason: .cannotApproveCommerceSession(error))
         case .setPaymentAsset:
             ReasonableError(reason: .cannotSetCommerceSessionPaymentAsset(error))
+        case .setAmount:
+            ReasonableError(reason: .cannotSetCommerceSessionAmount(error))
         }
     }
 }

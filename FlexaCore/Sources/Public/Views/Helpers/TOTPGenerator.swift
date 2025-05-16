@@ -9,7 +9,7 @@
 import Foundation
 import CryptoKit
 
-enum HMACAlgorithm: String, CaseIterable {
+public enum HMACAlgorithm: String, CaseIterable {
     case sha1, sha256, sha512
 
     func authenticate(_ data: Data, using key: SymmetricKey) -> Data {
@@ -27,7 +27,7 @@ enum HMACAlgorithm: String, CaseIterable {
     }
 }
 
-protocol TOTPGeneratorProtocol {
+public protocol TOTPGeneratorProtocol {
     init(secret: Data, digits: Int, timeInterval: Int, algorithm: HMACAlgorithm)
     func generate(secondsSince1970: Int) -> String?
 }

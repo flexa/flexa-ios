@@ -11,8 +11,13 @@ import Foundation
 public enum CommerceSessionStatus: String {
     case completed, unknown, closed
     case requiresPaymentAsset = "requires_payment_asset"
+    case requiresAmount = "requires_amount"
     case requiresTransaction = "requires_transaction"
     case requiresApproval = "requires_approval"
+}
+
+public enum CommerceSessionAuthorizationStatus: String {
+    case failed, pending, succeeded
 }
 
 public protocol CommerceSession {
@@ -38,6 +43,7 @@ public protocol CommerceSessionAuthorization {
     var instructions: String? { get }
     var number: String { get }
     var details: String? { get }
+    var status: CommerceSessionAuthorizationStatus { get }
 }
 
 public protocol CommerceSessionCredit {

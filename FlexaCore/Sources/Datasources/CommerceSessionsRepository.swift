@@ -31,8 +31,15 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
         }
     }
 
+    @Synchronized
+    private var wasWatching = false
+
     private var watchAPIResource: FlexaAPIResource {
-        CommerceSessionResource.watch(SSECommerceSessionEvent.allCases.map({ $0.rawValue }))
+        CommerceSessionResource.watch(
+            SSECommerceSessionEvent
+                .allCases
+                .filter({ $0 != .requiresAmount })
+                .map({ $0.rawValue }))
     }
 
     init() {
@@ -125,10 +132,11 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
         current = nil
     }
 
-    func close(_ id: String) async throws {
-        try await networkClient.sendRequest(
+    func close(_ id: String) async throws -> CommerceSession {
+        let commerceSession: Models.CommerceSession = try await networkClient.sendRequest(
             resource: CommerceSessionResource.close(id)
         )
+        return commerceSession
     }
 
     func approve(_ id: String) async throws {
@@ -139,6 +147,7 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
 
     func watch(currentOnly: Bool, onEvent: @escaping (Result<CommerceSessionEvent, Error>) -> Void) {
         watchCurrentOnly = currentOnly
+        sseClient?.disconnect()
         guard var sseClient = Container.shared.sseClient((watchAPIResource, timeoutInterval)) else {
             FlexaLogger.commerceSessionLogger.error("Cannot create an SSEClient for \(watchAPIResource)")
             return
@@ -146,6 +155,7 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
 
         self.sseClient = sseClient
         self.onEvent = onEvent
+        self.wasWatching = true
 
         SSECommerceSessionEvent.allCases.forEach { event in
             sseClient.addListener(for: event.rawValue, handler: eventHandler)
@@ -180,6 +190,7 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
         sseClient?.disconnect()
         lastEventId = nil
         sseClient = nil
+        wasWatching = false
     }
 
     func setPaymentAsset(commerceSessionId id: String, assetId: String) async throws {
@@ -187,6 +198,15 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
             resource: CommerceSessionResource.setPaymentAsset(
                 id,
                 SetPaymentAssetInput(paymentAssetId: assetId)
+            )
+        )
+    }
+
+    func setAmount(commerceSessionId id: String, amount: Decimal, assetId: String) async throws {
+        try await networkClient.sendRequest(
+            resource: CommerceSessionResource.setAmount(
+                id,
+                SetAmountInput(amount: amount, paymentAssetId: assetId)
             )
         )
     }
@@ -209,7 +229,9 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
         do {
             let event = try Models.Event<Models.CommerceSession>(data)
             let commerceSessionEvent = sseCommerceSessionEvent.commerceSessionEvent(event.data)
-            onEvent(.success(commerceSessionEvent))
+            if shouldNotifyEvent(event) {
+                onEvent(.success(commerceSessionEvent))
+            }
         } catch let error {
             FlexaLogger.commerceSessionLogger.error(error)
             onEvent(.failure(error))
@@ -251,7 +273,7 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
     }
 
     @objc func appDidBecomeActive() {
-        guard let sseClient else {
+        guard let sseClient, wasWatching else {
             return
         }
         FlexaLogger.commerceSessionLogger.debug("Resuming event watching")
@@ -274,6 +296,7 @@ class CommerceSessionsRepository: CommerceSessionsRepositoryProtocol {
 enum SSECommerceSessionEvent: String, CaseIterable {
     case created = "commerce_session.created"
     case requiresTransaction = "commerce_session.requires_transaction"
+    case requiresAmount = "commerce_session.requires_amount"
     case requiresApproval = "commerce_session.requires_approval"
     case closed = "commerce_session.closed"
     case completed = "commerce_session.completed"
@@ -284,6 +307,8 @@ enum SSECommerceSessionEvent: String, CaseIterable {
             return .created(session)
         case .requiresTransaction:
             return .requiresTransaction(session)
+        case .requiresAmount:
+            return .requiresAmount(session)
         case .requiresApproval:
             return .requiresApproval(session)
         case .completed:

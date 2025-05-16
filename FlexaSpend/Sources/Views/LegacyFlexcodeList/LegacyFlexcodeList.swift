@@ -43,7 +43,7 @@ struct LegacyFlexcodeList: View {
                 } label: {
                     Text(L10n.LegacyFlexcodeTray.EditButton.title)
                         .font(.subheadline)
-                        .foregroundColor(.purple)
+                        .foregroundColor(.flexaTintColor)
                 }.padding(.trailing, .editButtonTrailingPadding)
             }
             ScrollView(.horizontal, showsIndicators: false) {

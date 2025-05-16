@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FlexaUICore"
-  s.version      = "1.0.10"
+  s.version      = "1.1.0"
   s.summary      = "Spend UI"
   s.description  = "Spend UI module by Flexa"
   s.homepage     = "https://github.com/flexa/flexa-ios"
@@ -15,8 +15,7 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/flexa/flexa-ios", :tag => s.version }
   s.source_files = 'FlexaUICore/Sources/**/*.{swift}'
 
-  s.dependency 'FlexaCore', "~> #{s.version}"
-  s.dependency 'SwiftUIIntrospect', "~> 0.12.0"
+  s.dependency 'SwiftUIIntrospect', "~> 1.3.0"
 
   s.test_spec 'Tests' do |test_spec|
     test_spec.source_files = 'FlexaUICore/Tests/**/*.{swift}'

@@ -33,18 +33,8 @@ public extension View {
         onNotification(.transactionSent, perform: perform, notificationCenter: flexaNotificationCenter)
     }
 
-    func onPaymentLink(_ perform: @escaping (_: URL) -> Void) -> some View {
-        onNotification(
-            .paymentLinkDetected,
-            perform: { notification in
-                guard let url = notification.userInfo?.values.first as? URL,
-                      case .paymentLink = url.flexaLink else {
-                    return
-                }
-                perform(url)
-            },
-            notificationCenter: flexaNotificationCenter
-        )
+    func onSpendSelected(_ perform: @escaping NotificationHandler) -> some View {
+        onNotification(.flexaComponentSpendSelected, perform: perform, notificationCenter: flexaNotificationCenter)
     }
 
     func onNotification(

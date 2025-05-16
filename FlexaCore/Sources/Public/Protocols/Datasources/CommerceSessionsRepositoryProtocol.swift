@@ -12,6 +12,7 @@ public enum CommerceSessionEvent {
     case created(CommerceSession)
     case requiresTransaction(CommerceSession)
     case requiresApproval(CommerceSession)
+    case requiresAmount(CommerceSession)
     case completed(CommerceSession)
     case closed(CommerceSession)
 
@@ -20,6 +21,7 @@ public enum CommerceSessionEvent {
         case .created(let commerceSession),
                 .requiresTransaction(let commerceSession),
                 .requiresApproval(let commerceSession),
+                .requiresAmount(let commerceSession),
                 .completed(let commerceSession),
                 .closed(let commerceSession):
             return commerceSession
@@ -38,9 +40,10 @@ public protocol CommerceSessionsRepositoryProtocol {
     )
     func setCurrent(_ commerceSession: CommerceSession?, isLegacy: Bool, wasTransactionSent: Bool)
     func clearCurrent()
-    func close(_ id: String) async throws
+    func close(_ id: String) async throws -> CommerceSession
     func approve(_ id: String) async throws
     func setPaymentAsset(commerceSessionId: String, assetId: String) async throws
+    func setAmount(commerceSessionId: String, amount: Decimal, assetId: String) async throws
     func stopWatching()
     func create(brand: Brand, amount: Decimal, assetId: String, paymentAssetId: String) async throws -> CommerceSession
     func create(paymentLink: URL, paymentAssetId: String) async throws -> CommerceSession

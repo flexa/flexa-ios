@@ -8,7 +8,7 @@
 
 import Foundation
 
-public struct AssetAccount: Identifiable {
+public struct AssetAccount: Identifiable, Equatable {
     public let id: String
     public var assets: [AssetWrapper]
 

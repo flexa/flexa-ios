@@ -72,11 +72,9 @@ public class AssetSelectionViewModel: ObservableObject, Identifiable {
     }
 
     required public init(_ assetAccounts: [AssetAccount],
-                         _ hideShortBalances: Bool,
                          _ amount: Decimal,
                          _ selectedAsset: AssetWrapper?) {
         self.assetAccounts = assetAccounts
-        self.hideShortBalances = hideShortBalances
         self.amount = amount
         self.selectedAsset = selectedAsset
         self.account = accountRepository.account

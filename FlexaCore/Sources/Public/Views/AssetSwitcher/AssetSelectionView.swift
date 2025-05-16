@@ -105,7 +105,7 @@ struct AssetSelectionView: View {
     func showAssetInfo(_ asset: AssetWrapper, standAlone: Bool = false) {
         transactionAssetDetailsView = TransactionAssetDetailsView(
             showView: $showAssetsModal,
-            tintColor: asset.assetColor ?? .purple,
+            tintColor: asset.assetColor ?? .flexaTintColor,
             viewModel: TransactionAssetDetailsViewModel(
                 displayMode: .asset,
                 asset: asset,

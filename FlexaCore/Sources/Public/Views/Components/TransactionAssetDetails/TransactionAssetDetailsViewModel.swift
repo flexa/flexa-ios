@@ -213,7 +213,9 @@ public class TransactionAssetDetailsViewModel: ObservableObject {
     func updateExchangeRateLabels() {
         let maximumFractionDigits = asset.exchangeRate?.precision ?? 6
         if let exchange = asset.exchange {
-            let value = (decimalAmountWithDiscount / exchange).formatted(maximumFractionDigits: maximumFractionDigits)
+            let value = (decimalAmountWithDiscount / exchange)
+                .rounded(places: maximumFractionDigits)
+                .formatted(maximumFractionDigits: maximumFractionDigits)
             secondaryAmount = Strings.amount(value, asset.assetSymbol)
             exchangeRate = Strings.value(asset.assetSymbol, asset.exchangeRate?.label ?? exchange.asCurrency)
         }

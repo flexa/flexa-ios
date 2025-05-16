@@ -8,9 +8,13 @@
 
 import Foundation
 import SwiftUI
+import FlexaUICore
+import SVGView
+import Factory
 
 public struct PaymentClip: View {
     @Environment(\.colorScheme) var colorScheme
+    @Injected(\.flexaClient) var flexaClient
     public typealias Closure = () -> Void
     @Binding private var isShowing: Bool
     @Binding private var paymentDone: Bool
@@ -27,6 +31,7 @@ public struct PaymentClip: View {
     private var walletIconURL: String = ""
     private var merchantLogoUrl: URL?
     private var merchantName = ""
+    private var merchantColor: Color
     private var baseAmount: String
     private var fee: Fee?
     private var isLoading: Bool
@@ -38,24 +43,28 @@ public struct PaymentClip: View {
         Color(colorScheme == .dark ? .systemBackground : .secondarySystemBackground)
     }
 
-    private let gradientStops: [Gradient.Stop] = [
-            Gradient.Stop(color: Color(hex: "#80C3FF"), location: 0),
-            Gradient.Stop(color: Color(hex: "#308DFF"), location: 0.31),
-            Gradient.Stop(color: Color(hex: "#002EFF"), location: 0.5),
-            Gradient.Stop(color: Color(hex: "#FFFFFF"), location: 0.5),
-            Gradient.Stop(color: Color(hex: "#EBF0FF"), location: 0.62),
-            Gradient.Stop(color: Color(hex: "#80FFFE"), location: 0.91)
-    ]
+    private var flexaSvgUrl: URL? {
+        let svgName = colorScheme == .dark ? "flexa-white" : "flexa"
+        return Bundle.coreBundle.svgBundle.url(forResource: svgName, withExtension: "svg")
+    }
+
+    private var theme: FXTheme {
+        flexaClient.theme
+    }
 
     @ViewBuilder
     var leftHeaderView: some View {
         HStack(spacing: 8) {
             RoundedRectangle(cornerRadius: 4.6)
-                .fill(AngularGradient(gradient: Gradient(stops: gradientStops), center: .center))
+                .fill(AngularGradient(colors: [.white, merchantColor], center: .center, angle: .degrees(180)))
                 .frame(width: 24, height: 24)
-            Text("flexa")
-                .font(.title.bold())
-
+            if let flexaSvgUrl {
+                SVGView(contentsOf: flexaSvgUrl)
+                    .frame(width: 52, height: 17)
+            } else {
+                Text(CoreStrings.Global.flexa)
+                    .font(.title2.bold())
+            }
         }
     }
 
@@ -71,7 +80,7 @@ public struct PaymentClip: View {
         SpendDragModalView(titleColor: .primary,
                            grabberColor: Color(UIColor.systemGray4),
                            isShowing: $isShowing,
-                           minHeight: 436,
+                           minHeight: 418,
                            enableBlur: true,
                            backgroundColor: backgroundColor,
                            leftHeaderView: leftHeaderView,
@@ -91,6 +100,7 @@ public struct PaymentClip: View {
                                               amount: amount,
                                               merchantLogoUrl: merchantLogoUrl,
                                               merchantName: merchantName,
+                                              merchantColor: merchantColor,
                                               didConfirm: didConfirm)
         )
     }
@@ -108,6 +118,7 @@ public struct PaymentClip: View {
                 isUsingAccountBalance: Bool,
                 merchantLogoUrl: URL?,
                 merchantName: String,
+                merchantColor: Color?,
                 fee: Fee?,
                 didConfirm: Closure?,
                 didCancel: Closure?,
@@ -127,6 +138,7 @@ public struct PaymentClip: View {
         self.asset = asset
         self.merchantLogoUrl = merchantLogoUrl
         self.merchantName = merchantName
+        self.merchantColor = merchantColor ?? .flexaTintColor
         self.baseAmount = baseAmount
         self.fee = fee
         self.updateAsset()
@@ -152,6 +164,7 @@ public struct PaymentClip: View {
                 ZStack {}
                     .sheet(isPresented: $showTransactionDetails) {
                         transactionDetailsView(viewModel).presentationDetents(detents)
+                            .environment(\.colorScheme, colorScheme)
                     }
         } else {
             modal
@@ -172,7 +185,7 @@ public struct PaymentClip: View {
                 showView: $showTransactionDetails,
                 viewModel: viewModel
             )
-        }
+        }.environment(\.colorScheme, theme.interfaceStyle.colorSheme ?? colorScheme)
     }
 
     mutating func updateAsset() {
@@ -198,24 +211,27 @@ struct PayNowContentView: View {
     var amount: String = ""
     var merchantLogoUrl: URL?
     var merchantName = ""
+    var merchantColor: Color
     var didConfirm: Closure?
 
     var showUpdatingBalanceButton: Bool {
         !payButtonEnabled && !isLoading && asset.isUpdatingBalance && !asset.enoughBalance(for: value.decimalValue ?? 0)
     }
 
-    private let gradientStops: [Gradient.Stop] = [
-        Gradient.Stop(color: Color(hex: "#006CFF"), location: 0),
-        Gradient.Stop(color: Color(hex: "#2A00FF"), location: 0.51),
-        Gradient.Stop(color: Color(hex: "#7800FF"), location: 1)
-    ]
+    private var linearGradientColors: [Color] {
+        guard !showUpdatingBalanceButton else {
+            return [Color(UIColor.systemGray3)]
+        }
+        return [
+            merchantColor.shiftingHue(by: 10),
+            merchantColor,
+            merchantColor.shiftingHue(by: -10)
+        ]
+    }
 
     private var linearGradient: LinearGradient {
-        guard !showUpdatingBalanceButton else {
-            return LinearGradient(colors: [Color(UIColor.systemGray3)], startPoint: .leading, endPoint: .trailing)
-        }
-        return LinearGradient(
-            gradient: Gradient(stops: gradientStops),
+        LinearGradient(
+            gradient: Gradient(colors: linearGradientColors),
             startPoint: .leading,
             endPoint: .trailing
         )
@@ -248,11 +264,11 @@ struct PayNowContentView: View {
                 .padding(.bottom, 4)
                 Text(CoreStrings.Payment.payMerchant(merchantName))
                     .multilineTextAlignment(.center)
-                    .font(.body.weight(.semibold))
+                    .font(.title3.weight(.semibold))
                     .foregroundColor(.primary.opacity(0.4))
                 Text(value)
                     .multilineTextAlignment(.center)
-                    .font(.system(size: 48, weight: .bold))
+                    .font(.system(size: 48, weight: .bold, design: .rounded))
                     .foregroundColor(.primary)
                 VStack(spacing: paymentDone ? 10 : 18) {
                     if paymentDone {
@@ -275,7 +291,6 @@ struct PayNowContentView: View {
                         }.frame(idealHeight: 44)
                             .padding(.top, 10)
                             .disabled(!assetSwitcherEnabled)
-
                         ZStack {
                             Button {
                                 didConfirm?()
@@ -323,7 +338,7 @@ struct PayNowContentView: View {
             }.background(Color.clear)
                 .listRowBackground(Color.clear)
         }.listStyle(PlainListStyle())
-        .padding(.top, 16)
+        .padding(.top, 20)
         .alert(isPresented: $showUpdatingBalanceAlert) {
             UpdatingBalanceView.alert(asset.availableBalanceInLocalCurrency ?? 0)
         }

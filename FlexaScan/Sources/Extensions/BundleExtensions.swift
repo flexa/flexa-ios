@@ -16,4 +16,9 @@ extension Bundle {
         return Bundle(for: FlexaScan.self)
         #endif
     }
+
+    var assetsBundle: Bundle {
+        let bundleUrl = bundleURL.appendingPathComponent("FlexaScanAssets.bundle")
+        return Bundle(url: bundleUrl) ?? self
+    }
 }

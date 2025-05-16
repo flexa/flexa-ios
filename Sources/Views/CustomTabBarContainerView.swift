@@ -12,9 +12,10 @@ import Factory
 
 struct CustomTabBarContainerView<Content: View>: View {
     // MARK: - Instance properties
-    @EnvironmentObject var modalState: SpendModalState
+    @EnvironmentObject var flexaState: FlexaState
     @Binding var selection: TabBarItem
     @State private var tabs: [TabBarItem] = []
+    @Injected(\.appStateManager) var appStateManager
     let content: Content
 
     // MARK: - Initialization
@@ -28,10 +29,10 @@ struct CustomTabBarContainerView<Content: View>: View {
         ZStack(alignment: .bottom) {
             content
                 .ignoresSafeArea().zIndex(1)
-            if !modalState.visible {
+            if !flexaState.isModalVisible, flexaState.isPayWithFlexaEnabled {
                 CustomTabBarView(tabs: tabs, selection: $selection)
                     .transition(.opacity)
-                    .animation(.default, value: modalState.visible)
+                    .animation(.default, value: flexaState.isModalVisible)
                     .zIndex(2)
             }
         }

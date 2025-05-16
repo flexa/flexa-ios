@@ -12,32 +12,34 @@ import Factory
 import CoreImage.CIFilterBuiltins
 import Base32
 
-enum FlexcodeSymbology: Hashable {
+public enum FlexcodeSymbology: Hashable {
     case qr, pdf417, code128
     case custom(String)
 }
 
-struct Flexcode {
-    var code: String
-    var image: UIImage?
+public struct Flexcode {
+    public var code: String
+    public var image: UIImage?
 }
 
-protocol FlexcodeGeneratorProtocol {
+public protocol FlexcodeGeneratorProtocol {
     func flexcodes(for: OneTimeKey?, types: [FlexcodeSymbology], scale: CGFloat) -> [FlexcodeSymbology: Flexcode]
-    func flexcodes(forCode: String, types: [FlexcodeSymbology], scale: CGFloat) -> [FlexcodeSymbology: Flexcode]
+    func flexcodes(forCode: String, types: [FlexcodeSymbology], scale: CGFloat, useCache: Bool) -> [FlexcodeSymbology: Flexcode]
 }
 
-extension FlexcodeGeneratorProtocol {
+public extension FlexcodeGeneratorProtocol {
     func flexcodes(for key: OneTimeKey?) -> [FlexcodeSymbology: Flexcode] {
         flexcodes(for: key, types: [.pdf417, .code128], scale: 5)
     }
 
-    func flexcodes(forCode code: String) -> [FlexcodeSymbology: Flexcode] {
-        flexcodes(forCode: code, types: [.pdf417, .code128], scale: 5)
+    func flexcodes(forCode code: String, useCache: Bool = false) -> [FlexcodeSymbology: Flexcode] {
+        flexcodes(forCode: code, types: [.pdf417, .code128], scale: 5, useCache: false)
     }
 }
 
-struct FlexcodeGenerator: FlexcodeGeneratorProtocol {
+class FlexcodeGenerator: FlexcodeGeneratorProtocol {
+    private var cachedCodes: [String: [FlexcodeSymbology: Flexcode]] = [:]
+
     func flexcode(for key: OneTimeKey?, type: FlexcodeSymbology, scale: CGFloat) -> Flexcode? {
         guard let key else {
             FlexaLogger.error("Missing key")
@@ -78,14 +80,23 @@ struct FlexcodeGenerator: FlexcodeGeneratorProtocol {
         }
     }
 
-    func flexcodes(forCode code: String, types: [FlexcodeSymbology], scale: CGFloat) -> [FlexcodeSymbology: Flexcode] {
-        types
+    func flexcodes(forCode code: String, types: [FlexcodeSymbology], scale: CGFloat, useCache: Bool) -> [FlexcodeSymbology: Flexcode] {
+        if let flexcodes = cachedCodes[code], !flexcodes.isEmpty, useCache {
+            return flexcodes
+        }
+
+        let flexcodes = types
             .reduce(into: [FlexcodeSymbology: Flexcode]()) {
                 $0[$1] = Flexcode(
                     code: code,
                     image: createImageCode(from: code, type: $1, scale: scale)
                 )
             }
+
+        if useCache {
+            cachedCodes[code] = flexcodes
+        }
+        return flexcodes
     }
 
     func createImageCode(from code: String, type: FlexcodeSymbology, scale: CGFloat) -> UIImage? {

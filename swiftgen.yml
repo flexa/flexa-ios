@@ -18,9 +18,15 @@ strings:
       - templateName: structured-swift5
         output: FlexaSpend/Sources/Commons/Strings+Generated.swift
 xcassets:
-  inputs: FlexaSpend/Sources/Resources/SpendColors.xcassets
-  outputs:
-    - templateName: swift5
-      output: FlexaSpend/Sources/Commons/Colors.swift
-      params:
-        bundle: Bundle.spendBundle.colorsBundle
+  - inputs: FlexaSpend/Sources/Resources/SpendColors.xcassets
+    outputs:
+      - templateName: swift5
+        output: FlexaSpend/Sources/Commons/Colors.swift
+        params:
+          bundle: Bundle.spendBundle.colorsBundle
+  - inputs: FlexaScan/Sources/Resources/ScanAssets.xcassets
+    outputs:
+      - templateName: swift5
+        output: FlexaScan/Sources/Commons/ScanAssets+Generated.swift
+        params:
+          bundle: Bundle.scanBundle.assetsBundle

@@ -45,7 +45,7 @@ struct ConfirmAccountDeletionView: View {
     private var header: some View {
         Image(systemName: "envelope.badge")
             .font(.system(size: 48, weight: .bold))
-            .foregroundStyle(Color.purple)
+            .foregroundStyle(Color.flexaTintColor)
             .frame(width: 68)
             .padding(.vertical)
         Text(Strings.Header.title)

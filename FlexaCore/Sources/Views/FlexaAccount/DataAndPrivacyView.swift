@@ -30,7 +30,7 @@ struct DataAndPrivacyView: View {
         .environment(\.defaultMinListRowHeight, 56)
         .navigationTitle(Strings.Navigation.title)
         .navigationBarTitleDisplayMode(.inline)
-        .tint(.purple)
+        .tint(.flexaTintColor)
         .onChange(of: showDeleteAccountSheet) { _ in
             reload.toggle()
         }
@@ -65,7 +65,7 @@ struct DataAndPrivacyView: View {
 
                 Text(.init(Strings.Sections.Header.description))
                     .font(.subheadline)
-                    .tint(.purple)
+                    .tint(.flexaTintColor)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 26)
 
@@ -99,7 +99,7 @@ struct DataAndPrivacyView: View {
                         .symbolRenderingMode(.multicolor)
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .foregroundStyle(Color.purple)
+                        .foregroundStyle(Color.flexaTintColor)
                         .frame(width: 44)
                     VStack(alignment: .leading) {
                         Text(Strings.Sections.DeleteAccount.Cells.DeletionPending.title)

@@ -14,7 +14,12 @@ import Vision
 extension ScannerView {
     class ViewModel: NSObject, ObservableObject {
         private let config = Container.shared.scanConfig()
+        private let generator = UINotificationFeedbackGenerator()
+
         @Injected(\.eventNotifier) var eventNotifier
+        @Injected(\.appStateManager) var appStateManager
+        @Published var error: Error?
+        @Published var commerceSessionViewModel: CommerceSessionView.ViewModel
         @Published var cameraManager = CameraManager()
         @Published var showSettingAlert = false
         @Published var isPermissionGranted: Bool = false
@@ -24,9 +29,9 @@ extension ScannerView {
             }
         }
 
+        @Synchronized var shouldProcessFrame: Bool = true
         var captureSession = AVCaptureSession()
-        var onTransactionRequest: Flexa.TransactionRequestCallback?
-        var onSend: Flexa.SendHandoff?
+        var allowToDisablePayWithFlexa: Bool = false
 
         var isFlashlightAvailable: Bool {
             guard isPermissionGranted else {
@@ -35,6 +40,9 @@ extension ScannerView {
 
             return device?.hasTorch == true
         }
+
+        private var onTransactionRequest: Flexa.TransactionRequestCallback?
+        private var onSend: Flexa.SendHandoff?
 
         private var device: AVCaptureDevice? {
             cameraManager.device
@@ -54,12 +62,19 @@ extension ScannerView {
         ]
 
         init(onTransactionRequest: Flexa.TransactionRequestCallback? = nil,
-             onSend: Flexa.SendHandoff? = nil) {
+             onSend: Flexa.SendHandoff? = nil,
+             allowToDisablePayWithFlexa: Bool = false) {
+
+            commerceSessionViewModel = CommerceSessionView.ViewModel(
+                signTransaction: onTransactionRequest)
+
             super.init()
             self.onTransactionRequest = onTransactionRequest
             self.onSend = onSend
+            self.allowToDisablePayWithFlexa = allowToDisablePayWithFlexa
             captureSession = cameraManager.captureSession
             cameraManager.outputSampleBufferDelegate = self
+            generator.prepare()
         }
 
         deinit {
@@ -77,6 +92,7 @@ extension ScannerView {
                 if videoStatus == .authorized {
                     isPermissionGranted = true
                     setupCamera()
+                    commerceSessionViewModel.startWatching()
                 } else if videoStatus == .notDetermined {
                     AVCaptureDevice.requestAccess(for: AVMediaType.video, completionHandler: requestAccessHandler)
                 } else if videoStatus == .denied {
@@ -103,6 +119,15 @@ extension ScannerView {
             isFlashlightOn = false
         }
 
+        func handleModalStateChange(_ isShowingModal: Bool) {
+            if isShowingModal {
+                stopCapturing()
+            } else {
+                resumeCapturing()
+                shouldProcessFrame = true
+            }
+        }
+
         func toggleFlashlight() {
             isFlashlightOn.toggle()
         }
@@ -119,6 +144,11 @@ extension ScannerView {
                 FlexaLogger.error(error)
             }
         }
+
+        @MainActor
+        func setError(_ error: Error?) {
+            self.error = error
+        }
     }
 }
 
@@ -127,6 +157,9 @@ extension ScannerView.ViewModel: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_ output: AVCaptureOutput,
                        didOutput sampleBuffer: CMSampleBuffer,
                        from connection: AVCaptureConnection) {
+        guard shouldProcessFrame else {
+            return
+        }
 
         guard let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
             FlexaLogger.error("Cannot create CMSampleBufferGetImageBuffer")
@@ -171,13 +204,9 @@ private extension ScannerView.ViewModel {
             return
         }
 
-        if let url = data.first?.url, case .paymentLink = url.flexaLink {
-            eventNotifier.post(name: .paymentLinkDetected, userInfo: ["paymentLink": url])
-        } else {
-            DispatchQueue.main.async {
-                FlexaLogger.debug(data)
-                // Process code and make callbacks
-            }
+        DispatchQueue.main.async {
+            FlexaLogger.debug(data)
+            // Process code and make callbacks
         }
     }
 
@@ -190,6 +219,7 @@ private extension ScannerView.ViewModel {
             if granted {
                 isPermissionGranted = true
                 setupCamera()
+                 commerceSessionViewModel.startWatching()
             } else {
                 isPermissionGranted = false
                 showSettingAlert = true
@@ -197,13 +227,23 @@ private extension ScannerView.ViewModel {
         }
     }
 
+    @objc func handleStopCapturingNotification() {
+        commerceSessionViewModel.stopWatching()
+        stopCapturing()
+    }
+
+    @objc func handleResumeCapturingNotification() {
+        commerceSessionViewModel.startWatching()
+        resumeCapturing()
+    }
+
     func setupSubscriptions() {
         resumeCapturingNotifications.forEach {
-            eventNotifier.addObserver(self, selector: #selector(resumeCapturing), name: $0)
+            eventNotifier.addObserver(self, selector: #selector(handleResumeCapturingNotification), name: $0)
         }
 
         stopCapturingNotifications.forEach {
-            eventNotifier.addObserver(self, selector: #selector(stopCapturing), name: $0)
+            eventNotifier.addObserver(self, selector: #selector(handleStopCapturingNotification), name: $0)
         }
     }
 }

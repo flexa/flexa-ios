@@ -99,7 +99,7 @@ struct AssetRow: View {
                 Image(systemName: "info.circle")
                     .resizable()
                     .scaledToFit()
-                    .foregroundColor(Color.purple)
+                    .foregroundColor(.flexaTintColor)
                     .frame(width: .imageWidth, height: .imageHeight, alignment: .center)
                     .onTapGesture {
                         showInfo()

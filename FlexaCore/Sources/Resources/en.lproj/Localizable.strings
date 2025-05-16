@@ -2,7 +2,11 @@
 "global.ok" = "OK";
 "global.back" = "Back";
 "global.cancel" = "Cancel";
+"global.close" = "Close";
 "global.done" = "Done";
+"global.sending" = "Sending...";
+"global.signing" = "Signing...";
+"global.flexa" = "flexa";
 
 // Log
 "log.hidden.text" = "[hidden value]";
@@ -39,6 +43,7 @@
 "auth.main.textfields.email.placeholder" = "What’s your email address?";
 "auth.main.links.about.title" = "About Flexa & Privacy...";
 "auth.main.buttons.next.title" = "Continue";
+"auth.main.menu.dont_show_again" = "Don't show again";
 
 // Verify Email
 "auth.verify_email.header.sign_in.title" = "Sign in to Flexa";
@@ -100,6 +105,7 @@ Flexa Account";
 "payment.balance.title" = "%s Balance";
 "payment.currency_avaliable.title" = "%s Available";
 "payment.hide_short_balances.title" = "Hide Short Balances";
+"payment.using_ticker.subtitle" = "Using %s";
 
 //Transaction Details
 "payment.transaction_details.footer" = "Flexa automatically selects the best exchange rate and network fee for your payments. [Learn more...](https://flexa.co)";
@@ -123,7 +129,7 @@ Flexa Account";
 // Web Links
 "web_links.how_to_pay" = "https://flexa.co/guides/how-to-pay";
 "web_links.report_issue" = "https://flexa.co/report-an-issue";
-"web_links.merchant_list" = "https://flexa.network/directory";
+"web_links.merchant_list" = "https://%@/directory";
 "web_links.merchant_locations" = "%@/%@/locations";
 
 // Flexa Account
@@ -163,3 +169,18 @@ Flexa Account";
 "confirm_account_deletion.table.rows.email.to" = "To: ";
 "confirm_account_deletion.table.rows.delete.title" = "Delete your Flexa Account";
 "confirm_account_deletion.buttons.open_email.title" = "Open \"Mail\"";
+
+// Legacy Flexcode
+"legacy_flexcode.amount_entry.labels.minimum_amount" = "Minimum Amount: %s";
+"legacy_flexcode.amount_entry.labels.maximum_amount" = "Maximum Amount: %s";
+"legacy_flexcode.amount_entry.buttons.payment.enter_amount.title" = "Enter Amount";
+"legacy_flexcode.amount_entry.buttons.payment.confirm.title" = "Confirm";
+"legacy_flexcode.amount_entry.buttons.balance_unavailable.title" = "Balance Not Yet Available";
+"legacy_flexcode.promotions.labels.saving" = "Saving %s";
+"legacy_flexcode.prevent_screenshot_text" = "Flexa loves you <3";
+
+// Asset Switcher
+"asset_switcher.using_flexa_account.title" = "Using your Flexa Account";
+
+// Payment Card
+"payment.pay_merchant" = "Pay %s";

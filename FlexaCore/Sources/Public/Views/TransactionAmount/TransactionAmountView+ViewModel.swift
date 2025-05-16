@@ -1,6 +1,6 @@
 //
 //  TransactionAmountView+ViewModel.swift
-//  FlexaSpend
+//  FlexaCore
 //
 //  Created by Rodrigo Ordeix on 7/10/24.
 //  Copyright © 2024 Flexa. All rights reserved.
@@ -35,20 +35,20 @@ extension TransactionAmountView.ViewModel {
 }
 
 extension TransactionAmountView {
-    typealias Strings = L10n.LegacyFlexcode.AmountEntry
+    typealias Strings = CoreStrings.LegacyFlexcode.AmountEntry
 
-    class ViewModel: ObservableObject {
-        @Published var isLoading = false
+    public class ViewModel: ObservableObject {
+        @Published public var isLoading = false
         @Published var loadingTitle = ""
-        @Published var isPaymentDone = false
+        @Published public var isPaymentDone = false
         @Published var amountText = "$0"
         @Published var error: Error?
-        @Published var commerceSessionCreated = false
+        @Published public var commerceSessionCreated = false
         @Published var showConfirmationButtonTitle = false
         @Published var showAmountMessage = false
         @Published var account: Account?
 
-        @Published var selectedAsset: AssetWrapper? {
+        @Published public var selectedAsset: AssetWrapper? {
             didSet {
                 guard let selectedAsset else {
                     return
@@ -65,10 +65,10 @@ extension TransactionAmountView {
 
         let usdAssetId = FlexaConstants.usdAssetId
         let locale = Locale(identifier: "en-US")
-        var cancelledByUser = false
+        public var cancelledByUser = false
 
-        var commerceSession: CommerceSession?
-        var brand: Brand?
+        public var commerceSession: CommerceSession?
+        public var brand: Brand?
 
         var fee: Fee? {
             commerceSession?.requestedTransaction?.fee
@@ -79,7 +79,7 @@ extension TransactionAmountView {
         }
 
         var brandColor: Color {
-            brand?.color ?? .purple
+            brand?.color ?? .flexaTintColor
         }
 
         var decimalSeparator: Character {
@@ -157,7 +157,7 @@ extension TransactionAmountView {
 
         var payButtonTitle: String {
             if isPaymentDone {
-                return L10n.Common.done
+                return CoreStrings.Global.done
             }
 
             if isLoading {
@@ -248,7 +248,7 @@ extension TransactionAmountView {
 
             var label = promotion.label
             if promotionApplies {
-                label = L10n.LegacyFlexcode.Promotions.Labels.saving(promotionDiscount.asCurrency)
+                label = CoreStrings.LegacyFlexcode.Promotions.Labels.saving(promotionDiscount.asCurrency)
             }
 
             guard let url = promotion.url else {
@@ -291,23 +291,22 @@ extension TransactionAmountView {
 
         var assetSwitcherTitle: String {
             if hasAmount && isAmountHigherThanMin && accountBalanceCoversFullAmount {
-                return L10n.AssetSwitcher.UsingFlexaAccount.title
+                return CoreStrings.AssetSwitcher.UsingFlexaAccount.title
             }
-            return L10n.Payment.UsingTicker.subtitle(selectedAsset?.assetSymbol ?? "")
+            return CoreStrings.Payment.UsingTicker.subtitle(selectedAsset?.assetSymbol ?? "")
         }
 
-        init(brand: Brand?) {
+        public init(brand: Brand?) {
             self.brand = brand
         }
 
-        func clear() {
+        public func clear(_ resetCreationFlag: Bool = true) {
             cancelledByUser = false
             amountText = "$0"
             isLoading = false
             commerceSession = nil
             loadingTitle = ""
             isPaymentDone = false
-            commerceSessionCreated = false
             showMaximumAmountMessage = false
             showMinimumAmountMessage = false
             showConfirmationButtonTitle = false
@@ -315,6 +314,10 @@ extension TransactionAmountView {
                 accountHash: assetConfig.selectedAssetAccountHash,
                 assetId: assetConfig.selectedAssetId)
             account = accountRepository.account
+            if resetCreationFlag {
+                commerceSessionCreated = false
+            }
+
         }
 
         func keyPressed(_ key: KeyType) {
@@ -362,6 +365,18 @@ extension TransactionAmountView {
             showConfirmationButtonTitle = hasAmount && isAmountHigherThanMin
         }
 
+        func createOrUpdateCommerceSession() {
+            if let commerceSession, commerceSession.status == .requiresTransaction {
+                setCommerceSeesionAmount()
+            } else {
+                createCommerceSession()
+            }
+        }
+
+        func setCommerceSeesionAmount() {
+            // TODO:
+        }
+
         func createCommerceSession() {
             guard let brand, !isLoading else {
                 return
@@ -383,7 +398,7 @@ extension TransactionAmountView {
         }
 
         func setCommerceSession(_ commerceSession: CommerceSession, transactionSent: Bool = false) {
-            clear()
+            clear(false)
             brand = commerceSession.brand
             amountText = commerceSession.amount.asCurrency
             Task {
@@ -414,14 +429,14 @@ extension TransactionAmountView {
                     guard let self, self.loadingTitle.isEmpty else {
                         return
                     }
-                    setLoadingButtonTitle(L10n.Common.signing)
+                    setLoadingButtonTitle(CoreStrings.Global.signing)
                 }
             }
         }
 
         func transactionSent() {
             Task {
-                await setLoadingButtonTitle(L10n.Common.sending)
+                await setLoadingButtonTitle(CoreStrings.Global.sending)
             }
         }
 

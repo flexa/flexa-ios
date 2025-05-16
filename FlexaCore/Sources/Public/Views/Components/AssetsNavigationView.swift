@@ -40,11 +40,11 @@ public struct AssetsNavigationView: View {
                 }, label: {
                     Text(CoreStrings.Payment.done)
                         .font(.body.weight(.semibold))
-                        .foregroundColor(Color.purple)
+                        .foregroundColor(.flexaTintColor)
                 })
             )
         }
-        .accentColor(.purple)
+        .accentColor(.flexaTintColor)
         .ignoresSafeArea()
     }
 

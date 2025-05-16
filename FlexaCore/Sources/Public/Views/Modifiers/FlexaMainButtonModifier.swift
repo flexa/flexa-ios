@@ -9,17 +9,25 @@
 import SwiftUI
 
 public extension View {
+
+    private func getTextColor(for backgroundColor: Color?) -> Color {
+        guard let backgroundColor, !backgroundColor.isDark else {
+            return .white
+        }
+        return .black
+    }
+
     func flexaButton(
-        background: some View = Color.purple,
-        textColor: Color = .white,
+        background: some View = Color.flexaTintColor,
+        textColor: Color? = nil,
         disabledTextColor: Color? = nil,
         cornerRadius: CGFloat = 10,
         disabledOpacity: CGFloat = 0.2) -> some View {
             modifier(
                 FlexaMainButtonModifier(
                     color: background,
-                    textColor: textColor,
-                    disabledTextColor: disabledTextColor ?? textColor,
+                    textColor: textColor ?? getTextColor(for: background as? Color),
+                    disabledTextColor: disabledTextColor ?? textColor ?? getTextColor(for: background as? Color),
                     cornerRadius: cornerRadius,
                     disabledOpacity: disabledOpacity
                 )

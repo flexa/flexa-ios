@@ -19,7 +19,7 @@ extension CameraManager {
 
 class CameraManager: NSObject, ObservableObject {
     @Published var status = Status.unconfigured
-    @Published var error: Error?
+    @Published var error: ReasonableError?
 
     let captureSession = AVCaptureSession()
     let queue = DispatchQueue(label: "com.flexa.FlexaScan")

@@ -43,7 +43,7 @@ public struct AssetExchangeRateView: View {
                 Section(
                     footer: HStack {
                         Text(.init(L10n.Payment.TransactionDetails.footer))
-                            .tint(.purple)
+                            .tint(.flexaTintColor)
                     }
                 ) {
                     HStack {
@@ -101,7 +101,7 @@ public struct AssetExchangeRateView: View {
                 showAssetsModal = false
             }, label: {
                 Text(L10n.Payment.done)
-                    .foregroundColor(.purple)
+                    .foregroundColor(.flexaTintColor)
             })
         )
     }

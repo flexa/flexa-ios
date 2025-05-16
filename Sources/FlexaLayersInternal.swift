@@ -29,7 +29,10 @@ final class FlexaInternal: Flexa {
     }()
 
     lazy var scanBuilder: FlexaScan.Builder? = {
-        sections.contains(.scan) ? Flexa.buildScan() : nil
+        guard sections.contains(.scan) else {
+            return nil
+        }
+        return Flexa.buildScan().allowToDisablePayWithFlexa(sections.count > 1)
     }()
 
     lazy var spend: FlexaSpend? = {
@@ -76,18 +79,14 @@ final class FlexaInternal: Flexa {
     ///
     /// If the user is already signed in then it will open the screens specified by the ``Flexa/sections`` method. If the user is not signed in the it will open the sign in/sign up screens.
     public func openMain() {
-        appStateManager.closeCommerceSessionOnDismissal = true
+        appStateManager.resetState()
         guard Flexa.canSpend else {
             FlexaLogger.error("Flexa is running on a restricted region and spends are disabled. Please check Flexa.canSpend")
             FlexaIdentity.showRestrictedRegionView()
             return
         }
-        Flexa
-            .buildIdentity()
-            .build()
-            .collect { result in
-                self.showMainOrAuth(result: result)
-            }
+
+        spend?.open()
     }
 
     /// Handles universal links received by the parent application. Currently allows you to use universal links to speed up the sign in/sign up process.
@@ -100,35 +99,5 @@ final class FlexaInternal: Flexa {
             }
         }
         return false
-    }
-
-    /// Opens Flexa's' main screen, if the user is already signed in, or the sign in/sign up screen otherwise
-    /// - parameter result: indicates if the user is authenticated (`connected`) or not
-    ///
-    /// If `result` is `connected` then Flexa SDK opens the main screen
-    /// if `result` is `notConnected` then Flexa SDK starts the auth flow
-    private func showMainOrAuth(result: ConnectResult, allowSignIn: Bool = true) {
-        guard Flexa.canSpend else {
-            FlexaLogger.error("Flexa is running on a restricted region and spends are disabled. Please check Flexa.canSpend")
-            FlexaIdentity.showRestrictedRegionView()
-            return
-        }
-        DispatchQueue.main.async { [self] in
-            switch result {
-            case .connected:
-                UIViewController.showViewOnTop(
-                    FlexaView(scanContent: scanContent, payContent: spendContent)
-                )
-            case .notConnected:
-                if allowSignIn {
-                    Flexa.buildIdentity()
-                        .onResult { result in
-                            self.showMainOrAuth(result: result, allowSignIn: false)
-                        }
-                        .build()
-                        .open()
-                }
-            }
-        }
     }
 }

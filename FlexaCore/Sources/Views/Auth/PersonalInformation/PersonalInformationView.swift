@@ -18,6 +18,7 @@ struct PersonalInformationView: View {
     }
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) var colorScheme
     @StateObject var viewModel: ViewModel
     @FocusState var focusedField: FocusableField?
     @State var showPicker: Bool = false
@@ -56,7 +57,7 @@ struct PersonalInformationView: View {
         }
         .background(.thinMaterial)
         .tint(nil)
-        .alertTintColor(.purple)
+        .alertTintColor(.flexaTintColor)
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .toolbar {
@@ -79,7 +80,7 @@ struct PersonalInformationView: View {
                 in: ...Date.now,
                 displayedComponents: .date
             )
-
+            .preferredColorScheme(colorScheme)
             .datePickerStyle(.graphical)
             .padding()
             .pickerDetents(datePickerHeight)
@@ -99,7 +100,7 @@ struct PersonalInformationView: View {
     private var header: some View {
         Image(systemName: "person.text.rectangle.fill")
             .font(.system(size: 48, weight: .bold))
-            .foregroundStyle(Color.purple)
+            .foregroundStyle(Color.flexaTintColor)
             .frame(width: 68)
             .padding(.vertical)
         Text(Strings.Header.title)
@@ -153,7 +154,7 @@ struct PersonalInformationView: View {
                     .onTapGesture(perform: endEditing)
             }
         }
-        .tint(.purple)
+        .tint(.flexaTintColor)
         .animation(.default, value: focusedField)
         .scrollContentBackgroundHidden(true)
         .disableScroll()
@@ -176,7 +177,7 @@ struct PersonalInformationView: View {
                 showingPrivacyAlert = true
             } label: {
                 Text(Strings.Buttons.About.title)
-                    .tint(.purple)
+                    .tint(.flexaTintColor)
                     .font(.body.weight(.semibold))
             }
             Button {

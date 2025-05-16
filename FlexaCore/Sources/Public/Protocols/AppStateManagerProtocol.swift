@@ -10,6 +10,7 @@ import Foundation
 
 public protocol AppStateManagerProtocol {
     var closeCommerceSessionOnDismissal: Bool { get set }
+    func resetState()
     func backgroundRefresh()
     func refresh() async
     func purgeIfNeeded()

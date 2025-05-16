@@ -54,18 +54,30 @@ public struct FlexaRoundedButton: View {
     }
 
     public var body: some View {
+        if buttonAction != nil {
+            button
+        } else {
+            label
+        }
+    }
+
+    private var label: some View {
+        ZStack(alignment: .center) {
+            Circle()
+                .fill(backgroundColor)
+                .frame(width: size.width, height: size.height, alignment: .center)
+            image
+                .imageScale(.medium)
+                .font(symbolFont)
+                .foregroundColor(color)
+        }
+    }
+
+    private var button: some View {
         Button {
             buttonAction?()
         } label: {
-            ZStack(alignment: .center) {
-                Circle()
-                    .fill(backgroundColor)
-                    .frame(width: size.width, height: size.height, alignment: .center)
-                image
-                    .imageScale(.medium)
-                    .font(symbolFont)
-                    .foregroundColor(color)
-            }
+            label
         }.buttonStyle(PlainButtonStyle())
     }
 }

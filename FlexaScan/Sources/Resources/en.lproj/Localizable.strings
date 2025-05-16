@@ -1,3 +1,7 @@
+// Common
+"common.ok" = "OK";
+"common.undo" = "Undo";
+
 // Scanner
 "scan.title" = "Send, pay, or connect to a desktop website";
 "scan.buttons.enable_camera.title" = "Enable camera Access";
@@ -5,3 +9,14 @@
 // Errors
 "errors.camera_access.title" = "Camera error";
 "errors.camera_access.message" = "There was an error getting the video device";
+
+// Alerts
+"alerts.spend_opt_out.title" = "\"Pay\" is Now Hidden";
+"alerts.spend_opt_out.message" = "If you want to use Flexa in the future, just tap the More button, and then tap Pay with Flexa.";
+
+// Navigation Menu
+"settings_menu.items.scan_from_photo.title" = "Scan from photo";
+"settings_menu.items.pay_with_flexa.title" = "Pay with Flexa";
+"settings_menu.items.manage_flexa_id.title" = "Manage Flexa Account";
+"settings_menu.items.report_issue.title" = "Report an Issue";
+

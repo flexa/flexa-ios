@@ -8,19 +8,29 @@
 
 import SwiftUI
 import Factory
+import FlexaUICore
 
 struct AuthMainView: View {
     private typealias Strings = CoreStrings.Auth.Main
 
     private let bottomViewId = UUID()
 
-    @Environment(\.theme.views.primary) var theme
+    @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isEmailFieldFocused: Bool
 
-    @StateObject var viewModel: ViewModel = Container.shared.authMainViewModel()
+    @StateObject var viewModel: ViewModel
     @State var bottomViewBottomPadding: CGFloat = .bottomViewBottomPaddingDefault
     @State private var showingPrivacyAlert: Bool = false
+    @State private var showMenu: Bool = false
+
+    init(allowToDisablePayWithFlexa: Bool) {
+        _viewModel = StateObject(
+            wrappedValue: Container
+                .shared
+                .authMainViewModel(allowToDisablePayWithFlexa)
+            )
+    }
 
     var body: some View {
         NavigationView {
@@ -53,8 +63,9 @@ struct AuthMainView: View {
         }
         .navigationViewStyle(.stack)
         .environment(\.dismissAll, dismiss)
-        .tint(.purple)
-        .alertTintColor(.purple)
+        .environment(\.colorScheme, Container.shared.flexaClient().theme.interfaceStyle.colorSheme ?? colorScheme)
+        .tint(.flexaTintColor)
+        .alertTintColor(.flexaTintColor)
         .flexaAuthNavigationbar()
         .flexaPrivacyAlert(isPresented: $showingPrivacyAlert)
     }
@@ -62,9 +73,23 @@ struct AuthMainView: View {
     private var closeButton: some View {
         HStack(alignment: .top) {
             Spacer()
-            FlexaRoundedButton(.close) {
-                dismiss()
-            }.padding()
+            menu {
+                FlexaRoundedButton(.close)
+            } menuContent: {
+                Button {
+                    viewModel.userClosedAuth()
+                    dismiss()
+                } label: {
+                    Label(CoreStrings.Global.close, systemImage: "xmark")
+                }
+                Button(role: .destructive) {
+                    viewModel.disablePayWithFlexa()
+                    dismiss()
+                } label: {
+                    Label(Strings.Menu.dontShowAgain, systemImage: "eye.slash")
+
+                }
+            }
         }.frame(maxWidth: .infinity)
     }
 
@@ -104,7 +129,7 @@ struct AuthMainView: View {
             .renderingMode(.template)
             .resizable()
             .aspectRatio(contentMode: .fit)
-            .foregroundStyle(Color.purple)
+            .foregroundStyle(Color.flexaTintColor)
             .frame(width: .bulletInstantPaymentIconSize, height: .bulletInstantPaymentIconSize)
             .padding(0)
             .padding(.leading, .bulletPrivateIconWidth - .bulletInstantPaymentIconSize)
@@ -115,7 +140,7 @@ struct AuthMainView: View {
             .renderingMode(.template)
             .resizable()
             .aspectRatio(contentMode: .fit)
-            .foregroundStyle(Color.purple)
+            .foregroundStyle(Color.flexaTintColor)
             .rotationEffect(.degrees(90))
             .frame(width: .bulletPrivateIconWidth, height: .bulletPrivateIconHeight)
             .padding(.horizontal, 0)
@@ -184,7 +209,7 @@ struct AuthMainView: View {
                                 .renderingMode(.template)
                         }
                         .frame(width: .infoButtonSize, height: .infoButtonSize)
-                        .foregroundStyle(Color.purple)
+                        .foregroundStyle(Color.flexaTintColor)
                         .padding()
                     }
                 }
@@ -241,8 +266,33 @@ struct AuthMainView: View {
         } label: {
             Text(title)
                 .font(.subheadline)
-                .foregroundColor(Color.purple)
+                .foregroundColor(Color.flexaTintColor)
         }.padding(.top, .linkButtonTopPadding)
+    }
+
+    @ViewBuilder
+    private func menu<Label: View, Content: View>(
+        @ViewBuilder label: @escaping () -> Label,
+        @ViewBuilder menuContent: @escaping () -> Content
+    ) -> some View {
+        if viewModel.showMenuOnClose {
+            Menu {
+                menuContent()
+            } label: {
+                label()
+            }
+            .padding()
+        } else {
+            Menu {
+                menuContent()
+            } label: {
+                label()
+            } primaryAction: {
+                viewModel.userClosedAuth()
+                dismiss()
+            }
+            .padding()
+        }
     }
 
     private func handleFocusChange(_ isFocused: Bool, scrollViewProxy: ScrollViewProxy) {

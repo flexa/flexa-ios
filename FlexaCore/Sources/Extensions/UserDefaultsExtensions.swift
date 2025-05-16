@@ -22,6 +22,7 @@ public extension UserDefaults {
         case transactionFees = "transaction_fees"
         case apiHost = "flexa_api_host"
         case hasRunBefore = "has_run_before"
+        case payWithFlexaEnabled = "pay_with_flexa_enabled"
     }
 
     static let flexaStore = UserDefaults(suiteName: Storage.name) ?? UserDefaults.standard
@@ -52,7 +53,7 @@ public extension UserDefaults {
 
     func purgeAll() {
         Key.allCases
-            .filter { $0 != .apiHost }
+            .filter { $0 != .apiHost && $0 != .payWithFlexaEnabled }
             .forEach { removeObject(forKey: $0.rawValue) }
     }
 }

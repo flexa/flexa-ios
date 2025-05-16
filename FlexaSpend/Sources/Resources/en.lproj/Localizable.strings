@@ -32,7 +32,6 @@
 
 // Payment Card
 "payment.description" = "%s avaliable";
-"payment.pay_merchant" = "Pay %s";
 
 // Legacy flexcode tray
 "legacy_flexcode_tray.title" = "More instant payments";
@@ -48,15 +47,6 @@
 
 // Legacy flexcode
 "legacy_flexcode.alerts.scan_help.title" = "Tips for Using Flexcodes at %@";
-"legacy_flexcode.amount_entry.labels.minimum_amount" = "Minimum Amount: %s";
-"legacy_flexcode.amount_entry.labels.maximum_amount" = "Maximum Amount: %s";
-"legacy_flexcode.amount_entry.buttons.payment.enter_amount.title" = "Enter Amount";
-"legacy_flexcode.amount_entry.buttons.payment.confirm.title" = "Confirm";
-"legacy_flexcode.amount_entry.buttons.balance_unavailable.title" = "Balance Not Yet Available";
-"legacy_flexcode.promotions.labels.saving" = "Saving %s";
-
-// Asset Switcher
-"asset_switcher.using_flexa_account.title" = "Using your Flexa Account";
 
 // Exchange Rate
 "payment.asset.exchange_rate.avaliable" = "%s avaliable";

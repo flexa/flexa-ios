@@ -8,6 +8,7 @@
 
 import Factory
 import UIKit
+import SwiftUI
 
 /// The entry point of Flexa SDK.
 ///
@@ -15,6 +16,7 @@ import UIKit
 open class Flexa {
 
     public typealias TransactionRequestCallback = (Result<FXTransaction, Error>) -> Void
+    public typealias PaymentAuthorizationCallback = (FXPaymentAuthorization) -> Void
     public typealias SendHandoff = (FXTransaction) -> Void
 
     @Injected(\.flexaClient) private static var flexaClient
@@ -44,10 +46,9 @@ open class Flexa {
     public static func initialize(_ client: FXClient) {
         flexaClient.publishableKey = client.publishableKey
         flexaClient.assetAccounts = client.assetAccounts
-        flexaClient.theme = client.theme
+        flexaClient.theme.loadFrom(client.theme)
 
         if !isInitialized {
-            appStateManager.purgeIfNeeded()
             assetsRepository.backgroundRefresh()
             appStateManager.backgroundRefresh()
             isInitialized.toggle()
@@ -82,6 +83,15 @@ open class Flexa {
         Self.flexaClient.theme = theme
     }
 
+    @MainActor
+    public static func showPaymentClip(commerceSession: CommerceSession, signTransaction: ((Result<FXTransaction, Error>) -> Void)?) {
+        UIViewController.showViewOnTop(
+            paymentClip(for: commerceSession, signTransaction: signTransaction),
+            modalPresentationStyle: .overCurrentContext,
+            modalTransitionStyle: .crossDissolve
+        )
+    }
+
     /// Dismisses the SDK.
     ///
     ///  - parameter closeCommerceSessions: Indicates to the SDK if the ongoing Commerce Sessions should be closed alongside the screens. If it's `false` and there was an ongoing Commerce Session, the next time the user opens the SDK it will try to resume the Commerce Session.
@@ -99,9 +109,72 @@ open class Flexa {
         }
     }
 
+    /// Invoked when a transaction finishes succesfully
+    /// - parameter commerceSessionId: The current commerce session id
+    /// - parameter signature: The transaction signature
+    public static func transactionSent(commerceSessionId: String, signature: String) {
+        FlexaLogger.commerceSessionLogger.debug("Flexa.transactionSent(cs: \(commerceSessionId), hash: \(signature))")
+        Container
+            .shared
+            .appStateManager()
+            .signTransaction(
+                commerceSessionId: commerceSessionId,
+                signature: signature
+            )
+    }
+
+    /// Invoked when a transaction fails
+    /// - parameter commerceSessionId: The current commerce session id
+    public static func transactionFailed(commerceSessionId: String) {
+        FlexaLogger.commerceSessionLogger.debug("Flexa.transactionFailed(cs: \(commerceSessionId))")
+        Container
+            .shared
+            .appStateManager()
+            .closeCommerceSession(commerceSessionId: commerceSessionId)
+    }
+
     public init() {
         guard String(describing: self) != "FlexaCore.Flexa" else {
             fatalError("You cannot instantiate Flexa directly. Please use a builder.")
+        }
+    }
+}
+
+private extension Flexa {
+    struct StandalonePaymentClip<Content: View>: View {
+        @Environment(\.theme) private var theme
+        @Environment(\.colorScheme) private var colorScheme
+
+        @StateObject var linkData = Container.shared.universalLinkData()
+        @StateObject var flexaState = Container.shared.flexaState()
+        var content: () -> Content
+
+        var body: some View {
+            content()
+                .environmentObject(flexaState)
+                .flexaHandleUniversalLink()
+                .environmentObject(linkData)
+                .environment(\.colorScheme, theme.interfaceStyle.colorSheme ?? colorScheme)
+        }
+
+        init(@ViewBuilder content: @escaping () -> Content) {
+            self.content = content
+        }
+    }
+
+    @MainActor
+    static func paymentClip(for commerceSession: CommerceSession, signTransaction: ((Result<FXTransaction, Error>) -> Void)?) -> some View {
+        let viewModel = CommerceSessionView.ViewModel(
+            signTransaction: signTransaction,
+            isStandalone: true
+        )
+        return StandalonePaymentClip {
+            CommerceSessionView(viewModel: viewModel)
+                .onAppear {
+                    viewModel.startWatching()
+                    viewModel.commerceSessionHandler.resumeCommerceSession(commerceSession, isLegacy: false, wasTransactionSent: false)
+                }
+                .onDisappear(perform: viewModel.stopWatching)
         }
     }
 }

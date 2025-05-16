@@ -59,8 +59,8 @@ struct NotificationView: View {
                     Text(.init(notification.actionText))
                         .multilineTextAlignment(.leading)
                         .font(.body.weight(.semibold))
-                        .tint(.purple)
-                        .foregroundColor(.purple)
+                        .tint(.flexaTintColor)
+                        .foregroundColor(.flexaTintColor)
                         .padding([.trailing, .bottom], 16)
                         .padding(.top, 12)
 

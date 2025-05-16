@@ -50,6 +50,15 @@ public extension Flexa {
             return self
         }
 
+        /// Specifies the callback to be called by Flexa when an update happens on a payment authorization
+        /// - parameter callback: Will be invoked by Flexa when an update on the payment authrization is detected
+        /// - returns self instance in order to chain other methods
+        @discardableResult
+        public func onPaymentAuthorization(_ callback: @escaping Flexa.PaymentAuthorizationCallback) -> Self {
+            flexa.spendBuilder?.onPaymentAuthorization(callback)
+            return self
+        }
+
         @discardableResult
         public func onSendHandoff(_ callback: @escaping Flexa.SendHandoff) -> Self {
             flexa.scanBuilder?.onSendHandoff(callback)

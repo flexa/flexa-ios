@@ -58,8 +58,8 @@ struct NoAssetsView: View {
                     }
                     .padding(.vertical, 8)
                     .padding(.horizontal, 14)
-                    .background(Color.purple)
-                    .foregroundColor(.white)
+                    .background(Color.flexaTintColor)
+                    .foregroundColor(.flexaContrastTintColor)
                 })
                 .clipShape(Capsule())
                 .padding(.top, 20)

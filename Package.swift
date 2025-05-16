@@ -33,7 +33,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/kishikawakatsumi/KeychainAccess.git", from: "3.0.0"),
-        .package(url: "https://github.com/devicekit/DeviceKit.git", from: "5.0.0"),
+        .package(url: "https://github.com/devicekit/DeviceKit.git", from: "5.5.0"),
         .package(url: "https://github.com/exyte/SVGView.git", from: "1.0.4"),
         .package(url: "https://github.com/SwiftGen/SwiftGenPlugin", from: "6.6.2"),
         .package(url: "https://github.com/hmlongco/Factory.git", from: "2.3.0"),
@@ -66,19 +66,22 @@ let package = Package(
                 "Factory",
                 "DeviceKit",
                 "KeychainAccess",
+                "FlexaUICore",
+                "Base32",
+                "SVGView",
                 .product(name: "SwiftUIIntrospect", package: "swiftui-introspect")
             ],
             path: "FlexaCore/Sources",
+            resources: [.process("Resources")],
             plugins: ["SwiftLintPlugin"]),
         .testTarget(
             name: "FlexaCoreTests",
-            dependencies: ["FlexaCore", "Nimble", "Quick", "Fakery"],
+            dependencies: ["FlexaCore", "FlexaUICore", "Nimble", "Quick", "Fakery"],
             path: "FlexaCore/Tests",
             plugins: ["SwiftLintPlugin"]),
         .target(
             name: "FlexaUICore",
             dependencies: [
-                "FlexaCore",
                 .product(name: "SwiftUIIntrospect", package: "swiftui-introspect")
             ],
             path: "FlexaUICore/Sources",
@@ -87,19 +90,19 @@ let package = Package(
             name: "FlexaUICoreTests",
             dependencies: [
                 "FlexaUICore",
-                "FlexaCore",
                 .product(name: "SwiftUIIntrospect", package: "swiftui-introspect")
             ],
             path: "FlexaUICore/Tests",
             plugins: ["SwiftLintPlugin"]),
         .target(
             name: "FlexaScan",
-            dependencies: ["FlexaCore"],
+            dependencies: ["FlexaCore", "FlexaUICore"],
             path: "FlexaScan/Sources",
+            resources: [.process("Resources")],
             plugins: ["SwiftLintPlugin"]),
         .testTarget(
             name: "FlexaScanTests",
-            dependencies: ["FlexaCore", "FlexaScan"],
+            dependencies: ["FlexaCore", "FlexaUICore", "FlexaScan"],
             path: "FlexaScan/Tests",
             plugins: ["SwiftLintPlugin"]),
         .target(

@@ -9,7 +9,9 @@
 import SwiftUI
 
 struct RestrictedRegionView: View {
+    @Environment(\.theme) var theme
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         NavigationView {
@@ -29,6 +31,7 @@ struct RestrictedRegionView: View {
             .background(.thinMaterial)
             .tint(nil)
             .dragIndicator(true)
+            .environment(\.colorScheme, theme.interfaceStyle.colorSheme ?? colorScheme)
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
         }

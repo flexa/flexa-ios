@@ -15,6 +15,7 @@ struct MagicCodeView: View {
     @State var showingAlert: Bool = false
     @Environment(\.dismissAll) var dismissAll
     @Environment(\.loginResult) var loginResult
+    @Environment(\.delayCallbacks) var delayCallbacks
     @EnvironmentObject var linkData: UniversalLinkData
 
     var body: some View {
@@ -40,7 +41,7 @@ struct MagicCodeView: View {
                 } label: {
                     Text(Strings.Links.NoCode.title)
                         .font(.subheadline)
-                        .foregroundColor(Color.purple)
+                        .foregroundColor(.flexaTintColor)
                 }.padding(.bottom, 60)
                     .disabled(viewModel.isLoading)
                     .opacity(viewModel.isLoading ? 0.4 : 1)
@@ -60,9 +61,18 @@ struct MagicCodeView: View {
             viewModel.validateWithUrl(url)
         }.onChange(of: viewModel.validated) { value in
             if value {
-                dismissAll?()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
-                    loginResult?(.connected)
+                if delayCallbacks {
+                    dismissAll?()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
+                        loginResult?(.connected)
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        loginResult?(.connected)
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.75) {
+                        dismissAll?()
+                    }
                 }
             }
         }
@@ -73,7 +83,7 @@ struct MagicCodeView: View {
     private var header: some View {
         Image(systemName: "lock.rotation")
             .font(.system(size: 48, weight: .bold))
-            .foregroundStyle(Color.purple)
+            .foregroundStyle(Color.flexaTintColor)
             .frame(width: 68, height: 58)
             .padding(.vertical)
         Text(Strings.Header.title)

@@ -96,6 +96,12 @@ internal enum CoreStrings {
       }
     }
   }
+  internal enum AssetSwitcher {
+    internal enum UsingFlexaAccount {
+      /// Using your Flexa Account
+      internal static let title = CoreStrings.tr("Localizable", "asset_switcher.using_flexa_account.title", fallback: "Using your Flexa Account")
+    }
+  }
   internal enum Auth {
     internal enum MagicCode {
       internal enum Alerts {
@@ -147,6 +153,10 @@ internal enum CoreStrings {
           /// About Flexa & Privacy...
           internal static let title = CoreStrings.tr("Localizable", "auth.main.links.about.title", fallback: "About Flexa & Privacy...")
         }
+      }
+      internal enum Menu {
+        /// Don't show again
+        internal static let dontShowAgain = CoreStrings.tr("Localizable", "auth.main.menu.dont_show_again", fallback: "Don't show again")
       }
       internal enum Sections {
         internal enum Privacy {
@@ -402,10 +412,58 @@ internal enum CoreStrings {
     internal static let back = CoreStrings.tr("Localizable", "global.back", fallback: "Back")
     /// Cancel
     internal static let cancel = CoreStrings.tr("Localizable", "global.cancel", fallback: "Cancel")
+    /// Close
+    internal static let close = CoreStrings.tr("Localizable", "global.close", fallback: "Close")
     /// Done
     internal static let done = CoreStrings.tr("Localizable", "global.done", fallback: "Done")
+    /// flexa
+    internal static let flexa = CoreStrings.tr("Localizable", "global.flexa", fallback: "flexa")
     /// OK
     internal static let ok = CoreStrings.tr("Localizable", "global.ok", fallback: "OK")
+    /// Sending...
+    internal static let sending = CoreStrings.tr("Localizable", "global.sending", fallback: "Sending...")
+    /// Signing...
+    internal static let signing = CoreStrings.tr("Localizable", "global.signing", fallback: "Signing...")
+  }
+  internal enum LegacyFlexcode {
+    /// Flexa loves you <3
+    internal static let preventScreenshotText = CoreStrings.tr("Localizable", "legacy_flexcode.prevent_screenshot_text", fallback: "Flexa loves you <3")
+    internal enum AmountEntry {
+      internal enum Buttons {
+        internal enum BalanceUnavailable {
+          /// Balance Not Yet Available
+          internal static let title = CoreStrings.tr("Localizable", "legacy_flexcode.amount_entry.buttons.balance_unavailable.title", fallback: "Balance Not Yet Available")
+        }
+        internal enum Payment {
+          internal enum Confirm {
+            /// Confirm
+            internal static let title = CoreStrings.tr("Localizable", "legacy_flexcode.amount_entry.buttons.payment.confirm.title", fallback: "Confirm")
+          }
+          internal enum EnterAmount {
+            /// Enter Amount
+            internal static let title = CoreStrings.tr("Localizable", "legacy_flexcode.amount_entry.buttons.payment.enter_amount.title", fallback: "Enter Amount")
+          }
+        }
+      }
+      internal enum Labels {
+        /// Maximum Amount: %s
+        internal static func maximumAmount(_ p1: UnsafePointer<CChar>) -> String {
+          return CoreStrings.tr("Localizable", "legacy_flexcode.amount_entry.labels.maximum_amount", p1, fallback: "Maximum Amount: %s")
+        }
+        /// Minimum Amount: %s
+        internal static func minimumAmount(_ p1: UnsafePointer<CChar>) -> String {
+          return CoreStrings.tr("Localizable", "legacy_flexcode.amount_entry.labels.minimum_amount", p1, fallback: "Minimum Amount: %s")
+        }
+      }
+    }
+    internal enum Promotions {
+      internal enum Labels {
+        /// Saving %s
+        internal static func saving(_ p1: UnsafePointer<CChar>) -> String {
+          return CoreStrings.tr("Localizable", "legacy_flexcode.promotions.labels.saving", p1, fallback: "Saving %s")
+        }
+      }
+    }
   }
   internal enum Log {
     internal enum Hidden {
@@ -510,6 +568,12 @@ internal enum CoreStrings {
       /// Details
       internal static let title = CoreStrings.tr("Localizable", "payment.transaction_details.title", fallback: "Details")
     }
+    internal enum UsingTicker {
+      /// Using %s
+      internal static func subtitle(_ p1: UnsafePointer<CChar>) -> String {
+        return CoreStrings.tr("Localizable", "payment.using_ticker.subtitle", p1, fallback: "Using %s")
+      }
+    }
     internal enum YourFlexaAccount {
       /// Your Flexa Account
       internal static let title = CoreStrings.tr("Localizable", "payment.your_flexa_account.title", fallback: "Your Flexa Account")
@@ -527,8 +591,10 @@ internal enum CoreStrings {
   internal enum WebLinks {
     /// https://flexa.co/guides/how-to-pay
     internal static let howToPay = CoreStrings.tr("Localizable", "web_links.how_to_pay", fallback: "https://flexa.co/guides/how-to-pay")
-    /// https://flexa.network/directory
-    internal static let merchantList = CoreStrings.tr("Localizable", "web_links.merchant_list", fallback: "https://flexa.network/directory")
+    /// https://%@/directory
+    internal static func merchantList(_ p1: Any) -> String {
+      return CoreStrings.tr("Localizable", "web_links.merchant_list", String(describing: p1), fallback: "https://%@/directory")
+    }
     /// %@/%@/locations
     internal static func merchantLocations(_ p1: Any, _ p2: Any) -> String {
       return CoreStrings.tr("Localizable", "web_links.merchant_locations", String(describing: p1), String(describing: p2), fallback: "%@/%@/locations")

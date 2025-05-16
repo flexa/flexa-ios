@@ -1,10 +1,9 @@
 import Foundation
-import FlexaCore
 import Combine
 import SwiftUI
 import Factory
 
-class LegacyFlexcodeViewModel: ObservableObject, Identifiable {
+public class LegacyFlexcodeViewModel: ObservableObject, Identifiable {
     @Injected(\.flexcodeGenerator) private var flexcodeGenerator
 
     var brandName: String {
@@ -20,7 +19,7 @@ class LegacyFlexcodeViewModel: ObservableObject, Identifiable {
     }
 
     var brandColor: Color {
-        brand?.color ?? .purple
+        brand?.color ?? .flexaTintColor
     }
 
     var instructions: String {
@@ -43,6 +42,8 @@ class LegacyFlexcodeViewModel: ObservableObject, Identifiable {
 
     @Published var pdf417Image: UIImage = UIImage()
     @Published var code128Image: UIImage = UIImage()
+    @Published var privatePdf417Image: UIImage = UIImage()
+    @Published var privateCode128Image: UIImage = UIImage()
 
     required init(brand: Brand?, authorization: CommerceSessionAuthorization) {
         self.brand = brand
@@ -50,5 +51,9 @@ class LegacyFlexcodeViewModel: ObservableObject, Identifiable {
         self.flexcodes = flexcodeGenerator.flexcodes(forCode: authorization.number)
         self.pdf417Image = flexcodes[.pdf417]?.image ?? UIImage()
         self.code128Image = flexcodes[.code128]?.image ?? UIImage()
+
+        let privateFlexcodes = flexcodeGenerator.flexcodes(forCode: CoreStrings.LegacyFlexcode.preventScreenshotText, useCache: true)
+        self.privatePdf417Image = privateFlexcodes[.pdf417]?.image ?? UIImage()
+        self.privateCode128Image = privateFlexcodes[.code128]?.image ?? UIImage()
     }
 }

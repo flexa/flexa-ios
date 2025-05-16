@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FlexaScan"
-  s.version      = "1.0.10"
+  s.version      = "1.1.0"
   s.summary      = "FlexaScan"
   s.description  = "QR code scanner by Flexa"
   s.homepage     = "https://github.com/flexa/flexa-ios"
@@ -15,9 +15,14 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/flexa/flexa-ios", :tag => s.version }
   s.source_files = 'FlexaScan/Sources/**/*.{swift}'
 
+  s.resource_bundle = {
+    'FlexaScanAssets' => "FlexaScan/Sources/Resources/ScanAssets.xcassets",
+  }
+
   s.pod_target_xcconfig = { 'PRODUCT_BUNDLE_IDENTIFIER': 'com.flexa.FlexaScan' }
 
   s.dependency 'FlexaCore', "~> #{s.version}"
+  s.dependency 'FlexaUICore', "~> #{s.version}"
 
   s.test_spec 'Tests' do |test_spec|
     test_spec.source_files = 'FlexaScan/Tests/**/*.{swift}'

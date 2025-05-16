@@ -10,8 +10,12 @@ import Foundation
 import UIKit
 
 extension Bundle {
-    public static var coreBundle: Bundle {
-        Bundle(for: Flexa.self)
+    static var coreBundle: Bundle {
+        #if SWIFT_PACKAGE
+        return Bundle.module
+        #else
+        return Bundle(for: Flexa.self)
+        #endif
     }
 
     public var stringsBundle: Bundle {
@@ -21,6 +25,11 @@ extension Bundle {
 
     var assetsBundle: Bundle {
         let bundleUrl = bundleURL.appendingPathComponent("Assets.bundle")
+        return Bundle(url: bundleUrl) ?? self
+    }
+
+    var svgBundle: Bundle {
+        let bundleUrl = bundleURL.appendingPathComponent("FlexaCoreSVG.bundle")
         return Bundle(url: bundleUrl) ?? self
     }
 

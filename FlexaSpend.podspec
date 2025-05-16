@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FlexaSpend"
-  s.version      = "1.0.10"
+  s.version      = "1.1.0"
   s.summary      = "FlexaSpend"
   s.description  = "FlexaSpend module by Flexa"
   s.homepage     = "https://github.com/flexa/flexa-ios"
@@ -17,7 +17,6 @@ Pod::Spec.new do |s|
   
   s.resource_bundle = {
     'FlexaSpendColors' => "FlexaSpend/Sources/Resources/SpendColors.xcassets",
-    'FlexaSpendSVG' => "FlexaSpend/Sources/Resources/svgs/*.svg"
   }
 
   s.pod_target_xcconfig = { 'PRODUCT_BUNDLE_IDENTIFIER': 'com.flexa.FlexaSpend' }
@@ -25,8 +24,6 @@ Pod::Spec.new do |s|
   s.dependency 'Factory', '~> 2.4.3'
   s.dependency 'FlexaCore', "~> #{s.version}"
   s.dependency 'FlexaUICore', "~> #{s.version}"
-  s.dependency 'SVGView', "~> 1.0.4"
-  s.dependency 'Base32', "~> 1.1.2"
 
   s.test_spec 'Tests' do |test_spec|
     test_spec.source_files = 'FlexaSpend/Tests/**/*.{swift}'

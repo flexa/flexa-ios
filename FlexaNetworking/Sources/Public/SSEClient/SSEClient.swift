@@ -79,6 +79,7 @@ class SSEClient: NSObject, SSEClientProtocol {
     func connect(lastEventId: String?) {
         logger.debug("SEEClient.connect")
         self.lastEventId = lastEventId
+        disconnect()
         urlSession = Container.shared.sseUrlSession((lastEventId, timeoutInterval, self))
         urlSession?.dataTask(with: request).resume()
         readyState = .connecting
@@ -86,13 +87,14 @@ class SSEClient: NSObject, SSEClientProtocol {
 
     func connect(request: URLRequest, lastEventId: String?) {
         logger.debug("SEEClient.connect withRequest")
-        disconnect()
         self.request = request
         connect(lastEventId: lastEventId)
     }
 
     func disconnect() {
-        logger.debug("SEEClient.disconnect")
+        if readyState != .closed {
+            logger.debug("SEEClient.disconnect")
+        }
         readyState = .closed
         urlSession?.invalidateAndCancel()
         urlSession = nil
@@ -187,9 +189,6 @@ extension SSEClient: URLSessionDataDelegate {
             }
 
             if let string = String(data: data, encoding: .utf8) {
-                if string.hasPrefix("data: keep-alive") {
-                    logger.debug("SSE Event\n\(string, privacy: .public)")
-                }
                 for event in listeners.keys {
                     let prefix = "event: \(event)"
                     if string.hasPrefix(prefix) {

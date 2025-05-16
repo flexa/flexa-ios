@@ -147,7 +147,7 @@ private struct TestAssetHelper: AssetHelperProtocol {
     }
 
     func color(for asset: AssetWrapper) -> Color? {
-        .purple
+        .flexaTintColor
     }
 
     func fxAccount(for: AssetWrapper) -> FXAssetAccount? {

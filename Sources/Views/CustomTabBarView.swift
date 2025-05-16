@@ -14,6 +14,8 @@ struct CustomTabBarView: View {
     @Binding var selection: TabBarItem
     @Namespace private var namespace
     @EnvironmentObject var linkData: UniversalLinkData
+    @State private var connectResult: ConnectResult = .notConnected(nil)
+    @State private var auth: FlexaIdentity!
 
     var body: some View {
         ZStack {
@@ -33,19 +35,17 @@ struct CustomTabBarView: View {
         }
         .padding(.horizontal, 24)
         .padding(.bottom, 30)
-        .onPaymentLink { _ in
-            switchToTab(tab: .spend)
-        }
         .onChange(of: linkData.url) { url in
             switch url?.flexaLink {
             case .scan:
                 switchToTab(tab: .scan)
-            case .pay, .paymentLink, .pinnedBrands:
+            case .pay, .pinnedBrands:
                 switchToTab(tab: .spend)
             default:
                 break
             }
         }
+        .onAppear(perform: getConnectionState)
     }
 }
 
@@ -75,9 +75,14 @@ extension CustomTabBarView {
         guard selection != tab else {
             return
         }
-        sendComponentChangeNotification(tab)
-        withAnimation(.easeIn) {
-            selection = tab
+
+        if tab == .spend {
+            switchToSpend()
+        } else {
+            sendComponentChangeNotification(tab)
+            withAnimation(.easeIn) {
+                selection = tab
+            }
         }
     }
 
@@ -94,5 +99,42 @@ extension CustomTabBarView {
         }()
 
         Container.shared.eventNotifier().post(name: notificationName)
+    }
+
+    private func switchToSpend(_ animated: Bool = true) {
+        guard case .connected = connectResult else {
+            auth.open()
+            return
+        }
+        sendComponentChangeNotification(.spend)
+        if animated {
+            withAnimation(.easeIn) {
+                selection = .spend
+            }
+        } else {
+            selection = .spend
+        }
+    }
+
+    private func getConnectionState() {
+        self.auth = Flexa
+            .buildIdentity()
+            .allowToDisablePayWithFlexa(true)
+            .delayCallbacks(false)
+            .onResult { result in
+                DispatchQueue.main.async {
+                    connectResult = result
+                    if case .connected = result {
+                        sendComponentChangeNotification(.spend)
+                        switchToSpend(false)
+                    }
+                }
+            }
+            .build()
+        auth.collect(handleConnectionStateChange)
+    }
+
+    private func handleConnectionStateChange(_ connectionResult: ConnectResult) {
+        self.connectResult = connectionResult
     }
 }

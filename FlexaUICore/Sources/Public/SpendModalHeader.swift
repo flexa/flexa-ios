@@ -8,7 +8,6 @@
 
 import Foundation
 import SwiftUI
-import FlexaCore
 
 public struct SpendModalHeader: View {
     var title: String

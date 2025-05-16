@@ -17,18 +17,8 @@ extension Bundle {
         #endif
     }
 
-    var assetsBundle: Bundle {
-        let bundleUrl = bundleURL.appendingPathComponent("FlexaSpendAssets.bundle")
-        return Bundle(url: bundleUrl) ?? self
-    }
-
     var colorsBundle: Bundle {
         let bundleUrl = bundleURL.appendingPathComponent("FlexaSpendColors.bundle")
-        return Bundle(url: bundleUrl) ?? self
-    }
-
-    var svgBundle: Bundle {
-        let bundleUrl = bundleURL.appendingPathComponent("FlexaSpendSVG.bundle")
         return Bundle(url: bundleUrl) ?? self
     }
 }

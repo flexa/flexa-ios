@@ -19,7 +19,7 @@ struct FlexaAuthNavigationBarModifier: ViewModifier {
     public func body(content: Content) -> some View {
         content
             .introspect(.navigationView(style: .stack), on: .iOS(.v15)) { navController in
-                navController.navigationBar.tintColor = .purple
+                navController.navigationBar.tintColor = UIColor(Color.flexaTintColor)
                 navController.navigationBar.setBackgroundImage(UIImage(), for: .default)
                 navController.navigationBar.shadowImage = UIImage()
                 navController.navigationBar.isTranslucent = true

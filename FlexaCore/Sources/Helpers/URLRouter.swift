@@ -21,6 +21,32 @@ struct URLRouter: URLRouterProtocol {
             return .systemBrowser(url)
         }
 
+        return lookByExactPath(url) ?? lookByPrefixPath(url) ?? lookForBrandDirectory(url) ?? .webView(replaceDomain(for: url))
+    }
+
+    func isFlexaUrl(_ url: URL) -> Bool {
+        FlexaConstants.Routing.flexaDomains.contains(url.sld)
+    }
+
+    func replaceDomain(for url: URL) -> URL {
+        guard var components = url.components, shouldReplaceDomain(for: url) else {
+            return url
+        }
+        components.host = FlexaConstants.Routing.flexaMainDomain
+        return components.url ?? url
+    }
+
+    func shouldReplaceDomain(for url: URL) -> Bool {
+        guard isFlexaUrl(url), let path = url.components?.path else {
+            return false
+        }
+
+        return pathsToReplaceHost.contains(where: {
+            path == $0 || path.hasPrefix("\($0)/")
+        })
+    }
+
+    func lookByExactPath(_ url: URL) -> FlexaLink? {
         if url.components?.path == FlexaLink.account.path {
             return .account
         }
@@ -44,45 +70,26 @@ struct URLRouter: URLRouterProtocol {
         if url.components?.path == FlexaLink.pay.path {
             return .pay
         }
+        return nil
+    }
 
-        if url.matches(regex: FlexaConstants.Routing.flexaPaymentLinkRegexPattern) {
-            return .paymentLink(url)
-        }
-
+    func lookByPrefixPath(_ url: URL) -> FlexaLink? {
         if let path = url.components?.path, let payPath = FlexaLink.pay.path, path.hasPrefix("\(payPath)/") {
             return .paymentLink(url)
-        }
-
-        if url.absoluteString.hasPrefix(CoreStrings.WebLinks.merchantList) {
-            return .brandWebView(url)
         }
 
         if let path = url.components?.path, let verifyPath = FlexaLink.verify(url).path, path.hasPrefix(verifyPath) {
             return .verify(url)
         }
-
-        return .webView(replaceDomain(for: url))
+        return nil
     }
 
-    func isFlexaUrl(_ url: URL) -> Bool {
-        FlexaConstants.Routing.flexaDomains.contains(url.sld)
-    }
-
-    func replaceDomain(for url: URL) -> URL {
-        guard var components = url.components, shouldReplaceDomain(for: url) else {
-            return url
+    func lookForBrandDirectory(_ url: URL) -> FlexaLink? {
+        for domain in FlexaConstants.Routing.flexaDomains {
+            if url.absoluteString.hasPrefix(CoreStrings.WebLinks.merchantList(domain)) {
+                return .brandWebView(url)
+            }
         }
-        components.host = FlexaConstants.Routing.flexaMainDomain
-        return components.url ?? url
-    }
-
-    func shouldReplaceDomain(for url: URL) -> Bool {
-        guard isFlexaUrl(url), let path = url.components?.path else {
-            return false
-        }
-
-        return pathsToReplaceHost.contains(where: {
-            path == $0 || path.hasPrefix("\($0)/")
-        })
+        return nil
     }
 }

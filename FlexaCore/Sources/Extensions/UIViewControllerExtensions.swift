@@ -26,18 +26,34 @@ public extension UIViewController {
         return rootViewController.topPresentedViewController()
     }
 
-    class func showViewOnTop<T: View>(_ view: T, showGrabber: Bool = false) {
-        let uiHostingController = UIHostingController(rootView: view)
-        uiHostingController.view.backgroundColor = .clear
-        showOnTop(uiHostingController, showGrabber: showGrabber)
-    }
+    class func showViewOnTop<T: View>(
+        _ view: T,
+        showGrabber: Bool = false,
+        modalPresentationStyle: UIModalPresentationStyle = .automatic,
+        modalTransitionStyle: UIModalTransitionStyle = .coverVertical) {
+            let uiHostingController = UIHostingController(rootView: view)
+            uiHostingController.view.backgroundColor = .clear
 
-    class func showOnTop(_ viewController: UIViewController, showGrabber: Bool = false) {
-        viewController.sheetPresentationController?.preferredCornerRadius = 30
-        viewController.sheetPresentationController?.prefersGrabberVisible = showGrabber
-        topMostViewController?
-            .topPresentedViewController()
-            .present(viewController, animated: true)
+            showOnTop(
+                uiHostingController,
+                showGrabber: showGrabber,
+                modalPresentationStyle: modalPresentationStyle,
+                modalTransitionStyle: modalTransitionStyle
+            )
+        }
+
+    class func showOnTop(
+        _ viewController: UIViewController,
+        showGrabber: Bool = false,
+        modalPresentationStyle: UIModalPresentationStyle = .automatic,
+        modalTransitionStyle: UIModalTransitionStyle = .coverVertical) {
+            viewController.modalPresentationStyle = modalPresentationStyle
+            viewController.modalTransitionStyle = modalTransitionStyle
+            viewController.sheetPresentationController?.preferredCornerRadius = 30
+            viewController.sheetPresentationController?.prefersGrabberVisible = showGrabber
+            topMostViewController?
+                .topPresentedViewController()
+                .present(viewController, animated: true)
     }
 
     func topPresentedViewController() -> UIViewController {
@@ -51,14 +67,17 @@ public extension UIViewController {
         return self.children.compactMap { $0.findNavigationController() }.first
     }
 
-    func showAlert(error: ReasonableError) {
+    class func showAlert(error: ReasonableError) {
         let alertController = UIAlertController(
             title: error.title,
             message: error.message,
             preferredStyle: .alert
         )
-        let action = UIAlertAction(title: "OK", style: .default)
+
+        let action = UIAlertAction(title: CoreStrings.Global.ok, style: .default)
         alertController.addAction(action)
-        present(alertController, animated: true)
+        topMostViewController?
+            .topPresentedViewController()
+            .present(alertController, animated: true)
     }
 }

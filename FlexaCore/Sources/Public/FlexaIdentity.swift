@@ -17,7 +17,15 @@ public final class FlexaIdentity: UniversalLinkHandlerProtocol {
     private static let universalLinkDomain = FlexaConstants.Routing.flexaLinkDomain
     private var onResultCallback: ((ConnectResult) -> Void)?
     private var delayCallbacks = true
+    private var allowToDisablePayWithFlexa: Bool = false
     private let authStore: AuthStoreProtocol?
+
+    static let maxIdentityClosedCounter: Int = 2
+    static var identityClosedCounter: Int = 0
+
+    public static var isSignedIn: Bool {
+        Container.shared.authStore().isSignedIn
+    }
 
     private init() {
         authStore = Container.shared.authStore()
@@ -29,14 +37,17 @@ public final class FlexaIdentity: UniversalLinkHandlerProtocol {
     /// If the user is already signed in then it will open the payment screen.
     /// If the user is not signed in the it will open the sign in/sign up screens.
     public func open() {
-        UIViewController.showViewOnTop(
-            createView()
-        )
+        DispatchQueue.main.async {
+            UIViewController.showViewOnTop(
+                self.createView()
+            )
+        }
     }
 
     public func createView() -> some View {
-        AuthMainView()
+        AuthMainView(allowToDisablePayWithFlexa: allowToDisablePayWithFlexa)
             .environmentObject(FlexaIdentity.linkData)
+            .delayCallbacks(delayCallbacks)
             .onLoginResult(onResultCallback)
     }
 
@@ -67,12 +78,9 @@ public final class FlexaIdentity: UniversalLinkHandlerProtocol {
         }
     }
 
-    /// Closes/dismisses any screen realted to the auth flow
-    public func close() {
-    }
-
     /// Clears all the auth information.
     public static func disconnect() {
+        FlexaIdentity.identityClosedCounter = 0
         Container.shared.authStore().signOut()
         Container.shared.keychainHelper().purgeAll()
         Container.shared.userDefaults().purgeAll()
@@ -126,6 +134,12 @@ public extension FlexaIdentity {
             return self
         }
 
+        @discardableResult
+        public func allowToDisablePayWithFlexa(_ allow: Bool) -> Builder {
+            identity.allowToDisablePayWithFlexa = allow
+            return self
+        }
+
         /// Builds a new instance of FlexaIdentity based on the configuration specified by the other builder methods (`onResult`)
         public func build() -> FlexaIdentity {
             let identity = self.identity
@@ -149,6 +163,18 @@ private extension FlexaIdentity {
             await MainActor.run {
                 block()
             }
+        }
+    }
+}
+
+extension FlexaIdentity {
+    static var maxClosedAttemptsReached: Bool {
+        identityClosedCounter >= maxIdentityClosedCounter
+    }
+
+    static func increaseIdentityClosedCounter() {
+        if !maxClosedAttemptsReached {
+            identityClosedCounter += 1
         }
     }
 }

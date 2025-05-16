@@ -9,6 +9,7 @@
 @_exported import FlexaCore
 import SwiftUI
 import Factory
+import FlexaUICore
 
 public final class FlexaScan {
     @Injected(\.scanConfig) private var config
@@ -19,26 +20,22 @@ public final class FlexaScan {
     private var onTransactionRequest: Flexa.TransactionRequestCallback?
     private var onSendHandoff: Flexa.SendHandoff?
     private var onBrowseHandoff: BrowseHandoff?
+    private var allowToDisablePayWithFlexa: Bool = false
 
     private init() {
     }
 
     public func open() {
-        appStateManager.closeCommerceSessionOnDismissal = true
-        // TODO: we are gonna show a payment clip, but this is gonna be done on a different issue. For now just let the system open the URL
-        @StateObject var linkData: UniversalLinkData = Container.shared.universalLinkData()
-        let view = createView()
-            .onPaymentLink { url in
-                UIApplication.shared.open(url)
-            }
-            .flexaHandleUniversalLink()
-            .environmentObject(linkData)
-        UIViewController.showViewOnTop(view)
+        appStateManager.resetState()
+        UIViewController.showViewOnTop(createStandaloneView())
     }
 
     public func createView() -> some View {
-        return ScannerView(onTransactionRequest: onTransactionRequest,
-                           onSend: onSendHandoff)
+        return ScannerView(
+            onTransactionRequest: onTransactionRequest,
+            onSend: onSendHandoff,
+            allowToDisablePayWithFlexa: allowToDisablePayWithFlexa
+        )
     }
 }
 
@@ -78,6 +75,12 @@ public extension FlexaScan {
         }
 
         @discardableResult
+        public func allowToDisablePayWithFlexa(_ allow: Bool) -> Builder {
+            self.scanner.allowToDisablePayWithFlexa = allow
+            return self
+        }
+
+        @discardableResult
         public func build() -> FlexaScan {
             let scanner = self.scanner
             self.scanner = FlexaScan()
@@ -97,5 +100,34 @@ public extension FlexaScan {
 public extension Flexa {
     static func buildScan() -> FlexaScan.Builder {
         FlexaScan.Builder()
+    }
+}
+
+private extension FlexaScan {
+    struct StandaloneScannerView<Content: View>: View {
+        @Environment(\.theme) private var theme
+        @Environment(\.colorScheme) private var colorScheme
+
+        @StateObject var linkData: UniversalLinkData = Container.shared.universalLinkData()
+        @StateObject var flexaState = Container.shared.flexaState()
+        var content: () -> Content
+
+        var body: some View {
+            content()
+                .environmentObject(flexaState)
+                .flexaHandleUniversalLink()
+                .environmentObject(linkData)
+                .theme(theme)
+                .environment(\.colorScheme, theme.interfaceStyle.colorSheme ?? colorScheme)
+        }
+
+        init(@ViewBuilder content: @escaping () -> Content) {
+            self.content = content
+        }
+    }
+
+    @ViewBuilder
+    func createStandaloneView() -> some View {
+        StandaloneScannerView(content: createView)
     }
 }

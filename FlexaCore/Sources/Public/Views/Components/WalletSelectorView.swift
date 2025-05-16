@@ -47,7 +47,7 @@ struct WalletSelectorView: View {
                     .frame(width: 14, height: 15, alignment: .center)
             }.padding([.horizontal], 16)
                 .frame(height: 44, alignment: .center)
-                .modifier(RoundedView(color: backgroundColor))
+                .modifier(RoundedView(color: backgroundColor, cornerRadius: 10))
 
         }
     }

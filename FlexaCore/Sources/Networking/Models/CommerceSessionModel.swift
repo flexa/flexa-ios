@@ -90,8 +90,18 @@ extension Models.CommerceSession {
 
 extension Models.CommerceSession {
     struct Authorization: FlexaModelProtocol, CommerceSessionAuthorization {
+        enum CodingKeys: String, CodingKey {
+            case instructions, details, number
+            case statusString = "status"
+        }
+
         var instructions, details: String?
         var number: String
+        var statusString: String
+
+        var status: CommerceSessionAuthorizationStatus {
+            CommerceSessionAuthorizationStatus(rawValue: statusString) ?? .pending
+        }
     }
 }
 
@@ -136,7 +146,8 @@ extension Models.CommerceSession: CommerceSession {
                 Models.CommerceSession.Authorization(
                     instructions: newValue.instructions,
                     details: newValue.details,
-                    number: newValue.number
+                    number: newValue.number,
+                    statusString: newValue.status.rawValue
                 )
             } else {
                 sessionAuthorization = nil

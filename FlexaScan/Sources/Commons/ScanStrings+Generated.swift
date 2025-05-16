@@ -10,6 +10,20 @@ import Foundation
 // swiftlint:disable explicit_type_interface function_parameter_count identifier_name line_length
 // swiftlint:disable nesting type_body_length type_name vertical_whitespace_opening_braces
 internal enum ScanStrings {
+  internal enum Alerts {
+    internal enum SpendOptOut {
+      /// If you want to use Flexa in the future, just tap the More button, and then tap Pay with Flexa.
+      internal static let message = ScanStrings.tr("Localizable", "alerts.spend_opt_out.message", fallback: "If you want to use Flexa in the future, just tap the More button, and then tap Pay with Flexa.")
+      /// "Pay" is Now Hidden
+      internal static let title = ScanStrings.tr("Localizable", "alerts.spend_opt_out.title", fallback: "\"Pay\" is Now Hidden")
+    }
+  }
+  internal enum Common {
+    /// OK
+    internal static let ok = ScanStrings.tr("Localizable", "common.ok", fallback: "OK")
+    /// Undo
+    internal static let undo = ScanStrings.tr("Localizable", "common.undo", fallback: "Undo")
+  }
   internal enum Errors {
     internal enum CameraAccess {
       /// There was an error getting the video device
@@ -25,6 +39,26 @@ internal enum ScanStrings {
       internal enum EnableCamera {
         /// Enable camera Access
         internal static let title = ScanStrings.tr("Localizable", "scan.buttons.enable_camera.title", fallback: "Enable camera Access")
+      }
+    }
+  }
+  internal enum SettingsMenu {
+    internal enum Items {
+      internal enum ManageFlexaId {
+        /// Manage Flexa Account
+        internal static let title = ScanStrings.tr("Localizable", "settings_menu.items.manage_flexa_id.title", fallback: "Manage Flexa Account")
+      }
+      internal enum PayWithFlexa {
+        /// Pay with Flexa
+        internal static let title = ScanStrings.tr("Localizable", "settings_menu.items.pay_with_flexa.title", fallback: "Pay with Flexa")
+      }
+      internal enum ReportIssue {
+        /// Report an Issue
+        internal static let title = ScanStrings.tr("Localizable", "settings_menu.items.report_issue.title", fallback: "Report an Issue")
+      }
+      internal enum ScanFromPhoto {
+        /// Scan from photo
+        internal static let title = ScanStrings.tr("Localizable", "settings_menu.items.scan_from_photo.title", fallback: "Scan from photo")
       }
     }
   }

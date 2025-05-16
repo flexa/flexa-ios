@@ -13,12 +13,20 @@ import Factory
 extension AuthMainView {
     class ViewModel: ObservableObject {
         @Injected(\.authStore) var authStore
+        @Injected(\.userDefaults) var userDefaults
+        @Injected(\.appStateManager) var appStateManager
+        @Injected(\.flexaState) var flexaState
 
         @Published var error: Error?
         @Published var isLoading: Bool = false
         @Published var emailAddress: String = ""
         @Published var shouldGoVerifyEmail: Bool = false
         @Published var shouldGoPersonalInfo: Bool = false
+        var allowToDisablePayWithFlexa: Bool
+
+        var isPayWithFlexaEnabled: Bool {
+            userDefaults.value(forKey: .payWithFlexaEnabled) ?? true
+        }
 
         var applicationName: String {
             Bundle.applicationDisplayName
@@ -30,6 +38,25 @@ extension AuthMainView {
 
         var isContinueButtonEnabled: Bool {
             isValid && !isLoading
+        }
+
+        var showMenuOnClose: Bool {
+            isPayWithFlexaEnabled && FlexaIdentity.maxClosedAttemptsReached && allowToDisablePayWithFlexa
+        }
+
+        init(allowToDisablePayWithFlexa: Bool) {
+            self.allowToDisablePayWithFlexa = allowToDisablePayWithFlexa
+        }
+
+        func userClosedAuth() {
+            guard allowToDisablePayWithFlexa else {
+                return
+            }
+            FlexaIdentity.increaseIdentityClosedCounter()
+        }
+
+        func disablePayWithFlexa() {
+            flexaState.isPayWithFlexaEnabled = false
         }
 
         func verifyEmailAddress() {

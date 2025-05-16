@@ -143,12 +143,6 @@ final class MagicCodeInputUIView: UIControl {
     }
 
     override func paste(_ sender: Any?) {
-        // Universal links are not configured yet, we are allowing to paste them here
-        if let string = UIPasteboard.general.string,
-           let url = URL(string: string),
-           FlexaIdentity.processUniversalLink(url: url) {
-            return
-        }
         code = UIPasteboard.general.string?.digits ?? ""
         UIMenuController.shared.hideMenu(from: self)
     }
@@ -187,7 +181,7 @@ final class MagicCodeInputUIView: UIControl {
 
         if isEnabled && isFirstResponder {
             nextLabel?.layer.borderWidth = 2
-            nextLabel?.layer.borderColor = UIColor.purple.cgColor
+            nextLabel?.layer.borderColor = UIColor(Color.flexaTintColor).cgColor
         }
     }
 

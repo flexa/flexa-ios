@@ -1,6 +1,6 @@
 //
 //  TransactionAmountView.swift
-//  FlexaSpend
+//  FlexaCore
 //
 //  Created by Rodrigo Ordeix on 7/10/24.
 //  Copyright © 2024 Flexa. All rights reserved.
@@ -8,12 +8,10 @@
 
 import SwiftUI
 import FlexaUICore
-import FlexaCore
 import Factory
 
-struct TransactionAmountView: View {
-    @Environment(\.presentationMode) var presentationMode
-    @Environment(\.theme) private var theme
+public struct TransactionAmountView: View {
+    @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) private var colorScheme
 
     @State private var keySize: CGSize = .zero
@@ -25,6 +23,12 @@ struct TransactionAmountView: View {
     @State private var showWebView = false
     @StateObject private var viewModel: ViewModel
     @StateObject private var viewModelAsset: AssetSelectionViewModel
+
+    @Injected(\.flexaClient) private var flexaClient
+
+    private var theme: FXTheme {
+        flexaClient.theme
+    }
 
     let grayColor = Color(
         UIColor { trait in
@@ -65,12 +69,12 @@ struct TransactionAmountView: View {
         return Color(hex: "D8D8D8").opacity(0.4)
     }
 
-    init(viewModel: ViewModel, viewModelAsset: AssetSelectionViewModel) {
+    public init(viewModel: ViewModel, viewModelAsset: AssetSelectionViewModel) {
         _viewModel = StateObject(wrappedValue: viewModel)
         _viewModelAsset = StateObject(wrappedValue: viewModelAsset)
     }
 
-    var body: some View {
+    public var body: some View {
         ZStack(alignment: .top) {
             GeometryReader { reader in
                 Color.clear
@@ -103,7 +107,7 @@ struct TransactionAmountView: View {
             closeButton
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(.thinMaterial)
+        .setCustomBackground(colorScheme)
         .dragIndicator(true)
         .sheet(isPresented: $showWebView) {
             FlexaWebView(url: viewModel.promotion?.url)
@@ -252,7 +256,7 @@ struct TransactionAmountView: View {
             if viewModel.isLoading {
                 FlexaRoundedButton(.close) {
                     viewModel.cancelledByUser = true
-                    presentationMode.wrappedValue.dismiss()
+                    dismiss()
                 }.padding()
             } else {
                 FlexaRoundedButton(.info) {
@@ -266,7 +270,7 @@ struct TransactionAmountView: View {
     var payButton: some View {
         ZStack {
             Button {
-                viewModel.createCommerceSession()
+                viewModel.createOrUpdateCommerceSession()
             } label: {
                 HStack(spacing: 10) {
                     if viewModel.isPaymentDone {
@@ -366,7 +370,7 @@ struct TransactionAmountView: View {
                         hasAmount: true
                     )
                 )
-            }
+            }.environment(\.colorScheme, theme.colorScheme ?? colorScheme)
         }
     }
 
@@ -386,7 +390,7 @@ struct TransactionAmountView: View {
         Text("")
             .frame(width: 0, height: 0)
             .hidden()
-            .alertTintColor(.purple)
+            .alertTintColor(.flexaTintColor)
     }
 
     private func numpadRow(keys: [String]) -> some View {
@@ -490,7 +494,6 @@ private extension TransactionAmountView {
 }
 
 private extension View {
-
     @ViewBuilder
     func updatingBalancePopover(_ showPopover: Binding<Bool>, balanceAvailable: Decimal) -> some View {
         if #available(iOS 16.4, *) {
@@ -501,6 +504,15 @@ private extension View {
             }
         } else {
             self
+        }
+    }
+
+    @ViewBuilder
+    func setCustomBackground(_ colorScheme: ColorScheme) -> some View {
+        if colorScheme == .dark {
+            self.background(Container.shared.flexaClient().theme.views.primary.backgroundColor)
+        } else {
+            self.background(.thinMaterial)
         }
     }
 }

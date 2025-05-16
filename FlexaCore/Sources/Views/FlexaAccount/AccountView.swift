@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Factory
+import FlexaUICore
 
 struct AccountView: View {
     typealias Strings = CoreStrings.Account
@@ -57,13 +58,13 @@ struct AccountView: View {
                     Button(CoreStrings.Global.cancel, role: .cancel) { }
                     Button(Strings.Alerts.SignOut.Buttons.SignOut.title, role: .destructive) {
                         viewModel.signOut()
-                        dismissAll?()
+                        Flexa.close()
                     }
                 } message: {
                     Text(Strings.Alerts.SignOut.message(viewModel.applicationName))
                 }
                 .onAppear(perform: load)
-        }.tint(.purple)
+        }.tint(.flexaTintColor)
             .dragIndicator(true)
             .errorAlert(error: $viewModel.error)
     }
@@ -104,7 +105,7 @@ struct AccountView: View {
                             .resizable()
                             .frame(width: 16, height: 16)
                             .font(.body.weight(.heavy))
-                            .foregroundStyle(.purple)
+                            .foregroundStyle(Color.flexaTintColor)
                             .rotationEffect(.degrees(arrowsImageRotationAngle))
                     }
                     .frame(width: 40)

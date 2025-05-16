@@ -10,7 +10,7 @@ import Nimble
 import Quick
 import Fakery
 import Foundation
-@testable import FlexaSpend
+@testable import FlexaCore
 
 class TOTPGeneratorSpec: QuickSpec {
     override class func spec() {

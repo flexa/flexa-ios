@@ -61,7 +61,7 @@ public extension ReasonableError {
         case invalidValue
         case custom(Error)
         case customMessage(String, String)
-        case uninplemented
+        case unimplemented
         case networkError(Error?)
         case cannotCreateAccount(Error?)
         case cannotGetAccount(Error?)
@@ -78,6 +78,7 @@ public extension ReasonableError {
         case cannotCloseCommerceSession(Error?)
         case cannotApproveCommerceSession(Error?)
         case cannotSetCommerceSessionPaymentAsset(Error?)
+        case cannotSetCommerceSessionAmount(Error?)
         case cannotCreateToken(Error?)
         case cannotVerifyToken(Error?)
         case cannotRefreshToken(Error?)
@@ -92,7 +93,7 @@ public extension ReasonableError {
                 return Strings.InvalidValue.title
             case .customMessage(let title, _):
                 return title
-            case .uninplemented:
+            case .unimplemented:
                 return Strings.Unimplemented.title
             default:
                 return Strings.Default.title
@@ -109,7 +110,7 @@ public extension ReasonableError {
                 return error.localizedDescription
             case .customMessage(_, let message):
                 return message
-            case .uninplemented:
+            case .unimplemented:
                 return Strings.Unimplemented.message
             default:
                 return Strings.Default.message
@@ -171,6 +172,68 @@ public extension ReasonableError {
     }
 }
 
+// Equatable
+extension ReasonableError.Reason: Equatable {
+    public static func ==(lhs: ReasonableError.Reason, rhs: ReasonableError.Reason) -> Bool {
+        switch (lhs, rhs) {
+        case (.unknown, .unknown),
+            (.invalidValue, .invalidValue),
+            (.unimplemented, .unimplemented):
+            return true
+        case (.customMessage(let lhsTitle, let lhsMessage), .customMessage(let rhsTitle, let rhsMessage)):
+            return lhsTitle == rhsTitle && lhsMessage == rhsMessage
+        case (.custom(let lhsError), .custom(let rhsError)):
+            return lhsError.localizedDescription == rhsError.localizedDescription
+        case (.networkError(let lhsError), .networkError(let rhsError)),
+            (.cannotCreateAccount(let lhsError), .cannotCreateAccount(let rhsError)),
+            (.cannotGetAccount(let lhsError), .cannotGetAccount(let rhsError)),
+            (.cannotDeleteAccount(let lhsError), .cannotDeleteAccount(let rhsError)),
+            (.cannotDeleteAppNotification(let lhsError), .cannotDeleteAppNotification(let rhsError)),
+            (.cannotConvertAsset(let lhsError), .cannotConvertAsset(let rhsError)),
+            (.cannotGetExchangeRates(let lhsError), .cannotGetExchangeRates(let rhsError)),
+            (.cannotGetAssets(let lhsError), .cannotGetAssets(let rhsError)),
+            (.cannotGetBrands(let lhsError), .cannotGetBrands(let rhsError)),
+            (.cannotSignTransaction(let lhsError), .cannotSignTransaction(let rhsError)),
+            (.cannotCreateCommerceSession(let lhsError), .cannotCreateCommerceSession(let rhsError)),
+            (.cannotGetCommerceSession(let lhsError), .cannotGetCommerceSession(let rhsError)),
+            (.cannotWatchSession(let lhsError), .cannotWatchSession(let rhsError)),
+            (.cannotCloseCommerceSession(let lhsError), .cannotCloseCommerceSession(let rhsError)),
+            (.cannotApproveCommerceSession(let lhsError), .cannotApproveCommerceSession(let rhsError)),
+            (.cannotSetCommerceSessionPaymentAsset(let lhsError), .cannotSetCommerceSessionPaymentAsset(let rhsError)),
+            (.cannotSetCommerceSessionAmount(let lhsError), .cannotSetCommerceSessionAmount(let rhsError)),
+            (.cannotCreateToken(let lhsError), .cannotCreateToken(let rhsError)),
+            (.cannotVerifyToken(let lhsError), .cannotVerifyToken(let rhsError)),
+            (.cannotRefreshToken(let lhsError), .cannotRefreshToken(let rhsError)),
+            (.cannotDeleteToken(let lhsError), .cannotDeleteToken(let rhsError)),
+            (.cannotSyncOneTimeKeys(let lhsError), .cannotSyncOneTimeKeys(let rhsError)):
+            return lhsError?.localizedDescription == rhsError?.localizedDescription
+        default:
+            return false
+        }
+    }
+}
+
+extension ReasonableError: Equatable {
+    public static func == (lhs: ReasonableError, rhs: ReasonableError) -> Bool {
+        lhs.reason == rhs.reason
+    }
+}
+
+public struct EquatableError: Error, Equatable {
+    public let base: Error
+
+    public init(_ base: Error) {
+        self.base = base
+    }
+
+    public static func == (lhs: EquatableError, rhs: EquatableError) -> Bool {
+        guard let lhs = lhs.base as? ReasonableError, let rhs = rhs.base as? ReasonableError else {
+            return false
+        }
+        return lhs == rhs
+    }
+}
+
 // MARK: Static methods
 extension ReasonableError {
     public static func custom(title: String, message: String) -> ReasonableError {
@@ -191,7 +254,7 @@ extension ReasonableError {
 
     public static let unknown = ReasonableError(reason: .unknown)
     public static let invalidValue = ReasonableError(reason: .invalidValue)
-    public static let uninplemented = ReasonableError(reason: .uninplemented)
+    public static let uninplemented = ReasonableError(reason: .unimplemented)
 }
 
 // MARK: Error

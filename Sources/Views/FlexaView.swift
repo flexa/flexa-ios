@@ -12,12 +12,13 @@ import FlexaUICore
 import Factory
 
 struct FlexaView<ScanView: View, PaymentView: View>: View {
-    @State private var selection: String = "home"
     @State private var tabSelection: TabBarItem = .scan
 
-    @StateObject var modalState = SpendModalState()
+    @StateObject var flexaState = Container.shared.flexaState()
     @StateObject var linkData: UniversalLinkData = Container.shared.universalLinkData()
+
     @Injected(\.flexaClient) var flexaClient
+
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismiss
 
@@ -40,6 +41,12 @@ struct FlexaView<ScanView: View, PaymentView: View>: View {
                         payContent()
                     }.tabBarItem(tab: .spend, selection: $tabSelection)
                 }
+                .onAuthorizationError {
+                    FlexaIdentity.disconnect()
+                    DispatchQueue.main.async {
+                        tabSelection = .scan
+                    }
+                }
             } else if let payContent {
                 payContent()
             } else if let scanContent {
@@ -48,7 +55,7 @@ struct FlexaView<ScanView: View, PaymentView: View>: View {
                 EmptyView()
             }
         }.environment(\.colorScheme, flexaClient.theme.interfaceStyle.colorSheme ?? colorScheme)
-            .environmentObject(modalState)
+            .environmentObject(flexaState)
             .flexaHandleUniversalLink()
             .environmentObject(linkData)
             .environment(\.dismissAll, dismiss)

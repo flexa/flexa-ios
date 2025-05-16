@@ -9,9 +9,10 @@
 import SwiftUI
 import SVGView
 
-struct FlexcodeView: View {
+public struct FlexcodeView: View {
     @Binding var pdf417Image: UIImage
     @Binding var code128Image: UIImage
+
     var gradientMiddleColor: Color
 
     var gradientColors: [Color] {
@@ -22,7 +23,13 @@ struct FlexcodeView: View {
         ]
     }
 
-    var body: some View {
+    public init(pdf417Image: Binding<UIImage>, code128Image: Binding<UIImage>, gradientMiddleColor: Color) {
+        self._pdf417Image = pdf417Image
+        self._code128Image = code128Image
+        self.gradientMiddleColor = gradientMiddleColor
+    }
+
+    public var body: some View {
         mainBlackBackgroundView {
             code128View
             codeBlackContainerView {
@@ -35,11 +42,11 @@ struct FlexcodeView: View {
             }
             .padding(.leading, 29)
             flexaAndGradientView
-        }
+        }.frame(width: 237, height: 207)
     }
 
     @ViewBuilder
-    static var placeholder: some View {
+    public static var placeholder: some View {
         ZStack {
             Rectangle().foregroundStyle(Color(UIColor.systemGray6))
                 .frame(width: 237, height: 207)
@@ -228,7 +235,7 @@ private extension FlexcodeView {
     }
 
     static func svgViewFromBundle(_ svg: FlexcodeSVG) -> some View {
-        guard let url = Bundle.spendBundle.svgBundle.url(forResource: svg.fileName, withExtension: "svg") else {
+        guard let url = Bundle.coreBundle.svgBundle.url(forResource: svg.fileName, withExtension: "svg") else {
             return SVGView(string: "")
         }
         return SVGView(contentsOf: url)

@@ -7,11 +7,18 @@
 //
 
 import SwiftUI
+import FlexaUICore
+import FlexaCore
+import Factory
 
 struct ScannerView: View {
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) var dismiss
+    @Environment(\.openURL) private var openURL
+    @EnvironmentObject var flexaState: FlexaState
+
     @StateObject var viewModel: ViewModel
     @StateObject var cameraManager: CameraManager
+    @State var isShowingEnablePayWithFlexaAlert: Bool = false
 
     private var navigationButtonColor: Color {
         if !viewModel.isPermissionGranted || viewModel.showSettingAlert {
@@ -40,11 +47,13 @@ struct ScannerView: View {
     }
 
     init(onTransactionRequest: Flexa.TransactionRequestCallback? = nil,
-         onSend: Flexa.SendHandoff? = nil) {
+         onSend: Flexa.SendHandoff? = nil,
+         allowToDisablePayWithFlexa: Bool) {
 
         let viewModel = ViewModel(
             onTransactionRequest: onTransactionRequest,
-            onSend: onSend
+            onSend: onSend,
+            allowToDisablePayWithFlexa: allowToDisablePayWithFlexa
         )
 
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -79,7 +88,8 @@ struct ScannerView: View {
                         }
                     }.opacity(0.75)
                 }.padding([.bottom, .horizontal], 58)
-            }.toolbar {
+            }
+            .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     if viewModel.isFlashlightAvailable {
                         FlexaRoundedButton(.custom(Image(systemName: flashlightImageName)),
@@ -93,36 +103,85 @@ struct ScannerView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: 8) {
-                        NavigationMenu {
-                            FlexaRoundedButton(.settings,
-                                               color: navigationButtonColor,
-                                               backgroundColor: navigationButtonBackgroundColor
-                            )
-                        }
-                        FlexaRoundedButton(.close,
-                                         color: navigationButtonColor,
-                                         backgroundColor: navigationButtonBackgroundColor,
-                                         buttonAction: dismiss
-                        )
-                    }
+                    rightToolbarItem
                 }
-            }.onAppear {
+            }
+            .onAppear {
                 viewModel.setup()
-            }.onDisappear {
+                isShowingEnablePayWithFlexaAlert = viewModel.allowToDisablePayWithFlexa && !flexaState.isPayWithFlexaEnabled
+            }
+            .onDisappear {
                 viewModel.stopCapturing()
             }
-            .errorAlert(error: $cameraManager.error)
+            .onChange(of: flexaState.isModalVisible, perform: viewModel.handleModalStateChange)
+            .onChange(of: cameraManager.error, perform: viewModel.setError)
+            .errorAlert(error: $viewModel.error)
+            .alert(ScanStrings.Alerts.SpendOptOut.title, isPresented: $isShowingEnablePayWithFlexaAlert) {
+                Button(ScanStrings.Common.undo) {
+                    flexaState.isPayWithFlexaEnabled = true
+                }
+                Button(ScanStrings.Common.ok) {
+                }
+            } message: {
+                Text(ScanStrings.Alerts.SpendOptOut.message)
+            }
         }
     }
 
     @ViewBuilder
     private var backgroundView: some View {
         #if targetEnvironment(simulator)
-        Color.purple.opacity(0.8).ignoresSafeArea()
+        Color.flexaTintColor.opacity(0.8).ignoresSafeArea()
         #else
         Color.black.ignoresSafeArea()
         #endif
+    }
+
+    @ViewBuilder
+    private var rightToolbarItem: some View {
+        HStack(spacing: 8) {
+            Menu {
+                Section {
+                    Button {
+                    } label: {
+                        Label(ScanStrings.SettingsMenu.Items.ScanFromPhoto.title, systemImage: "photo.on.rectangle")
+                    }
+                    if viewModel.allowToDisablePayWithFlexa && !flexaState.isPayWithFlexaEnabled {
+                        Button {
+                            flexaState.isPayWithFlexaEnabled = true
+                        } label: {
+                            HStack {
+                                Text(ScanStrings.SettingsMenu.Items.PayWithFlexa.title)
+                                Image(asset: Asset.flexaLogoGrayscale)
+                            }
+                        }
+                    }
+                }
+                Section {
+                    if FlexaIdentity.isSignedIn {
+                        Button {
+                            openAccount()
+                        } label: {
+                            Label(ScanStrings.SettingsMenu.Items.ManageFlexaId.title, systemImage: "person.text.rectangle")
+                        }
+                    }
+                    Button {
+                    } label: {
+                        Label(ScanStrings.SettingsMenu.Items.ReportIssue.title, systemImage: "exclamationmark.bubble")
+                    }
+                }
+            } label: {
+                FlexaRoundedButton(.settings,
+                                   color: navigationButtonColor,
+                                   backgroundColor: navigationButtonBackgroundColor
+                )
+            }
+            FlexaRoundedButton(.close,
+                               color: navigationButtonColor,
+                               backgroundColor: navigationButtonBackgroundColor,
+                               buttonAction: { dismiss() }
+            )
+        }
     }
 
     private func openSettings() {
@@ -134,7 +193,17 @@ struct ScannerView: View {
         UIApplication.shared.open(settingsUrl)
     }
 
-    private func dismiss() {
-        presentationMode.wrappedValue.dismiss()
+    private func openAccount() {
+        if FlexaIdentity.isSignedIn {
+            if let url = FlexaLink.account.url {
+                openURL(url)
+            }
+        } else {
+            Flexa
+                .buildIdentity()
+                .delayCallbacks(false)
+                .build()
+                .open()
+        }
     }
 }

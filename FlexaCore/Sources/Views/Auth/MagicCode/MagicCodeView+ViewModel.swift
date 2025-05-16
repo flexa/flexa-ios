@@ -71,8 +71,8 @@ extension MagicCodeView {
 
         @MainActor
         private func handleState(_ state: AuthStoreState = .none, error: Error? = nil) async {
-            self.isLoading = false
             self.validated = state == .loggedIn
+            self.isLoading = self.validated
             self.error = error
         }
     }

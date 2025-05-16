@@ -29,6 +29,6 @@ extension View {
         Text("")
             .frame(width: 0, height: 0)
             .hidden()
-            .alertTintColor(.purple)
+            .alertTintColor(.flexaTintColor)
     }
 }
