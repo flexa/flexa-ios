@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "Flexa"
-  s.version      = "1.1.0"
+  s.version      = "1.1.1"
   s.summary      = "Flexa SDK"
   s.description  = "Flexa SDK by Flexa"
   s.homepage     = "https://github.com/flexa/flexa-ios"
@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.module_name = "Flexa"
   s.platform = :ios
   s.swift_version = "5.1"
-  s.ios.deployment_target  = '15.0'
+  s.ios.deployment_target  = '16.0'
 
   s.source       = { :git => "https://github.com/flexa/flexa-ios", :tag => s.version }
   s.source_files = 'Sources/**/*.{swift}'
@@ -24,47 +24,47 @@ Pod::Spec.new do |s|
     ss.dependency 'FlexaScan', "~> #{s.version}"
     ss.dependency 'FlexaUICore', "~> #{s.version}"
     ss.dependency 'FlexaNetworking', "~> #{s.version}"
-    ss.ios.deployment_target = '15.0'
+    ss.ios.deployment_target = '16.0'
   end
 
   s.subspec 'Core' do |ss|
     ss.dependency 'FlexaCore', "~> #{s.version}"
-    ss.ios.deployment_target = '15.0'
+    ss.ios.deployment_target = '16.0'
   end
 
   s.subspec 'Scan' do |ss|
     ss.dependency 'FlexaCore', "~> #{s.version}"
     ss.dependency 'FlexaScan', "~> #{s.version}"
-    ss.ios.deployment_target = '15.0'
+    ss.ios.deployment_target = '16.0'
   end
 
   s.subspec 'FlexaLoad' do |ss|
     ss.dependency 'FlexaCore', "~> #{s.version}"
     ss.dependency 'FlexaLoad', "~> #{s.version}"
-    ss.ios.deployment_target = '15.0'
+    ss.ios.deployment_target = '16.0'
   end
 
   s.subspec 'Spend' do |ss|
     ss.dependency 'FlexaCore', "~> #{s.version}"
     ss.dependency 'FlexaSpend', "~> #{s.version}"
-    ss.ios.deployment_target = '15.0'
+    ss.ios.deployment_target = '16.0'
   end
 
   s.subspec 'Theming' do |ss|
     ss.dependency 'FlexaCore', "~> #{s.version}"
-    ss.ios.deployment_target = '15.0'
+    ss.ios.deployment_target = '16.0'
   end
 
   s.subspec 'UI' do |ss|
     ss.dependency 'FlexaCore', "~> #{s.version}"
     ss.dependency 'FlexaUICore', "~> #{s.version}"
-    ss.ios.deployment_target = '15.0'
+    ss.ios.deployment_target = '16.0'
   end
 
   s.subspec 'Networking' do |ss|
     ss.dependency 'FlexaCore', "~> #{s.version}"
     ss.dependency 'FlexaNetworking', "~> #{s.version}"
-    ss.ios.deployment_target = '15.0'
+    ss.ios.deployment_target = '16.0'
   end
 
   s.test_spec 'Tests' do |test_spec|

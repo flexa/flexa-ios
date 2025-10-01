@@ -8,6 +8,7 @@
 
 import Foundation
 import SwiftUI
+import FlexaUICore
 
 public typealias UpdateAssetClosure = (AssetWrapper) -> Void
 
@@ -17,6 +18,13 @@ public struct AssetsNavigationView: View {
     @Binding var showAssetsModal: Bool
     @StateObject private var viewModelAsset: AssetSelectionViewModel
     private var updateAsset: UpdateAssetClosure
+
+    private var listTopPadding: CGFloat {
+        if #available(iOS 26.0, *) {
+            return -20
+        }
+        return 0
+    }
 
     public init(showAssetsModal: Binding<Bool>,
                 viewModelAsset: StateObject<AssetSelectionViewModel>,
@@ -33,8 +41,23 @@ public struct AssetsNavigationView: View {
                                    viewModel: _viewModelAsset,
                                    didSelect: handleSelection)
             }
+            .padding(.top, listTopPadding)
             .navigationBarTitle(CoreStrings.Payment.PayUsing.title, displayMode: .inline).background(theme.backgroundColor)
-            .navigationBarItems(trailing:
+            .toolbar {
+                doneButton
+            }
+        }
+        .ignoresSafeArea()
+    }
+
+    @ToolbarContentBuilder
+    var doneButton: some ToolbarContent {
+        ToolbarItem(placement: .confirmationAction) {
+            if #available(iOS 26.0, *) {
+                FlexaRoundedButton(.checkmark) {
+                    showAssetsModal = false
+                }.tint(.flexaTintColor)
+            } else {
                 Button(action: {
                     showAssetsModal = false
                 }, label: {
@@ -42,10 +65,9 @@ public struct AssetsNavigationView: View {
                         .font(.body.weight(.semibold))
                         .foregroundColor(.flexaTintColor)
                 })
-            )
+                .accentColor(.flexaTintColor)
+            }
         }
-        .accentColor(.flexaTintColor)
-        .ignoresSafeArea()
     }
 
     private func handleSelection(selectedAsset: AssetWrapper) {

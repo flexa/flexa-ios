@@ -62,7 +62,20 @@ public struct SpendDragModalView<Content: View>: View {
     }
 
     private var cardPadding: CGFloat {
-        presentationMode == .card ? 16 : 0
+        if presentationMode == .sheet {
+            return 0
+        } else if #available(iOS 26.0, *) {
+            return 6
+        } else {
+            return 16
+        }
+    }
+
+    private var backgroundOpacity: CGFloat {
+        if #available(iOS 26.0, *) {
+            return 0.8
+        }
+        return 1
     }
 
     private var contentHorizontalPadding: CGFloat {
@@ -117,29 +130,34 @@ public struct SpendDragModalView<Content: View>: View {
     }
 
     public var body: some View {
+        mainContent
+    }
+
+    @ViewBuilder
+    var mainContent: some View {
         ZStack(alignment: .bottom) {
             backgroundView
             if isShowing {
                 ZStack(alignment: .top) {
                     contentView
-                    .frame(maxHeight: .infinity)
-                    .padding(.top, enableHeader ? 54 : 0)
-                    .padding(.bottom, contentBottomPadding)
-                    .padding(.horizontal, contentHorizontalPadding)
+                        .frame(maxHeight: .infinity)
+                        .padding(.top, enableHeader ? 54 : 0)
+                        .padding(.bottom, contentBottomPadding)
+                        .padding(.horizontal, contentHorizontalPadding)
                     if enableHeader {
                         headerView
                     }
                 }.accessibility(addTraits: .isModal)
-                .frame(height: curHeight)
-                .frame(maxWidth: .infinity)
-                .padding([.bottom, .horizontal], cardPadding)
-                .background(
-                   modalBackground
-                )
-                .animation(isDragging ? nil : .easeInOut(duration: duration))
-                .zIndex(isShowing ? 2 : 1)
-                .onDisappear { curHeight = minHeight }
-                .transition(.move(edge: .bottom))
+                    .frame(height: curHeight)
+                    .frame(maxWidth: .infinity)
+                    .padding([.bottom, .horizontal], cardPadding)
+                    .background(
+                        modalBackground
+                    )
+                    .animation(isDragging ? nil : .easeInOut(duration: duration))
+                    .zIndex(isShowing ? 2 : 1)
+                    .onDisappear { curHeight = minHeight }
+                    .transition(.move(edge: .bottom))
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
@@ -216,9 +234,22 @@ public struct SpendDragModalView<Content: View>: View {
                         if let rightHeaderView {
                             AnyView(rightHeaderView)
                         }
-
-                        FlexaRoundedButton(.close) {
-                            isShowing = false
+                        if #available(iOS 26, *) {
+                            Button {
+                                isShowing = false
+                            } label: {
+                                ZStack {
+                                    Circle().fill(Color(UIColor.secondarySystemFill))
+                                    Image(systemName: "xmark")
+                                        .font(Font.system(size: 15, weight: .semibold, design: .rounded))
+                                        .foregroundStyle(.secondary)
+                                }
+                            }.buttonStyle(.plain)
+                            .frame(width: 44, height: 44)
+                        } else {
+                            FlexaRoundedButton(.close) {
+                                isShowing = false
+                            }
                         }
                     }
                 }
@@ -226,19 +257,32 @@ public struct SpendDragModalView<Content: View>: View {
         }
         .padding([.horizontal, .top], 20)
         .frame(maxWidth: .infinity)
-        .gesture(dragGesture)
     }
 
+    @ViewBuilder
     private var modalBackground: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: cornerRadius)
-            if presentationMode == .sheet {
-                // HACK for RoundedCorners only on top
-                Spacer()
-                Rectangle().padding(.top, 60)
+            if #available(iOS 26.0, *) {
+                ZStack(alignment: .top) {
+                    UnevenRoundedRectangle(
+                        topLeadingRadius: 40,
+                        bottomLeadingRadius: 0,
+                        bottomTrailingRadius: 0,
+                        topTrailingRadius: 40
+                    ).frame(height: 40)
+                    ConcentricRectangle(corners: .concentric)
+                        .padding(.top, 40)
+                }
+            } else {
+                RoundedRectangle(cornerRadius: cornerRadius)
+                if presentationMode == .sheet {
+                    // HACK for RoundedCorners only on top
+                    Spacer()
+                    Rectangle().padding(.top, 60)
+                }
             }
         }
         .padding([.bottom, .horizontal], cardPadding)
-        .foregroundColor(backgroundColor)
+        .foregroundColor(backgroundColor.opacity(backgroundOpacity))
     }
 }

@@ -44,7 +44,13 @@ public extension FXTheme.Containers {
 
 public extension FXTheme.Containers {
     class Notification: FXTheme.View {
-        public static let `default` = Notification(padding: 16, borderRadius: 14)
+        private static var defaultBorderRadius: CGFloat {
+            if #available(iOS 26.0, *) {
+                return 20
+            }
+            return 14
+        }
+        public static let `default` = Notification(padding: 16, borderRadius: defaultBorderRadius)
 
         override var defaultBackgroundColor: Color {
             Color(
@@ -58,7 +64,13 @@ public extension FXTheme.Containers {
 
 public extension FXTheme.Containers {
     class Content: FXTheme.View {
-        public static let `default` = Content(padding: 42, borderRadius: 14)
+        private static var defaultBorderRadius: CGFloat {
+            if #available(iOS 26.0, *) {
+                return 20
+            }
+            return 14
+        }
+        public static let `default` = Content(padding: 42, borderRadius: defaultBorderRadius)
 
         override var defaultBackgroundColor: Color {
             Color(

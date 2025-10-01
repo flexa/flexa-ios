@@ -15,6 +15,13 @@ struct AssetSelectionView: View {
     @State private var transactionAssetDetailsView: TransactionAssetDetailsView?
     @StateObject private var viewModel: AssetSelectionViewModel
 
+    private var listStyle: some ListStyle {
+        if #available(iOS 26.0, *) {
+            return DefaultListStyle()
+        }
+        return PlainListStyle()
+    }
+
     init(showAssetsModal: Binding<Bool>,
          viewModel: StateObject<AssetSelectionViewModel>,
          didSelect: ClosureAsset?) {
@@ -25,23 +32,12 @@ struct AssetSelectionView: View {
 
     var body: some View {
         ZStack {
-            backgroundColor.ignoresSafeArea()
-            List {
-                balanceView
-                if !viewModel.accountBalanceCoversFullAmount {
-                    assetsList
-                }
-            }.listStyle(PlainListStyle())
-                .listRowSpacing(tableTheme.cellSpacing)
-
-                .shadow(color: tableTheme.shadow.color,
-                        radius: tableTheme.shadow.radius,
-                        x: tableTheme.shadow.x,
-                        y: tableTheme.shadow.y)
-                .background(NavigationLink("",
-                                           destination: transactionAssetDetailsView,
-                                           isActive: $isAssetExchangeRateViewPresented).hidden())
-                .padding(.horizontal, listPadding)
+            if #available(iOS 26.0, *) {
+                list.listSectionSpacing(0)
+            } else {
+                backgroundColor.ignoresSafeArea()
+                list
+            }
         }.animation(.none)
             .onAppear {
                 viewModel.loadAccount()
@@ -50,6 +46,26 @@ struct AssetSelectionView: View {
                     viewModel.showSelectedAssetDetail = false
                 }
             }
+    }
+
+    @ViewBuilder
+    private var list: some View {
+        List {
+            balanceView
+            if !viewModel.accountBalanceCoversFullAmount {
+                assetsList
+            }
+        }.listStyle(listStyle)
+            .listRowSpacing(tableTheme.cellSpacing)
+
+            .shadow(color: tableTheme.shadow.color,
+                    radius: tableTheme.shadow.radius,
+                    x: tableTheme.shadow.x,
+                    y: tableTheme.shadow.y)
+            .background(NavigationLink("",
+                                       destination: transactionAssetDetailsView,
+                                       isActive: $isAssetExchangeRateViewPresented).hidden())
+            .padding(.horizontal, listPadding)
     }
 
     @ViewBuilder

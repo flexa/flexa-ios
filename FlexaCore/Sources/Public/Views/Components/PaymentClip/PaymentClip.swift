@@ -48,6 +48,13 @@ public struct PaymentClip: View {
         return Bundle.coreBundle.svgBundle.url(forResource: svgName, withExtension: "svg")
     }
 
+    private var minHeight: CGFloat {
+        if #available(iOS 26.0, *) {
+            return 466
+        }
+        return 418
+    }
+
     private var theme: FXTheme {
         flexaClient.theme
     }
@@ -69,22 +76,14 @@ public struct PaymentClip: View {
     }
 
     @ViewBuilder
-    var rightHeaderView: some View {
-        FlexaRoundedButton(.info) {
-            showTransactionDetails = true
-        }
-    }
-
-    @ViewBuilder
     var modal: some View {
         SpendDragModalView(titleColor: .primary,
                            grabberColor: Color(UIColor.systemGray4),
                            isShowing: $isShowing,
-                           minHeight: 418,
+                           minHeight: minHeight,
                            enableBlur: true,
                            backgroundColor: backgroundColor,
                            leftHeaderView: leftHeaderView,
-                           rightHeaderView: rightHeaderView,
                            presentationMode: .card,
                            didClose: { didCancel?() },
                            contentView:
@@ -167,6 +166,7 @@ public struct PaymentClip: View {
                             .environment(\.colorScheme, colorScheme)
                     }
         } else {
+
             modal
             SpendDragModalView(
                                isShowing: $showTransactionDetails,
@@ -241,6 +241,27 @@ struct PayNowContentView: View {
         showUpdatingBalanceButton ? .clear : .white
     }
 
+    private var brandLogoSize: CGFloat {
+        if #available(iOS 26, *) {
+            return 80
+        }
+        return 48
+    }
+
+    private var brandLogoCornerRadius: CGFloat {
+        if #available(iOS 26, *) {
+            return 12
+        }
+        return 6
+    }
+
+    private var checkmarkSize: CGFloat {
+        if #available(iOS 26.0, *) {
+            return 72
+        }
+        return 50
+    }
+
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 8) {
@@ -249,18 +270,18 @@ struct PayNowContentView: View {
                         url: merchantLogoUrl,
                         content: { image in
                             image.resizable()
-                                .frame(width: 48, height: 48)
-                                .cornerRadius(6)
+                                .frame(width: brandLogoSize, height: brandLogoSize)
+                                .cornerRadius(brandLogoCornerRadius)
                                 .aspectRatio(contentMode: .fill)
                                 .scaledToFit()
                         },
                         placeholder: {
-                            RoundedRectangle(cornerRadius: 6)
+                            RoundedRectangle(cornerRadius: brandLogoCornerRadius)
                                 .fill(Color.gray)
-                                .frame(width: 48, height: 48)
+                                .frame(width: brandLogoSize, height: brandLogoSize)
                         })
                 }
-                .frame(height: 68)
+                .frame(height: brandLogoSize + 20)
                 .padding(.bottom, 4)
                 Text(CoreStrings.Payment.payMerchant(merchantName))
                     .multilineTextAlignment(.center)
@@ -276,63 +297,20 @@ struct PayNowContentView: View {
                             Image(systemName: "checkmark.circle")
                                 .resizable()
                         )
-                        .frame(width: 50, height: 50, alignment: .center)
+                        .frame(width: checkmarkSize, height: checkmarkSize, alignment: .center)
                         .transition(.scale)
-                        linearGradient.mask(
-                            Text(CoreStrings.Payment.done)
-                                .multilineTextAlignment(.center)
-                                .font(.body.weight(.semibold))
-                        )
-                        .frame(height: 20)
-                        .transition(.move(edge: .bottom))
-                    } else {
-                        WalletSelectorView(asset: asset, usingAccountBalance: isUsingAccountBalance) {
-                            didSelect?()
-                        }.frame(idealHeight: 44)
-                            .padding(.top, 10)
-                            .disabled(!assetSwitcherEnabled)
-                        ZStack {
-                            Button {
-                                didConfirm?()
-                            } label: {
-                                HStack(spacing: 10) {
-                                    Spacer()
-                                    if isLoading {
-                                        ProgressView()
-                                            .tint(.white)
-                                        Text(loadingTitle)
-                                            .font(.body.weight(.semibold))
-                                            .foregroundColor(.white)
-                                    } else {
-                                        Text(CoreStrings.Payment.payNow)
-                                            .font(.body.weight(.semibold))
-                                            .foregroundColor(payNowButtonForeground)
-                                    }
-                                    Spacer()
-                                }.padding()
-
-                            }
-                            .disabled(!payButtonEnabled)
-                            .opacity(payButtonEnabled ? 1 : 0.5)
-                            .frame(idealHeight: 51)
-                            .background(linearGradient)
-                            .cornerRadius(13)
-                            .overlay {
-                                if showUpdatingBalanceButton {
-                                    HStack {
-                                        Text(CoreStrings.Payment.BalanceUnavailable.title)
-                                        Image(systemName: "info.circle")
-                                            .renderingMode(.template)
-                                            .onTapGesture {
-                                                showUpdatingBalanceAlert = true
-                                            }
-                                    }.flexaButton(
-                                        background: Color.clear,
-                                        textColor: .secondary
-                                    )
-                                }
-                            }
+                        if #unavailable(iOS 26.0) {
+                            linearGradient.mask(
+                                Text(CoreStrings.Payment.done)
+                                    .multilineTextAlignment(.center)
+                                    .font(.body.weight(.semibold))
+                            )
+                            .frame(height: 20)
+                            .transition(.move(edge: .bottom))
                         }
+                    } else {
+                        walletSwitcher
+                        payButton
                     }
                 }.padding(.top, 20)
             }.background(Color.clear)
@@ -341,6 +319,90 @@ struct PayNowContentView: View {
         .padding(.top, 20)
         .alert(isPresented: $showUpdatingBalanceAlert) {
             UpdatingBalanceView.alert(asset.availableBalanceInLocalCurrency ?? 0)
+        }
+    }
+
+    @ViewBuilder
+    private var walletSwitcher: some View {
+        if #available(iOS 26.0, *) {
+            WalletSelectorView(asset: asset, usingAccountBalance: isUsingAccountBalance) {
+                didSelect?()
+            }.frame(idealHeight: 52)
+                .contentShape(.capsule)
+                .clipShape(.capsule)
+                .padding(.top, 10)
+                .disabled(!assetSwitcherEnabled)
+        } else {
+            WalletSelectorView(asset: asset, usingAccountBalance: isUsingAccountBalance) {
+                didSelect?()
+            }.frame(idealHeight: 44)
+                .padding(.top, 10)
+                .disabled(!assetSwitcherEnabled)
+        }
+    }
+
+    @ViewBuilder
+    private var payButton: some View {
+        ZStack {
+            if #available(iOS 26.0, *) {
+                rawPaymentButton
+                    .contentShape(.capsule)
+                    .clipShape(.capsule)
+                    .overlay {
+                        payButtonOverlay
+                    }
+            } else {
+                rawPaymentButton
+                    .overlay {
+                        payButtonOverlay
+                    }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var rawPaymentButton: some View {
+        Button {
+            didConfirm?()
+        } label: {
+            HStack(spacing: 10) {
+                Spacer()
+                if isLoading {
+                    ProgressView()
+                        .tint(.white)
+                    Text(loadingTitle)
+                        .font(.body.weight(.semibold))
+                        .foregroundColor(.white)
+                } else {
+                    Text(CoreStrings.Payment.payNow)
+                        .font(.body.weight(.semibold))
+                        .foregroundColor(payNowButtonForeground)
+                }
+                Spacer()
+            }.padding()
+
+        }
+        .disabled(!payButtonEnabled)
+        .opacity(payButtonEnabled ? 1 : 0.5)
+        .frame(idealHeight: 52)
+        .background(linearGradient)
+        .cornerRadius(13)
+    }
+
+    @ViewBuilder
+    private var payButtonOverlay: some View {
+        if showUpdatingBalanceButton {
+            HStack {
+                Text(CoreStrings.Payment.BalanceUnavailable.title)
+                Image(systemName: "info.circle")
+                    .renderingMode(.template)
+                    .onTapGesture {
+                        showUpdatingBalanceAlert = true
+                    }
+            }.flexaButton(
+                background: Color.clear,
+                textColor: .secondary
+            )
         }
     }
 

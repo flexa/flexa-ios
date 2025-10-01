@@ -26,7 +26,11 @@ struct AssetRow: View {
          enable: Bool = true,
          showInfo: @escaping () -> Void) {
 
-        self.title = asset.assetSymbol
+        if #available(iOS 26.0, *) {
+            self.title = asset.assetDisplayName
+        } else {
+            self.title = asset.assetSymbol
+        }
         if let balance = asset.balanceInLocalCurrency?.asCurrency {
             if asset.isUpdatingBalance {
                 self.subtitle = CoreStrings.Payment.Balance.title(balance)
@@ -96,14 +100,28 @@ struct AssetRow: View {
                 }.opacity(0.5)
             }
             Spacer()
-                Image(systemName: "info.circle")
-                    .resizable()
-                    .scaledToFit()
-                    .foregroundColor(.flexaTintColor)
-                    .frame(width: .imageWidth, height: .imageHeight, alignment: .center)
-                    .onTapGesture {
-                        showInfo()
-                    }
+            rightAccessoryView
+                .onTapGesture {
+                    showInfo()
+                }
+        }
+    }
+
+    @ViewBuilder
+    private var rightAccessoryView: some View {
+        if #available(iOS 26.0, *) {
+            Image(systemName: "ellipsis")
+                .resizable()
+                .scaledToFit()
+                .foregroundStyle(Color.primary)
+                .frame(width: .imageWidth, height: .imageHeight, alignment: .center)
+        } else {
+            Image(systemName: "info.circle")
+                .resizable()
+                .scaledToFit()
+                .foregroundColor(.flexaTintColor)
+                .frame(width: .imageWidth, height: .imageHeight, alignment: .center)
+
         }
     }
 }

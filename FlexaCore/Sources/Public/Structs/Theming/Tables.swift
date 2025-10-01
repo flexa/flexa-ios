@@ -11,6 +11,12 @@ import SwiftUI
 
 public extension FXTheme {
     class Tables: FlexaThemable {
+        private static var defaultMargin: CGFloat {
+            if #available(iOS 26.0, *) {
+                return 0
+            }
+            return 20
+        }
         public static let `default` = Tables()
 
         public var borderRadius: CGFloat
@@ -23,7 +29,7 @@ public extension FXTheme {
         public var separator: Separator
 
         init(borderRadius: CGFloat = 10,
-             margin: CGFloat = 20,
+             margin: CGFloat = Tables.defaultMargin,
              cellSpacing: CGFloat = 0,
              headingPadding: CGFloat = 0,
              footerPadding: CGFloat = 0,

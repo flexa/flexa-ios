@@ -10,10 +10,10 @@ import SwiftUI
 import FlexaUICore
 import Factory
 
+// swiftlint:disable type_body_length
 public struct TransactionAmountView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) private var colorScheme
-
     @State private var keySize: CGSize = .zero
     @State private var showTransactionDetails: Bool = false
     @State private var showAssetsModal = false
@@ -23,7 +23,6 @@ public struct TransactionAmountView: View {
     @State private var showWebView = false
     @StateObject private var viewModel: ViewModel
     @StateObject private var viewModelAsset: AssetSelectionViewModel
-
     @Injected(\.flexaClient) private var flexaClient
 
     private var theme: FXTheme {
@@ -75,6 +74,21 @@ public struct TransactionAmountView: View {
     }
 
     public var body: some View {
+        if #available(iOS 26.0, *) {
+            NavigationView {
+                content.toolbar {
+                        toolBar
+                }
+            }
+        } else {
+            content
+        }
+        transactionDetailsSheet
+        assetsSwitcherSheet
+        alerts
+    }
+
+    var content: some View {
         ZStack(alignment: .top) {
             GeometryReader { reader in
                 Color.clear
@@ -87,7 +101,9 @@ public struct TransactionAmountView: View {
                     }
             }
             VStack(alignment: .center, spacing: 0) {
-                brandLogo
+                if #unavailable(iOS 26.0) {
+                    brandLogo
+                }
                 if viewModel.hasPromotion {
                     promotionView
                         .padding(.top, .promotionTopPadding)
@@ -96,7 +112,7 @@ public struct TransactionAmountView: View {
                 amountLabel
                     .padding(.top, amountLabelTopPadding)
                     .shake(shakeAmount)
-                assetSwitcherButton
+                assetSwitcherContainer
                     .padding(.top, .assetSwitcherTopPadding)
                 Spacer()
                 numpadView
@@ -104,7 +120,9 @@ public struct TransactionAmountView: View {
             }
             .padding([.horizontal, .bottom], .padding)
             .padding(.top, .topPadding)
-            closeButton
+            if #unavailable(iOS 26.0) {
+                closeButton
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .setCustomBackground(colorScheme)
@@ -116,10 +134,6 @@ public struct TransactionAmountView: View {
         }.onAppear {
             viewModel.loadAccount()
         }
-
-        transactionDetailsSheet
-        assetSwitcher
-        alerts
     }
 
     var brandLogo: some View {
@@ -202,28 +216,27 @@ public struct TransactionAmountView: View {
         )
     }
 
+    @ViewBuilder
     var assetSwitcherButton: some View {
+        let action: () -> Void = {
+            viewModelAsset.amount = viewModel.decimalAmount - viewModel.promotionDiscount
+            viewModelAsset.hasAmount = viewModel.hasAmount
+            showAssetsModal = true
+        }
+        if #available(iOS 26.0, *) {
+            glassAssetSwitcherButton(action)
+        } else {
+            legacyAssetSwitcherButton(action)
+        }
+    }
+
+    var assetSwitcherContainer: some View {
         ZStack {
-            Button {
-                viewModelAsset.amount = viewModel.decimalAmount - viewModel.promotionDiscount
-                viewModelAsset.hasAmount = viewModel.hasAmount
-                showAssetsModal = true
-            } label: {
-                HStack {
-                    Text(viewModel.assetSwitcherTitle)
-                        .font(.callout)
-                        .foregroundColor(grayColor)
-                        .fontWeight(.semibold)
-                    Image(systemName: "chevron.down.circle.fill")
-                        .resizable()
-                        .foregroundColor(grayColor)
-                        .frame(width: 16, height: 16, alignment: .center)
-                }
-            }.opacity(viewModel.showAmountMessage ? 0 : 1)
+            assetSwitcherButton
+                .opacity(viewModel.showAmountMessage ? 0 : 1)
                 .disabled(viewModel.showAmountMessage || viewModel.isLoading)
                 .transition(.opacity)
                 .animation(.easeInOut(duration: 1), value: viewModel.showAmountMessage)
-
             Group {
                 Text(viewModel.minimumAmountMessage)
                     .opacity(viewModel.showMinimumAmountMessage ? 1 : 0)
@@ -250,6 +263,28 @@ public struct TransactionAmountView: View {
         .disabled(viewModel.isLoading)
     }
 
+    @ToolbarContentBuilder
+    var toolBar: some ToolbarContent {
+        if #available(iOS 26.0, *) {
+            ToolbarItem(placement: .principal) {
+                brandLogo
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                if viewModel.isLoading {
+                    FlexaRoundedButton(.close) {
+                        viewModel.cancelledByUser = true
+                        dismiss()
+                    }.padding()
+                } else {
+                    FlexaRoundedButton(.info) {
+                        self.showTransactionDetails = true
+                    }.padding()
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
     var closeButton: some View {
         HStack(alignment: .top) {
             Spacer()
@@ -386,6 +421,45 @@ public struct TransactionAmountView: View {
         }
     }
 
+    private func legacyAssetSwitcherButton(_ action: @escaping () -> Void) -> some View {
+        Button {
+            action()
+        } label: {
+            HStack {
+                Text(viewModel.assetSwitcherTitle)
+                    .font(.callout)
+                    .foregroundColor(grayColor)
+                    .fontWeight(.semibold)
+                Image(systemName: "chevron.down.circle.fill")
+                    .resizable()
+                    .foregroundColor(grayColor)
+                    .frame(width: 16, height: 16, alignment: .center)
+            }
+        }
+    }
+
+    @available(iOS 26.0, *)
+    private func glassAssetSwitcherButton(_ action: @escaping () -> Void) -> some View {
+        Button {
+            action()
+        } label: {
+            HStack {
+                Text(viewModel.assetSwitcherTitle)
+                    .font(.callout)
+                    .fontWeight(.semibold)
+                ZStack {
+                    Image(systemName: "chevron.down")
+                        .resizable()
+                        .foregroundColor(.secondary)
+                        .frame(width: 9, height: 5.5, alignment: .center)
+                        .padding(.top, 1)
+                        .font(.body.bold())
+                }.frame(width: 17, height: 17, alignment: .center)
+            }
+        }
+        .buttonStyle(.glass)
+    }
+
     private func blankView() -> some View {
         Text("")
             .frame(width: 0, height: 0)
@@ -446,27 +520,13 @@ public struct TransactionAmountView: View {
         }
     }
 }
+// swiftlint:enable type_body_length
 
 // MARK: Asset Switcher
 private extension TransactionAmountView {
-    @ViewBuilder
-    var assetSwitcher: some View {
-        if #available(iOS 16, *) {
-            assetsSwitcherSheet
-        } else {
-            assetSwitcherCard
-        }
-    }
-
     @available(iOS 16.0, *)
     @ViewBuilder
     var assetsSwitcherSheet: some View {
-        let detents: Set<PresentationDetent> = {
-            if viewModel.accountBalanceCoversFullAmount {
-                return [.fraction(0.40)]
-            }
-            return [.medium]
-        }()
         ZStack {}
             .sheet(isPresented: $showAssetsModal) {
                 VStack {
@@ -479,17 +539,8 @@ private extension TransactionAmountView {
                 .environment(\.colorScheme, theme.interfaceStyle.colorSheme ?? colorScheme)
                 .sheetCornerRadius(theme.views.sheet.borderRadius)
                 .ignoresSafeArea()
-                .presentationDetents(detents)
+                .presentationDetents([.fraction(0.40), .medium])
             }
-    }
-
-    @available(iOS, obsoleted: 16.0)
-    var assetSwitcherCard: some View {
-        AssetSelectionModal(isShowing: $showAssetsModal,
-                            viewModelAsset: viewModelAsset,
-                            updateAsset: { _ in
-            showAssetsModal = false
-        }).zIndex(2)
     }
 }
 

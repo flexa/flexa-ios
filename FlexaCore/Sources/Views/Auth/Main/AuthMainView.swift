@@ -53,9 +53,18 @@ struct AuthMainView: View {
                             handleFocusChange(isFocused, scrollViewProxy: scrollViewProxy)
                         }
                     }
-                    closeButton
+                    if #unavailable(iOS 26.0) {
+                        closeButton
+                    }
                 }.onTapGesture {
                     isEmailFieldFocused = false
+                }
+                .toolbar {
+                    if #available(iOS 26.0, *) {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            closeButtonMenu
+                        }
+                    }
                 }
             }.background(.thinMaterial)
                 .tint(nil)
@@ -73,24 +82,28 @@ struct AuthMainView: View {
     private var closeButton: some View {
         HStack(alignment: .top) {
             Spacer()
-            menu {
-                FlexaRoundedButton(.close)
-            } menuContent: {
-                Button {
-                    viewModel.userClosedAuth()
-                    dismiss()
-                } label: {
-                    Label(CoreStrings.Global.close, systemImage: "xmark")
-                }
-                Button(role: .destructive) {
-                    viewModel.disablePayWithFlexa()
-                    dismiss()
-                } label: {
-                    Label(Strings.Menu.dontShowAgain, systemImage: "eye.slash")
-
-                }
-            }
+            closeButtonMenu
         }.frame(maxWidth: .infinity)
+    }
+
+    private var closeButtonMenu: some View {
+        menu {
+            FlexaRoundedButton(.close)
+        } menuContent: {
+            Button {
+                viewModel.userClosedAuth()
+                dismiss()
+            } label: {
+                Label(CoreStrings.Global.close, systemImage: "xmark")
+            }
+            Button(role: .destructive) {
+                viewModel.disablePayWithFlexa()
+                dismiss()
+            } label: {
+                Label(Strings.Menu.dontShowAgain, systemImage: "eye.slash")
+
+            }
+        }
     }
 
     private var headerView: some View {

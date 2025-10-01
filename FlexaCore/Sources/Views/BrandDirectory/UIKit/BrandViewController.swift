@@ -78,6 +78,10 @@ class BrandViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        guard #unavailable(iOS 26) else {
+            return
+        }
+
         if showCustomNavigationBar {
             navigationController?.isNavigationBarHidden = true
         }
@@ -118,7 +122,12 @@ class BrandViewController: UIViewController {
     }
 
     private func setupNavigationBar() {
-        if showCustomNavigationBar {
+        if #available(iOS 26, *) {
+            if showCustomNavigationBar {
+                webView.scrollView.contentInsetAdjustmentBehavior = .never
+            }
+            return
+        } else if showCustomNavigationBar {
             webView.scrollView.contentInsetAdjustmentBehavior = .never
             setupCustomNavigationBar()
         } else if let navigationBar = navigationController?.navigationBar {
@@ -150,7 +159,6 @@ class BrandViewController: UIViewController {
             webView.leftAnchor.constraint(equalTo: view.leftAnchor),
             webView.rightAnchor.constraint(equalTo: view.rightAnchor)
         ])
-
     }
 
     func setupActivityIndicator() {
@@ -170,6 +178,9 @@ class BrandViewController: UIViewController {
     }
 
     private func setupOverlay() {
+        guard #unavailable(iOS 26) else {
+            return
+        }
         guard let navigationBar = navigationController?.navigationBar,
               let parent = navigationBar.superview, !showCustomNavigationBar else {
             return
@@ -233,6 +244,10 @@ class BrandViewController: UIViewController {
     }
 
     private func setupCloseButton() {
+        guard #unavailable(iOS 26) else {
+            navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(close))
+            return
+        }
         guard showCloseButton else {
             return
         }

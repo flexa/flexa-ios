@@ -44,14 +44,36 @@ struct FlexaMainButtonModifier: ViewModifier {
 
     @Environment(\.isEnabled) var isEnabled
 
-    func body(content: Content) -> some View {
+    func commonProperties(_ content: Content) -> some View {
         content
             .font(.body.weight(.semibold))
             .foregroundColor(isEnabled ? textColor : disabledTextColor)
             .padding()
             .frame(maxWidth: .infinity)
-            .background(AnyView(color).opacity(isEnabled ? 1 : disabledOpacity))
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-            .contentShape(RoundedRectangle(cornerRadius: cornerRadius))
+            .background(
+                AnyView(color).opacity(isEnabled ? 1 : disabledOpacity)
+
+            )
     }
+
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            commonProperties(content)
+                .clipShape(Capsule())
+                .contentShape(Capsule())
+        } else {
+            commonProperties(content)
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+                .contentShape(RoundedRectangle(cornerRadius: cornerRadius))
+        }
+    }
+}
+
+#Preview {
+    Button {
+
+    } label: {
+        Text("Button")
+    }.flexaButton()
+        .padding()
 }

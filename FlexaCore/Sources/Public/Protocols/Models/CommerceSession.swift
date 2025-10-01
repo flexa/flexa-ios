@@ -26,7 +26,7 @@ public protocol CommerceSession {
     var amount: String { get }
     var brand: Brand? { get }
     var label: String? { get }
-    var rate: Rate { get }
+    var rate: Rate? { get }
     var preferences: CommerceSessionPreference { get }
     var status: CommerceSessionStatus { get }
     var transactions: [FlexaCore.Transaction] { get }

@@ -64,11 +64,21 @@ struct FlexaBalanceView: View {
         )
     }
 
+    @ViewBuilder
     private var iconView: some View {
-        Image(systemName: "checkmark.circle.fill")
-            .resizable()
-            .foregroundColor(Color(UIColor.tertiaryLabel))
-            .frame(width: iconSize, height: iconSize)
+        if #available(iOS 26.0, *) {
+            ZStack {
+                Circle()
+                    .fill(Color.flexaTintColor.opacity(0.2))
+                Image(systemName: "person.fill.checkmark")
+                    .foregroundStyle(Color.flexaTintColor)
+            }.frame(width: iconSize, height: iconSize)
+        } else {
+            Image(systemName: "checkmark.circle.fill")
+                .resizable()
+                .foregroundColor(Color(UIColor.tertiaryLabel))
+                .frame(width: iconSize, height: iconSize)
+        }
 
     }
 

@@ -19,6 +19,24 @@ public struct FlexaWebView: View {
     }
 
     public var body: some View {
+        if #available(iOS 26.0, *) {
+            NavigationView {
+                content
+                    .ignoresSafeArea()
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            FlexaRoundedButton(.close) {
+                                dismiss()
+                            }
+                        }
+                    }
+            }
+        } else {
+            content
+        }
+    }
+
+    private var content: some View {
         ZStack(alignment: .top) {
             Color(UIColor.systemBackground)
             ZStack(alignment: .center) {
@@ -43,7 +61,10 @@ public struct FlexaWebView: View {
                     }
                 }
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
-            closeButton
+
+            if #unavailable(iOS 26.0) {
+                closeButton
+            }
         }
     }
 

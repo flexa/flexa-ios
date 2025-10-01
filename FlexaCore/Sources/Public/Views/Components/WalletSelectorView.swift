@@ -18,6 +18,13 @@ struct WalletSelectorView: View {
         Color(colorScheme == .dark ? UIColor.tertiarySystemFill.withAlphaComponent(0.16) : .white)
     }
 
+    private var height: CGFloat {
+        if #available(iOS 26, *) {
+            return 52
+        }
+        return 44
+    }
+
     init(asset: AssetWrapper,
          usingAccountBalance: Bool = false,
          buttonAction: @escaping () -> Void) {
@@ -46,7 +53,7 @@ struct WalletSelectorView: View {
                     .foregroundColor(.secondary)
                     .frame(width: 14, height: 15, alignment: .center)
             }.padding([.horizontal], 16)
-                .frame(height: 44, alignment: .center)
+                .frame(height: height, alignment: .center)
                 .modifier(RoundedView(color: backgroundColor, cornerRadius: 10))
 
         }

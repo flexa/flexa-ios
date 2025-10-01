@@ -13,6 +13,8 @@ public extension FlexaRoundedButton {
         case close
         case settings
         case info
+        case find
+        case checkmark
         case custom(_ image: Image)
     }
 }
@@ -24,18 +26,31 @@ public struct FlexaRoundedButton: View {
     var buttonType: ButtonType
     var symbolFont: Font
     var size: CGSize
+    var glassStyle: Bool
 
-    var image: Image {
+    private var systemName: String? {
         switch buttonType {
         case .close:
-            return Image(systemName: "xmark")
+            return "xmark"
         case .settings:
-            return Image(systemName: "ellipsis")
+            return "ellipsis"
         case .info:
-            return Image(systemName: "info")
+            return "info"
+        case .find:
+            return "magnifyingglass"
+        case .checkmark:
+            return "checkmark"
+        case .custom:
+            return nil
+        }
+    }
+
+    private var image: Image {
+        switch buttonType {
         case .custom(let image):
             return image
-
+        default:
+            return Image(systemName: systemName ?? "")
         }
     }
 
@@ -44,6 +59,7 @@ public struct FlexaRoundedButton: View {
                 backgroundColor: Color = Color(UIColor.tertiarySystemFill.withAlphaComponent(0.16)),
                 symbolFont: Font = Font.system(size: 15, weight: .semibold, design: .rounded),
                 size: CGSize = CGSize(width: 30, height: 30),
+                glassStyle: Bool = false,
                 buttonAction: (() -> Void)? = nil) {
         self.buttonType = buttonType
         self.color = color
@@ -51,13 +67,45 @@ public struct FlexaRoundedButton: View {
         self.symbolFont = symbolFont
         self.size = size
         self.buttonAction = buttonAction
+        self.glassStyle = glassStyle
     }
 
     public var body: some View {
-        if buttonAction != nil {
+        if #available(iOS 26, *) {
+            glassButton
+        } else if buttonAction != nil {
             button
         } else {
             label
+        }
+    }
+
+    @available(iOS 26.0, *)
+    @ViewBuilder
+    private var glassButton: some View {
+        if glassStyle {
+            Button {
+                buttonAction?()
+            } label: {
+                image
+                    .font(symbolFont)
+                    .foregroundColor(color)
+                    .frame(width: size.width, height: size.height, alignment: .center)
+            }
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
+        } else if systemName == nil {
+            Button {
+                buttonAction?()
+            } label: {
+                image
+                    .font(symbolFont)
+                    .frame(width: size.width, height: size.height, alignment: .center)
+            }
+        } else {
+            Button("", systemImage: systemName ?? "") {
+                buttonAction?()
+            }
         }
     }
 
@@ -79,5 +127,29 @@ public struct FlexaRoundedButton: View {
         } label: {
             label
         }.buttonStyle(PlainButtonStyle())
+    }
+}
+
+#Preview {
+    VStack(spacing: 20) {
+        HStack {
+            FlexaRoundedButton(.close)
+            FlexaRoundedButton(.settings)
+            FlexaRoundedButton(.info)
+            FlexaRoundedButton(.find)
+            FlexaRoundedButton(.custom(Image(systemName: "exclamationmark.bubble.fill"))) {
+                print("Tap")
+            }
+        }
+
+        HStack {
+            FlexaRoundedButton(.close, glassStyle: true)
+            FlexaRoundedButton(.settings, glassStyle: true)
+            FlexaRoundedButton(.info, glassStyle: true)
+            FlexaRoundedButton(.find, glassStyle: true)
+            FlexaRoundedButton(.custom(Image(systemName: "exclamationmark.bubble.fill")), glassStyle: true) {
+                print("Tap")
+            }
+        }
     }
 }

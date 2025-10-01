@@ -42,19 +42,7 @@ public extension String {
     }
 
     var digits: String {
-        let text = components(separatedBy: CharacterSet.decimalDigits.inverted)
-            .joined()
-            .replacingOccurrences(
-                of: "^0+",
-                with: "",
-                options: .regularExpression
-            )
-            .replacingOccurrences(
-                of: "^\\.",
-                with: "0.",
-                options: .regularExpression
-            )
-        return text.isEmpty ? "0" : text
+        components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
     }
 
     var digitsAndSeparator: String? {

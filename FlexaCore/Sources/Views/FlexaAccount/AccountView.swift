@@ -52,6 +52,7 @@ struct AccountView: View {
                     ToolbarItem(placement: .principal) { Color.clear }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         FlexaRoundedButton(.close, buttonAction: { dismiss() })
+                            .tint(nil)
                     }
                 }
                 .alert(Strings.Alerts.SignOut.title, isPresented: $showSignOutAlert) {
@@ -64,7 +65,8 @@ struct AccountView: View {
                     Text(Strings.Alerts.SignOut.message(viewModel.applicationName))
                 }
                 .onAppear(perform: load)
-        }.tint(.flexaTintColor)
+        }
+        .tint(.flexaTintColor)
             .dragIndicator(true)
             .errorAlert(error: $viewModel.error)
     }

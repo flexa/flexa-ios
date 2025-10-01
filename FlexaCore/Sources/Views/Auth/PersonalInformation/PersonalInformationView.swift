@@ -7,8 +7,6 @@
 //
 
 import SwiftUI
-import DeviceKit
-import SwiftUIIntrospect
 
 struct PersonalInformationView: View {
     typealias Strings = CoreStrings.Auth.PersonalInfo
@@ -24,7 +22,6 @@ struct PersonalInformationView: View {
     @State var showPicker: Bool = false
     @State var showingPrivacyAlert: Bool = false
 
-    let datePickerHeight = UIScreen.main.bounds.width - 40
     let formBackgroundColor = Color(
         lightColor: UIColor(hex: "#dfdfdf"),
         darkColor: UIColor(hex: "#3A3A3A")
@@ -35,15 +32,39 @@ struct PersonalInformationView: View {
         darkColor: UIColor.secondarySystemBackground
     )
 
+    private var customBackButton: Bool {
+        if #available(iOS 26, *) {
+            return false
+        }
+        return true
+    }
+
+    private var datePickerHeight: CGFloat {
+        return UIScreen.main.bounds.width - 40
+    }
+
+    private var termsEdgeInsets: EdgeInsets {
+        if #available(iOS 26, *) {
+            return EdgeInsets(top: 16, leading: 0, bottom: 16, trailing: 0)
+        }
+        return EdgeInsets()
+    }
+
     var body: some View {
         GeometryReader { proxy in
             ZStack(alignment: .top) {
                 ScrollView(.vertical) {
                     VStack(alignment: .center, spacing: 12) {
                         header.padding(.horizontal, 20)
-                        form.frame(minHeight: 280)
-                            .offset(y: -24)
-                        Spacer()
+                        if #available(iOS 26, *) {
+                            form.frame(minHeight: 310)
+                                .offset(y: -24)
+                                .listSectionSpacing(.compact)
+                        } else {
+                            form.frame(minHeight: 310)
+                                .offset(y: -24)
+                            Spacer()
+                        }
                         footer
 
                     }.frame(minHeight: proxy.size.height)
@@ -59,31 +80,16 @@ struct PersonalInformationView: View {
         .tint(nil)
         .alertTintColor(.flexaTintColor)
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
+        .navigationBarBackButtonHidden(customBackButton)
         .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button {
-                    goBack()
-                } label: {
-                    HStack(spacing: 5) {
-                        Image(systemName: "chevron.backward")
-                            .font(.body.bold())
-                        Text(CoreStrings.Global.back)
-                    }
-                }.offset(x: -8)
-            }
+            toolbar
         }
         .sheet(isPresented: $showPicker) {
-            DatePicker(
-                "",
-                selection: $viewModel.dateOfBirth,
-                in: ...Date.now,
-                displayedComponents: .date
-            )
+            datePickerSheetContent
             .preferredColorScheme(colorScheme)
             .datePickerStyle(.graphical)
-            .padding()
-            .pickerDetents(datePickerHeight)
+
+            .presentationDetents([.height(datePickerHeight)])
         }
         NavigationLink(
             destination: VerifyEmailView(
@@ -110,6 +116,23 @@ struct PersonalInformationView: View {
         Text(Strings.Header.subtitle)
             .multilineTextAlignment(.center)
             .padding(.horizontal, 20)
+    }
+
+    @ToolbarContentBuilder
+    private var toolbar: some ToolbarContent {
+        if #unavailable(iOS 26) {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    goBack()
+                } label: {
+                    HStack(spacing: 5) {
+                        Image(systemName: "chevron.backward")
+                            .font(.body.bold())
+                        Text(CoreStrings.Global.back)
+                    }
+                }.offset(x: -8)
+            }
+        }
     }
 
     @ViewBuilder
@@ -149,8 +172,9 @@ struct PersonalInformationView: View {
             }
 
             Section {
-                termsSection.listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets())
+                termsSection
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(termsEdgeInsets)
                     .onTapGesture(perform: endEditing)
             }
         }
@@ -192,7 +216,9 @@ struct PersonalInformationView: View {
                         .flexaButton()
                 }
             }.disabled(!viewModel.isValid)
-        }.padding(.bottom, 70)
+        }
+        .frame(maxHeight: 100)
+        .padding(.bottom, 70)
     }
 
     @ViewBuilder
@@ -206,6 +232,30 @@ struct PersonalInformationView: View {
             showPicker = true
         })
         .contentShape(Rectangle())
+    }
+
+    @ViewBuilder
+    private var datePickerSheetContent: some View {
+        if #available(iOS 26, *) {
+            DatePicker(
+                "",
+                selection: $viewModel.dateOfBirth,
+                in: ...Date.now,
+                displayedComponents: .date
+            )
+            .ignoresSafeArea(edges: .bottom)
+            .padding()
+            .offset(y: 50)
+
+        } else {
+            DatePicker(
+                "",
+                selection: $viewModel.dateOfBirth,
+                in: ...Date.now,
+                displayedComponents: .date
+            )
+            .padding()
+        }
     }
 
     @ViewBuilder
@@ -244,20 +294,6 @@ struct PersonalInformationView: View {
         endEditing()
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
             self.dismiss()
-        }
-    }
-}
-
-private extension View {
-
-    @ViewBuilder
-    func pickerDetents(_ height: CGFloat) -> some View {
-        if #available(iOS 16.0, *) {
-            self.presentationDetents([.height(height)])
-        } else {
-            self.introspect(.sheet, on: .iOS(.v15)) {
-                ($0 as? UISheetPresentationController)?.detents = [.medium()]
-            }
         }
     }
 }

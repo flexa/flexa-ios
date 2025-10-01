@@ -45,8 +45,8 @@ internal enum L10n {
     }
   }
   internal enum LegacyFlexcodeTray {
-    /// More instant payments
-    internal static let title = L10n.tr("Localizable", "legacy_flexcode_tray.title", fallback: "More instant payments")
+    /// Get a one-time code
+    internal static let title = L10n.tr("Localizable", "legacy_flexcode_tray.title", fallback: "Get a one-time code")
     internal enum EditButton {
       /// Edit
       internal static let title = L10n.tr("Localizable", "legacy_flexcode_tray.edit_button.title", fallback: "Edit")

@@ -29,7 +29,7 @@ extension Models {
         var sessionBrand: Brand?
         var sessionPreferences: Preference
         var statusString: String
-        var sessionRate: Models.Rate
+        var sessionRate: Models.Rate?
         var sessionTransactions: [Models.Transaction]?
         var sessionAuthorization: Authorization?
         var sessionCredits: [Credit]
@@ -42,7 +42,7 @@ extension Models {
             self.asset = try container.decode(String.self, forKey: CodingKeys.asset)
             self.label = try container.decodeIfPresent(String.self, forKey: CodingKeys.label)
             self.amount = try container.decode(String.self, forKey: CodingKeys.amount)
-            self.sessionRate = try container.decode(Models.Rate.self, forKey: CodingKeys.sessionRate)
+            self.sessionRate = try container.decodeIfPresent(Models.Rate.self, forKey: CodingKeys.sessionRate)
             self.statusString = try container.decode(String.self, forKey: CodingKeys.statusString)
 
             self.sessionPreferences = try container.decode(
@@ -124,7 +124,7 @@ extension Models.CommerceSession: CommerceSession {
         sessionPreferences
     }
 
-    var rate: Rate {
+    var rate: Rate? {
         sessionRate
     }
 

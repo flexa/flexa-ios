@@ -121,6 +121,13 @@ public struct LegacyFlexcodeContentView: View {
         self.showHelp = showHelp
     }
 
+    private var screenshotPreventionBackgroundColor: Color {
+        if #available(iOS 26, *) {
+            return .clear
+        }
+        return theme.views.sheet.backgroundColor
+    }
+
     public var body: some View {
         VStack(spacing: .stackSpacing) {
                 ZStack(alignment: .center) {
@@ -156,7 +163,7 @@ public struct LegacyFlexcodeContentView: View {
                                 pdf417Image: $viewModel.pdf417Image,
                                 code128Image: $viewModel.code128Image,
                                 gradientMiddleColor: viewModel.brandColor
-                            ).preventScreenshot(backgroundColor: theme.views.sheet.backgroundColor) {
+                            ).preventScreenshot(backgroundColor: screenshotPreventionBackgroundColor) {
                                 FlexcodeView(
                                     pdf417Image: $viewModel.privatePdf417Image,
                                     code128Image: $viewModel.privateCode128Image,

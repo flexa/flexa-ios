@@ -39,7 +39,12 @@ public struct FXTheme: FlexaThemable {
         case webView = "webViewThemeConfig"
     }
 
-    private static let defaultTintColor = Color.purple
+    private static var defaultTintColor: Color {
+        if #available(iOS 26.0, *) {
+            return Color(hex: "8800FF")
+        }
+        return Color.purple
+    }
 
     /// Indicates the interface style the sdk will display (`light`, `dark` or `automatic`)
     public var interfaceStyle: InterfaceStyle

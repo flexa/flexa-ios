@@ -75,7 +75,7 @@ struct SpendView: View {
                                 LegacyFlexcodeList(didSelect: { brand in
                                     viewModel.brandSelected(brand)
                                 })
-                                .padding(.leading, padding)
+                                .padding(.leading, brandsListHorizontalPadding)
                                 .padding(.bottom, padding)
                             }
                         }
@@ -88,14 +88,7 @@ struct SpendView: View {
                 .navigationTitle(Text(L10n.Payment.PayWithFlexa.title))
                 .navigationBarTitleDisplayMode(viewModel.showInlineNavigationTitle ? .inline : .automatic)
                 .toolbar {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        HStack(spacing: 8) {
-                            NavigationMenu {
-                                FlexaRoundedButton(.settings)
-                            }
-                            FlexaRoundedButton(.close, buttonAction: { dismissView() })
-                        }
-                    }
+                    SpendToolbar(dismissView)
                 }
             }
             .navigationViewStyle(.stack)
@@ -176,34 +169,12 @@ struct SpendView: View {
     }
 
     private var assetSwitcherButton: some View {
-        Button {
+        SpendAssetSwitcherButton(asset: $viewModel.commerceSessionViewModel.viewModelAsset.selectedAsset) {
             viewModelAsset.amount = 0
             viewModelAsset.hasAmount = false
             viewModelAsset.showSelectedAssetDetail = false
             viewModel.commerceSessionViewModel.showAssetsModal = true
-        } label: {
-            HStack {
-                Text(L10n.Payment.UsingTicker.subtitle(viewModel.selectedAssetSymbol))
-                    .font(.callout)
-                    .foregroundColor(Asset.payWithFlexaWalletSwitcherButton.swiftUIColor)
-                    .bold()
-                ZStack {
-                    Image(systemName: "chevron.down.circle.fill")
-                        .resizable()
-                        .foregroundColor(Color(UIColor.secondarySystemFill))
-                    Image(systemName: "chevron.down")
-                        .resizable()
-                        .foregroundColor(Asset.payWithFlexaWalletSwitcherButton.swiftUIColor)
-                        .frame(width: 9, height: 5.5, alignment: .center)
-                        .padding(.top, 1)
-                        .font(.body.bold())
-                }.frame(width: 17, height: 17, alignment: .center)
-
-                Spacer()
-            }
-
-        }.padding(.horizontal, largeNavigationTitleLeftMargin)
-            .padding(.top)
+        }
     }
 
     private var notificationsList: some View {
@@ -230,12 +201,24 @@ private extension SpendView {
         primaryTheme.padding ?? 0
     }
 
+    var brandsListHorizontalPadding: CGFloat {
+        if #available(iOS 26.0, *) {
+            return 0
+        } else {
+            return padding
+        }
+    }
+
     var mainBackgroundColor: Color {
         primaryTheme.backgroundColor
     }
 
     var largeNavigationTitleLeftMargin: CGFloat {
-        padding + 6
+        if #available(iOS 26.0, *) {
+            return padding
+        } else {
+            return padding + 6
+        }
     }
 
     var sheetBorderRadius: CGFloat {

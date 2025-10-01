@@ -1,4 +1,5 @@
 import SwiftUI
+import FlexaUICore
 
 public struct TransactionAssetDetailsView: View {
     @Environment(\.dismiss) var dismiss
@@ -22,20 +23,35 @@ public struct TransactionAssetDetailsView: View {
     }
 
     public var body: some View {
+        if #available(iOS 26.0, *) {
+            contentView
+                .toolbar {
+                    ToolbarItem(placement: .confirmationAction) {
+                            FlexaRoundedButton(.checkmark) {
+                                showView = false
+                            }.tint(tintColor)
+                    }
+                }
+        } else {
+            contentView
+                .navigationBarItems(
+                    leading: leftHeaderView,
+                    trailing: rightHeaderView
+                )
+                .navigationBarBackButtonHidden(true)
+        }
+    }
+}
+
+private extension TransactionAssetDetailsView {
+    private var contentView: some View {
         detailsView
             .onAppear {
                 viewModel.loadExchangeRate()
                 viewModel.loadAccount()
             }
-        .navigationBarItems(
-            leading: leftHeaderView,
-            trailing: rightHeaderView
-        )
-        .navigationBarBackButtonHidden(true)
     }
-}
 
-private extension TransactionAssetDetailsView {
     @ViewBuilder
     var leftHeaderView: some View {
         if viewModel.displayMode == .asset && !viewModel.isStandAlone {

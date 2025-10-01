@@ -50,7 +50,7 @@ public struct CommerceSessionView: View {
         ZStack {
             legacyFlexcodeInputAmountSheet
             paymentCard
-            assetSwitcher
+            assetsSwitcherSheet
             legacyFlexcodeCard
         }
         .interactiveDismissDisabled(viewModel.showPaymentModal || viewModel.showLegacyFlexcode)
@@ -132,28 +132,12 @@ private extension CommerceSessionView {
                     viewModelAsset: viewModel.viewModelAsset
                 )
                 .environment(\.colorScheme, flexaClient.theme.interfaceStyle.colorSheme ?? colorScheme)
-                .sheetCornerRadius(30)
             }
-    }
-
-    @ViewBuilder
-    var assetSwitcher: some View {
-        if #available(iOS 16, *) {
-            assetsSwitcherSheet
-        } else {
-            assetSwitcherCard
-        }
     }
 
     @available(iOS 16.0, *)
     @ViewBuilder
     var assetsSwitcherSheet: some View {
-        let detents: Set<PresentationDetent> = {
-            if viewModel.viewModelAsset.accountBalanceCoversFullAmount {
-                return [.fraction(0.40)]
-            }
-            return [.medium]
-        }()
         ZStack {}
             .sheet(isPresented: $viewModel.showAssetsModal) {
                 VStack {
@@ -166,7 +150,7 @@ private extension CommerceSessionView {
                 .environment(\.colorScheme, flexaClient.theme.interfaceStyle.colorSheme ?? colorScheme)
                 .sheetCornerRadius(sheetBorderRadius)
                 .ignoresSafeArea()
-                .presentationDetents(detents)
+                .presentationDetents([.fraction(0.40), .medium])
             }
     }
 

@@ -21,6 +21,20 @@ struct LegacyFlexcodeList: View {
 
     public var didSelect: Closure?
 
+    private var titleFont: Font {
+        if #available(iOS 26.0, *) {
+            return .title2.weight(.semibold)
+        }
+        return .subheadline.weight(.semibold)
+    }
+
+    private var editButtonFont: Font {
+        if #available(iOS 26.0, *) {
+            return .subheadline.weight(.semibold)
+        }
+        return .subheadline
+    }
+
     init(didSelect: Closure? = nil) {
         self.didSelect = didSelect
     }
@@ -31,19 +45,31 @@ struct LegacyFlexcodeList: View {
             .frame(width: .brandLogoSize, height: .brandLogoSize)
     }
 
+    @ViewBuilder
+    private var editButtonBackground: some View {
+        if #available(iOS 26.0, *) {
+            Capsule()
+                .foregroundStyle(Color(UIColor.tertiarySystemFill))
+                .frame(width: 50, height: 30)
+        } else {
+            Color.clear
+        }
+    }
+
     var body: some View {
         VStack {
             HStack {
                 Text(L10n.LegacyFlexcodeTray.title)
-                    .font(.subheadline.weight(.semibold))
+                    .font(titleFont)
                     .padding(.leading, .titleLeadingPadding)
                 Spacer()
                 Button {
                     showMerchantSorter = true
                 } label: {
                     Text(L10n.LegacyFlexcodeTray.EditButton.title)
-                        .font(.subheadline)
+                        .font(editButtonFont)
                         .foregroundColor(.flexaTintColor)
+                        .background(editButtonBackground)
                 }.padding(.trailing, .editButtonTrailingPadding)
             }
             ScrollView(.horizontal, showsIndicators: false) {
@@ -108,23 +134,59 @@ struct LegacyFlexcodeList: View {
 // MARK: Theming
 private extension LegacyFlexcodeList {
     var listCornerRadius: CGFloat {
-        theme.containers.content.borderRadius
+        if #available(iOS 26.0, *) {
+            return 0
+        }
+        return theme.containers.content.borderRadius
     }
 
     var backgroundColor: Color {
-        theme.containers.content.backgroundColor
+        if #available(iOS 26.0, *) {
+            return .clear
+        }
+        return theme.containers.content.backgroundColor
     }
 }
 
 private extension CGFloat {
-    static let listHorizontalPadding: CGFloat = 22
     static let listVerticalPadding: CGFloat = 20
-    static let listSpacing: CGFloat = 20
     static let listItemSpacing: CGFloat = 10
-    static let brandLogoSize: CGFloat = 54
     static let brandNameSize: CGFloat = 66
-    static let brandLogoCornerRadius: CGFloat = 6
     static let editButtonTrailingPadding: CGFloat = 32
-    static let titleLeadingPadding: CGFloat = 8
-    static let viewHeight: CGFloat = 140
+    static var titleLeadingPadding: CGFloat {
+        if #available(iOS 26.0, *) {
+            return 24
+        }
+        return 8
+    }
+    static var viewHeight: CGFloat {
+        if #available(iOS 26.0, *) {
+            return 100
+        }
+        return 140
+    }
+    static var listHorizontalPadding: CGFloat {
+        if #available(iOS 26.0, *) {
+            return titleLeadingPadding
+        }
+        return 22
+    }
+    static var brandLogoSize: CGFloat {
+        if #available(iOS 26.0, *) {
+            return 68
+        }
+        return 54
+    }
+    static var brandLogoCornerRadius: CGFloat {
+        if #available(iOS 26.0, *) {
+            return 14
+        }
+        return 6
+    }
+    static var listSpacing: CGFloat {
+        if #available(iOS 26.0, *) {
+            return 12
+        }
+        return 20
+    }
 }

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FlexaLoad"
-  s.version      = "1.1.0"
+  s.version      = "1.1.1"
   s.summary      = "FlexaLoad"
   s.description  = "FlexaLoad module by Flexa"
   s.homepage     = "https://github.com/flexa/flexa-ios"
@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.module_name = "FlexaLoad"
   s.platform = :ios
   s.swift_version = "5.1"
-  s.ios.deployment_target  = '15.0'
+  s.ios.deployment_target  = '16.0'
 
   s.source       = { :git => "https://github.com/flexa/flexa-ios", :tag => s.version }
   s.source_files = 'FlexaLoad/Sources/**/*.{swift}'

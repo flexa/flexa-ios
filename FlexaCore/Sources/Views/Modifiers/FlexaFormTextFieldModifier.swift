@@ -21,11 +21,21 @@ struct FlexaFormTextFieldModifier: ViewModifier {
     var backgroundColor: Color
 
     public func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            commonProperties(content)
+                .clipShape(.capsule)
+        } else {
+            commonProperties(content)
+                .cornerRadius(cornerRadius)
+        }
+
+    }
+
+    private func commonProperties(_ content: Content) -> some View {
         content
             .font(.body)
             .foregroundColor(.primary)
             .padding()
             .background(backgroundColor)
-            .cornerRadius(cornerRadius)
     }
 }

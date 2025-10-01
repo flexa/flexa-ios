@@ -34,7 +34,7 @@
 "payment.description" = "%s avaliable";
 
 // Legacy flexcode tray
-"legacy_flexcode_tray.title" = "More instant payments";
+"legacy_flexcode_tray.title" = "Get a one-time code";
 "legacy_flexcode_tray.edit_button.title" = "Edit";
 
 // Merchant sorter

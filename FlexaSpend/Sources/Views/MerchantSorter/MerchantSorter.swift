@@ -49,16 +49,9 @@ struct MerchantSorter: View {
             }
             .environment(\.defaultMinListRowHeight, 50)
             .navigationTitle(Text(Strings.title))
-            .navigationBarItems(
-                trailing:
-                    Button(action: {
-                        dismiss()
-                    }, label: {
-                        Text(L10n.Common.done)
-                            .font(.headline)
-                            .foregroundColor(.flexaTintColor)
-                    })
-            )
+            .toolbar {
+                doneButton
+            }
         }
         .environment(\.colorScheme, flexaClient.theme.interfaceStyle.colorSheme ?? colorScheme)
         .dragIndicator(true, backgroundColor: Color(UIColor.systemGroupedBackground))
@@ -90,6 +83,25 @@ struct MerchantSorter: View {
 
         } else {
             EmptyView()
+        }
+    }
+
+    @ToolbarContentBuilder
+    var doneButton: some ToolbarContent {
+        ToolbarItem(placement: .confirmationAction) {
+            if #available(iOS 26.0, *) {
+                FlexaRoundedButton(.checkmark) {
+                    dismiss()
+                }.tint(.flexaTintColor)
+            } else {
+                Button(action: {
+                    dismiss()
+                }, label: {
+                    Text(L10n.Common.done)
+                        .font(.headline)
+                        .foregroundColor(.flexaTintColor)
+                })
+            }
         }
     }
 

@@ -289,11 +289,18 @@ extension TransactionAmountView {
             hasAmount && hasAccountBalance && accountBalance >= decimalAmount - promotionDiscount
         }
 
+        var selectedAssetToDisplay: String {
+            if #available(iOS 26.0, *) {
+                return selectedAsset?.assetDisplayName ?? ""
+            }
+            return selectedAsset?.assetSymbol ?? ""
+        }
+
         var assetSwitcherTitle: String {
             if hasAmount && isAmountHigherThanMin && accountBalanceCoversFullAmount {
                 return CoreStrings.AssetSwitcher.UsingFlexaAccount.title
             }
-            return CoreStrings.Payment.UsingTicker.subtitle(selectedAsset?.assetSymbol ?? "")
+            return CoreStrings.Payment.UsingTicker.subtitle(selectedAssetToDisplay)
         }
 
         public init(brand: Brand?) {

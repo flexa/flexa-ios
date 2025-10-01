@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "Flexa",
     defaultLocalization: LanguageTag("en"),
-    platforms: [.iOS(.v15)],
+    platforms: [.iOS(.v16)],
     products: [
         .library(
             name: "Flexa",
@@ -40,7 +40,7 @@ let package = Package(
         .package(url: "https://github.com/Quick/Nimble.git", from: "13.2.0"),
         .package(url: "https://github.com/Quick/Quick.git", from: "7.0.0"),
         .package(url: "https://github.com/vadymmarkov/Fakery.git", from: "5.1.0"),
-        .package(url: "https://github.com/siteline/swiftui-introspect", from: "1.3.0"),
+        .package(url: "https://github.com/siteline/swiftui-introspect", "1.3.0"..<"27.0.0"),
         .package(url: "https://github.com/ekscrypto/Base32.git", from: "1.2.0")
     ],
     targets: [
