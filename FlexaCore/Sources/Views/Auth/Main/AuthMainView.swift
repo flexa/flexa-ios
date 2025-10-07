@@ -23,6 +23,7 @@ struct AuthMainView: View {
     @State var bottomViewBottomPadding: CGFloat = .bottomViewBottomPaddingDefault
     @State private var showingPrivacyAlert: Bool = false
     @State private var showMenu: Bool = false
+    @EnvironmentObject var linkData: UniversalLinkData
 
     init(allowToDisablePayWithFlexa: Bool) {
         _viewModel = StateObject(
@@ -76,6 +77,7 @@ struct AuthMainView: View {
         .tint(.flexaTintColor)
         .alertTintColor(.flexaTintColor)
         .flexaAuthNavigationbar()
+        .flexaHandleUniversalLink()
         .flexaPrivacyAlert(isPresented: $showingPrivacyAlert)
     }
 
@@ -173,7 +175,7 @@ struct AuthMainView: View {
                 image: privacyImage,
                 linkText: Strings.Links.About.title,
                 linkAction: {
-                    showingPrivacyAlert = true
+                    linkData.url = FlexaLink.privacy.url
                 }
             )
         }
@@ -215,7 +217,7 @@ struct AuthMainView: View {
                     HStack {
                         Spacer()
                         Button {
-
+                            showingPrivacyAlert = true
                         } label: {
                             Image(systemName: "info.circle")
                                 .resizable()

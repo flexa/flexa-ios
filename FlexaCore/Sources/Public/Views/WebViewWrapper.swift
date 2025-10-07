@@ -11,6 +11,7 @@ import SwiftUI
 
 struct WebViewWrapper: UIViewRepresentable {
     let url: URL
+    let adjustContent: Bool
     @Binding var isLoading: Bool
     @Binding var error: Error?
 
@@ -22,6 +23,9 @@ struct WebViewWrapper: UIViewRepresentable {
         let webView = WebView()
         let request = URLRequest(url: url)
         webView.navigationDelegate = context.coordinator
+        if adjustContent {
+            webView.scrollView.contentInsetAdjustmentBehavior = .never
+        }
         webView.allowsBackForwardNavigationGestures = true
         webView.customUserAgent = "\(webView.userAgent) FlexaSpend/ \(Flexa.version)"
         webView.load(request)

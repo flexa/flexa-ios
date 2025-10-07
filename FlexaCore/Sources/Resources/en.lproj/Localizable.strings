@@ -127,6 +127,7 @@ Flexa Account";
 "account_balance.pay_remaining.title" = "PAY REMAINING %s USING";
 
 // Web Links
+"web_links.privacy" = "https://flexa.co/legal/privacy";
 "web_links.how_to_pay" = "https://flexa.co/guides/how-to-pay";
 "web_links.report_issue" = "https://flexa.co/report-an-issue";
 "web_links.merchant_list" = "https://%@/directory";

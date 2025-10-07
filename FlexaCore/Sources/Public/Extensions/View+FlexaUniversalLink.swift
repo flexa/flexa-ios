@@ -35,7 +35,7 @@ public struct FlexaUniversalLinkHandlerModifier: ViewModifier {
     public func body(content: Content) -> some View {
         content
             .sheet(isPresented: $isShowingWebView) {
-                FlexaWebView(url: url)
+                FlexaWebView(url: url, adjustContent: shouldAdjustWebViewContent(for: url))
                     .colorScheme(flexaClient.theme.interfaceStyle.colorSheme ?? colorScheme)
                     .ignoresSafeArea()
             }
@@ -70,6 +70,7 @@ public struct FlexaUniversalLinkHandlerModifier: ViewModifier {
             case .webView(let linkUrl):
                 self.url = linkUrl
                 isShowingWebView = true
+                linkData.url = nil
             case .brandWebView(let linkUrl):
                 self.url = linkUrl
                 isShowingBrandDirectory = true
@@ -90,5 +91,9 @@ public struct FlexaUniversalLinkHandlerModifier: ViewModifier {
             return true
         }
         return false
+    }
+
+    private func shouldAdjustWebViewContent(for url: URL?) -> Bool {
+        url?.absoluteString == FlexaLink.privacy.url?.absoluteString
     }
 }

@@ -78,7 +78,7 @@ struct VerifyEmailView: View {
                     Rectangle()
                         .fill(theme.backgroundColor)
                         .cornerRadius(6, corners: [.topLeft, .topRight])
-                )
+                ).listRowSeparator(.hidden, edges: .top)
                 Text(viewModel.bottomTitle)
                     .font(.system(size: 18, weight: .bold))
                     .listRowSeparator(.hidden, edges: .bottom)

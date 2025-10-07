@@ -599,6 +599,8 @@ internal enum CoreStrings {
     internal static func merchantLocations(_ p1: Any, _ p2: Any) -> String {
       return CoreStrings.tr("Localizable", "web_links.merchant_locations", String(describing: p1), String(describing: p2), fallback: "%@/%@/locations")
     }
+    /// https://flexa.co/legal/privacy
+    internal static let privacy = CoreStrings.tr("Localizable", "web_links.privacy", fallback: "https://flexa.co/legal/privacy")
     /// https://flexa.co/report-an-issue
     internal static let reportIssue = CoreStrings.tr("Localizable", "web_links.report_issue", fallback: "https://flexa.co/report-an-issue")
   }

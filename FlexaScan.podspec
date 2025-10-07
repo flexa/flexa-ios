@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FlexaScan"
-  s.version      = "1.1.1"
+  s.version      = "1.1.2"
   s.summary      = "FlexaScan"
   s.description  = "QR code scanner by Flexa"
   s.homepage     = "https://github.com/flexa/flexa-ios"

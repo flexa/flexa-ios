@@ -10,12 +10,14 @@ import FlexaUICore
 
 public struct FlexaWebView: View {
     let url: URL?
+    let adjustContent: Bool
     @State var isLoading = true
     @State var error: Error?
     @Environment(\.dismiss) private var dismiss
 
-    public init(url: URL?) {
+    public init(url: URL?, adjustContent: Bool = false) {
         self.url = url
+        self.adjustContent = adjustContent
     }
 
     public var body: some View {
@@ -41,7 +43,7 @@ public struct FlexaWebView: View {
             Color(UIColor.systemBackground)
             ZStack(alignment: .center) {
                 if let url, error == nil {
-                    WebViewWrapper(url: url, isLoading: $isLoading, error: $error)
+                    WebViewWrapper(url: url, adjustContent: adjustContent, isLoading: $isLoading, error: $error)
                 }
                 if isLoading {
                     ProgressView().tint(.flexaTintColor)
