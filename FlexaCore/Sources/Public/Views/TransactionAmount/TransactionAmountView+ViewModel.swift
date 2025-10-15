@@ -290,7 +290,7 @@ extension TransactionAmountView {
         }
 
         var selectedAssetToDisplay: String {
-            if #available(iOS 26.0, *) {
+            if Flexa.supportsGlass {
                 return selectedAsset?.assetDisplayName ?? ""
             }
             return selectedAsset?.assetSymbol ?? ""

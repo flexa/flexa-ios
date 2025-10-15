@@ -202,7 +202,7 @@ private extension SpendView {
     }
 
     var brandsListHorizontalPadding: CGFloat {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return 0
         } else {
             return padding
@@ -214,7 +214,7 @@ private extension SpendView {
     }
 
     var largeNavigationTitleLeftMargin: CGFloat {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return padding
         } else {
             return padding + 6

@@ -30,7 +30,7 @@ Alternatively, you can directly update Package.swift with this dependency:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/flexa/flexa-ios.git", from: "0.0.1")
+    .package(url: "https://github.com/flexa/flexa-ios.git", from: "1.1.3")
 ]
 ```
 
@@ -53,9 +53,37 @@ Add the following to your Podfile:
 pod 'Flexa'
 ```
 
+### Xcode 16 compatibility
+
+We are adopting Xcode 26 and the latest UI available on iOS 26. Because of this, some code may not compile on Xcode 16. There is a simple way to turn off the new features by setting an environment variable `FX_ENABLE_GLASS` (you should not set this variable to 0 while working with Xcode 26):
+
+#### Swift Package Manager
+
+Set the variable before opening your project (or before running xcodebuild in CI):
+```sh
+export FX_ENABLE_GLASS=0
+open YOUR_PROJECT.xcodeproj
+# If you have multiple Xcode versions, you can specify which one to use:
+# open -a /Applications/Xcode_16.4.app YOUR_PROJECT.xcodeproj
+```
+Or before building:
+```sh
+export FX_ENABLE_GLASS=0
+xcodebuild...
+```
+
+#### CocoaPods
+
+Set the variable before running pod install, and you should be ready to go:
+
+```sh
+export FX_ENABLE_GLASS=0
+pod install
+```
+
 ## Requirements
 
-Flexa SDK for iOS requires Xcode 15 or later and is compatible with apps that target iOS 15 or above.
+Flexa SDK for iOS requires Xcode 16 or later and is compatible with apps that target iOS 16 or above.
 
 ## Integration
 

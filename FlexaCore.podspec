@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FlexaCore"
-  s.version      = "1.1.2"
+  s.version      = "1.1.3"
   s.summary      = "Flexa Core"
   s.description  = "Flexa Core module by Flexa"
   s.homepage     = "https://github.com/flexa/flexa-ios"
@@ -27,6 +27,10 @@ Pod::Spec.new do |s|
   s.dependency 'FlexaUICore', "~> #{s.version}"
   s.dependency 'Base32', "~> 1.1.2"
   s.dependency 'SVGView', "~> 1.0.4"
+
+  s.pod_target_xcconfig = {
+    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => ENV['FX_ENABLE_GLASS'] != '0' ? 'FX_ENABLE_GLASS' : ''
+  }
 
   s.test_spec 'Tests' do |test_spec|
     test_spec.source_files = 'FlexaCore/Tests/**/*.{swift}'

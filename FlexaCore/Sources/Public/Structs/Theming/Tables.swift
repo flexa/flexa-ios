@@ -12,7 +12,7 @@ import SwiftUI
 public extension FXTheme {
     class Tables: FlexaThemable {
         private static var defaultMargin: CGFloat {
-            if #available(iOS 26.0, *) {
+            if Flexa.supportsGlass {
                 return 0
             }
             return 20

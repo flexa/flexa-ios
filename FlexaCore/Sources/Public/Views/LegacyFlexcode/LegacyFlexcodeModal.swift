@@ -122,7 +122,7 @@ public struct LegacyFlexcodeContentView: View {
     }
 
     private var screenshotPreventionBackgroundColor: Color {
-        if #available(iOS 26, *) {
+        if Flexa.supportsGlass {
             return .clear
         }
         return theme.views.sheet.backgroundColor

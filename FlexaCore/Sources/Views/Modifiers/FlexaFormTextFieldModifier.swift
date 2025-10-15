@@ -21,7 +21,7 @@ struct FlexaFormTextFieldModifier: ViewModifier {
     var backgroundColor: Color
 
     public func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             commonProperties(content)
                 .clipShape(.capsule)
         } else {

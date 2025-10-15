@@ -26,7 +26,6 @@ public struct FlexaRoundedButton: View {
     var buttonType: ButtonType
     var symbolFont: Font
     var size: CGSize
-    var glassStyle: Bool
 
     private var systemName: String? {
         switch buttonType {
@@ -59,7 +58,6 @@ public struct FlexaRoundedButton: View {
                 backgroundColor: Color = Color(UIColor.tertiarySystemFill.withAlphaComponent(0.16)),
                 symbolFont: Font = Font.system(size: 15, weight: .semibold, design: .rounded),
                 size: CGSize = CGSize(width: 30, height: 30),
-                glassStyle: Bool = false,
                 buttonAction: (() -> Void)? = nil) {
         self.buttonType = buttonType
         self.color = color
@@ -67,11 +65,10 @@ public struct FlexaRoundedButton: View {
         self.symbolFont = symbolFont
         self.size = size
         self.buttonAction = buttonAction
-        self.glassStyle = glassStyle
     }
 
     public var body: some View {
-        if #available(iOS 26, *) {
+        if FlexaUICore.supportsGlass {
             glassButton
         } else if buttonAction != nil {
             button
@@ -80,21 +77,9 @@ public struct FlexaRoundedButton: View {
         }
     }
 
-    @available(iOS 26.0, *)
     @ViewBuilder
     private var glassButton: some View {
-        if glassStyle {
-            Button {
-                buttonAction?()
-            } label: {
-                image
-                    .font(symbolFont)
-                    .foregroundColor(color)
-                    .frame(width: size.width, height: size.height, alignment: .center)
-            }
-            .buttonStyle(.glass)
-            .buttonBorderShape(.circle)
-        } else if systemName == nil {
+        if systemName == nil {
             Button {
                 buttonAction?()
             } label: {
@@ -138,16 +123,6 @@ public struct FlexaRoundedButton: View {
             FlexaRoundedButton(.info)
             FlexaRoundedButton(.find)
             FlexaRoundedButton(.custom(Image(systemName: "exclamationmark.bubble.fill"))) {
-                print("Tap")
-            }
-        }
-
-        HStack {
-            FlexaRoundedButton(.close, glassStyle: true)
-            FlexaRoundedButton(.settings, glassStyle: true)
-            FlexaRoundedButton(.info, glassStyle: true)
-            FlexaRoundedButton(.find, glassStyle: true)
-            FlexaRoundedButton(.custom(Image(systemName: "exclamationmark.bubble.fill")), glassStyle: true) {
                 print("Tap")
             }
         }

@@ -89,7 +89,7 @@ struct MerchantSorter: View {
     @ToolbarContentBuilder
     var doneButton: some ToolbarContent {
         ToolbarItem(placement: .confirmationAction) {
-            if #available(iOS 26.0, *) {
+            if Flexa.supportsGlass {
                 FlexaRoundedButton(.checkmark) {
                     dismiss()
                 }.tint(.flexaTintColor)

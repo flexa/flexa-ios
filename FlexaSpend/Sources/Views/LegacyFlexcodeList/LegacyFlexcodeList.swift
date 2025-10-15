@@ -22,14 +22,14 @@ struct LegacyFlexcodeList: View {
     public var didSelect: Closure?
 
     private var titleFont: Font {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return .title2.weight(.semibold)
         }
         return .subheadline.weight(.semibold)
     }
 
     private var editButtonFont: Font {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return .subheadline.weight(.semibold)
         }
         return .subheadline
@@ -47,7 +47,7 @@ struct LegacyFlexcodeList: View {
 
     @ViewBuilder
     private var editButtonBackground: some View {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             Capsule()
                 .foregroundStyle(Color(UIColor.tertiarySystemFill))
                 .frame(width: 50, height: 30)
@@ -134,14 +134,14 @@ struct LegacyFlexcodeList: View {
 // MARK: Theming
 private extension LegacyFlexcodeList {
     var listCornerRadius: CGFloat {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return 0
         }
         return theme.containers.content.borderRadius
     }
 
     var backgroundColor: Color {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return .clear
         }
         return theme.containers.content.backgroundColor
@@ -154,37 +154,37 @@ private extension CGFloat {
     static let brandNameSize: CGFloat = 66
     static let editButtonTrailingPadding: CGFloat = 32
     static var titleLeadingPadding: CGFloat {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return 24
         }
         return 8
     }
     static var viewHeight: CGFloat {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return 100
         }
         return 140
     }
     static var listHorizontalPadding: CGFloat {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return titleLeadingPadding
         }
         return 22
     }
     static var brandLogoSize: CGFloat {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return 68
         }
         return 54
     }
     static var brandLogoCornerRadius: CGFloat {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return 14
         }
         return 6
     }
     static var listSpacing: CGFloat {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return 12
         }
         return 20

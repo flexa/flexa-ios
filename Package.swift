@@ -2,6 +2,10 @@
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
+import Foundation
+
+let env = ProcessInfo.processInfo.environment["FX_ENABLE_GLASS"]
+let supportsGlass = (env == nil) || (env == "1")
 
 let package = Package(
     name: "Flexa",
@@ -53,7 +57,8 @@ let package = Package(
             name: "Flexa",
             dependencies: ["FlexaCore", "FlexaScan", "FlexaLoad", "FlexaSpend", "FlexaUICore"],
             path: "Sources",
-            plugins: ["SwiftLintPlugin"]),
+            plugins: ["SwiftLintPlugin"]
+        ),
         .testTarget(
             name: "FlexaTests",
             dependencies: ["FlexaCore", "Flexa"],
@@ -73,6 +78,9 @@ let package = Package(
             ],
             path: "FlexaCore/Sources",
             resources: [.process("Resources")],
+            swiftSettings:
+                supportsGlass ? [.define("FX_ENABLE_GLASS")] : []
+            ,
             plugins: ["SwiftLintPlugin"]),
         .testTarget(
             name: "FlexaCoreTests",
@@ -85,6 +93,9 @@ let package = Package(
                 .product(name: "SwiftUIIntrospect", package: "swiftui-introspect")
             ],
             path: "FlexaUICore/Sources",
+            swiftSettings:
+                supportsGlass ? [.define("FX_ENABLE_GLASS")] : []
+            ,
             plugins: ["SwiftLintPlugin"]),
         .testTarget(
             name: "FlexaUICoreTests",

@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "FlexaUICore"
-  s.version      = "1.1.2"
+  s.version      = "1.1.3"
   s.summary      = "Spend UI"
   s.description  = "Spend UI module by Flexa"
   s.homepage     = "https://github.com/flexa/flexa-ios"
@@ -16,6 +16,10 @@ Pod::Spec.new do |s|
   s.source_files = 'FlexaUICore/Sources/**/*.{swift}'
 
   s.dependency 'SwiftUIIntrospect', "~> 26.0.0"
+
+  s.pod_target_xcconfig = {
+    'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => ENV['FX_ENABLE_GLASS'] != '0' ? 'FX_ENABLE_GLASS' : ''
+  }
 
   s.test_spec 'Tests' do |test_spec|
     test_spec.source_files = 'FlexaUICore/Tests/**/*.{swift}'

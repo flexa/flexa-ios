@@ -49,7 +49,7 @@ public struct PaymentClip: View {
     }
 
     private var minHeight: CGFloat {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return 466
         }
         return 418
@@ -242,21 +242,21 @@ struct PayNowContentView: View {
     }
 
     private var brandLogoSize: CGFloat {
-        if #available(iOS 26, *) {
+        if Flexa.supportsGlass {
             return 80
         }
         return 48
     }
 
     private var brandLogoCornerRadius: CGFloat {
-        if #available(iOS 26, *) {
+        if Flexa.supportsGlass {
             return 12
         }
         return 6
     }
 
     private var checkmarkSize: CGFloat {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return 72
         }
         return 50
@@ -299,7 +299,7 @@ struct PayNowContentView: View {
                         )
                         .frame(width: checkmarkSize, height: checkmarkSize, alignment: .center)
                         .transition(.scale)
-                        if #unavailable(iOS 26.0) {
+                        if !Flexa.supportsGlass {
                             linearGradient.mask(
                                 Text(CoreStrings.Payment.done)
                                     .multilineTextAlignment(.center)
@@ -324,7 +324,7 @@ struct PayNowContentView: View {
 
     @ViewBuilder
     private var walletSwitcher: some View {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             WalletSelectorView(asset: asset, usingAccountBalance: isUsingAccountBalance) {
                 didSelect?()
             }.frame(idealHeight: 52)
@@ -344,7 +344,7 @@ struct PayNowContentView: View {
     @ViewBuilder
     private var payButton: some View {
         ZStack {
-            if #available(iOS 26.0, *) {
+            if Flexa.supportsGlass {
                 rawPaymentButton
                     .contentShape(.capsule)
                     .clipShape(.capsule)

@@ -78,7 +78,7 @@ class BrandViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        guard #unavailable(iOS 26) else {
+        guard Flexa.supportsGlass else {
             return
         }
 
@@ -122,7 +122,7 @@ class BrandViewController: UIViewController {
     }
 
     private func setupNavigationBar() {
-        if #available(iOS 26, *) {
+        if Flexa.supportsGlass {
             if showCustomNavigationBar {
                 webView.scrollView.contentInsetAdjustmentBehavior = .never
             }
@@ -178,7 +178,7 @@ class BrandViewController: UIViewController {
     }
 
     private func setupOverlay() {
-        guard #unavailable(iOS 26) else {
+        if Flexa.supportsGlass {
             return
         }
         guard let navigationBar = navigationController?.navigationBar,
@@ -244,7 +244,7 @@ class BrandViewController: UIViewController {
     }
 
     private func setupCloseButton() {
-        guard #unavailable(iOS 26) else {
+        if Flexa.supportsGlass {
             navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(close))
             return
         }

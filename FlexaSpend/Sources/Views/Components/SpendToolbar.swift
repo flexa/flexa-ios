@@ -18,7 +18,7 @@ struct SpendToolbar: ToolbarContent {
     }
 
     var body: some ToolbarContent {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             ToolbarItem(placement: .topBarLeading) {
                 FlexaRoundedButton(.close, buttonAction: { closeAction?() })
             }
@@ -34,13 +34,26 @@ struct SpendToolbar: ToolbarContent {
             }
         } else {
             ToolbarItem(placement: .navigationBarTrailing) {
-                HStack(spacing: 8) {
-                    NavigationMenu {
-                        FlexaRoundedButton(.settings)
-                    }
-                    FlexaRoundedButton(.close, buttonAction: { closeAction?() })
+#if FX_SUPPORTS_GLASS
+                if #available (iOS 26.0, *), Flexa.supportsGlass {
+                    legacyToolbarItem.glassEffect(.identity)
+                } else {
+                    legacyToolbarItem
                 }
+#else
+                legacyToolbarItem
+#endif
             }
+        }
+    }
+
+    @ViewBuilder
+    private var legacyToolbarItem: some View {
+        HStack(spacing: 8) {
+            NavigationMenu {
+                FlexaRoundedButton(.settings)
+            }
+            FlexaRoundedButton(.close, buttonAction: { closeAction?() })
         }
     }
 }

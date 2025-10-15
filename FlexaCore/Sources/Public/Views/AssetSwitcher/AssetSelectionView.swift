@@ -15,13 +15,6 @@ struct AssetSelectionView: View {
     @State private var transactionAssetDetailsView: TransactionAssetDetailsView?
     @StateObject private var viewModel: AssetSelectionViewModel
 
-    private var listStyle: some ListStyle {
-        if #available(iOS 26.0, *) {
-            return DefaultListStyle()
-        }
-        return PlainListStyle()
-    }
-
     init(showAssetsModal: Binding<Bool>,
          viewModel: StateObject<AssetSelectionViewModel>,
          didSelect: ClosureAsset?) {
@@ -32,7 +25,7 @@ struct AssetSelectionView: View {
 
     var body: some View {
         ZStack {
-            if #available(iOS 26.0, *) {
+            if #available(iOS 26.0, *), Flexa.supportsGlass {
                 list.listSectionSpacing(0)
             } else {
                 backgroundColor.ignoresSafeArea()
@@ -50,12 +43,7 @@ struct AssetSelectionView: View {
 
     @ViewBuilder
     private var list: some View {
-        List {
-            balanceView
-            if !viewModel.accountBalanceCoversFullAmount {
-                assetsList
-            }
-        }.listStyle(listStyle)
+        listWithHeader
             .listRowSpacing(tableTheme.cellSpacing)
 
             .shadow(color: tableTheme.shadow.color,
@@ -66,6 +54,25 @@ struct AssetSelectionView: View {
                                        destination: transactionAssetDetailsView,
                                        isActive: $isAssetExchangeRateViewPresented).hidden())
             .padding(.horizontal, listPadding)
+    }
+
+    @ViewBuilder
+    private var listWithHeader: some View {
+        if Flexa.supportsGlass {
+            List {
+                balanceView
+                if !viewModel.accountBalanceCoversFullAmount {
+                    assetsList
+                }
+            }.listStyle(.automatic)
+        } else {
+            List {
+                balanceView
+                if !viewModel.accountBalanceCoversFullAmount {
+                    assetsList
+                }
+            }.listStyle(.plain)
+        }
     }
 
     @ViewBuilder

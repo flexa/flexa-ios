@@ -45,7 +45,7 @@ public extension FXTheme.Containers {
 public extension FXTheme.Containers {
     class Notification: FXTheme.View {
         private static var defaultBorderRadius: CGFloat {
-            if #available(iOS 26.0, *) {
+            if Flexa.supportsGlass {
                 return 20
             }
             return 14
@@ -65,7 +65,7 @@ public extension FXTheme.Containers {
 public extension FXTheme.Containers {
     class Content: FXTheme.View {
         private static var defaultBorderRadius: CGFloat {
-            if #available(iOS 26.0, *) {
+            if Flexa.supportsGlass {
                 return 20
             }
             return 14

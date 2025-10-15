@@ -26,7 +26,7 @@ struct AssetRow: View {
          enable: Bool = true,
          showInfo: @escaping () -> Void) {
 
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             self.title = asset.assetDisplayName
         } else {
             self.title = asset.assetSymbol
@@ -109,7 +109,7 @@ struct AssetRow: View {
 
     @ViewBuilder
     private var rightAccessoryView: some View {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             Image(systemName: "ellipsis")
                 .resizable()
                 .scaledToFit()

@@ -54,14 +54,14 @@ struct AuthMainView: View {
                             handleFocusChange(isFocused, scrollViewProxy: scrollViewProxy)
                         }
                     }
-                    if #unavailable(iOS 26.0) {
+                    if !Flexa.supportsGlass {
                         closeButton
                     }
                 }.onTapGesture {
                     isEmailFieldFocused = false
                 }
                 .toolbar {
-                    if #available(iOS 26.0, *) {
+                    if Flexa.supportsGlass {
                         ToolbarItem(placement: .topBarTrailing) {
                             closeButtonMenu
                         }

@@ -28,6 +28,17 @@ open class Flexa {
     @Injected(\.eventNotifier) private static var eventNotifier
     private static var isInitialized = false
 
+#if FX_ENABLE_GLASS
+    public static var supportsGlass: Bool {
+        if #available(iOS 26.0, *) {
+            return true
+        }
+        return false
+    }
+#else
+    public static let supportsGlass = false
+#endif
+
     @Synchronized public static internal(set) var canSpend = true {
         didSet {
             if !canSpend {

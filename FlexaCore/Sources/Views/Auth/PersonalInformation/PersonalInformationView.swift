@@ -33,7 +33,7 @@ struct PersonalInformationView: View {
     )
 
     private var customBackButton: Bool {
-        if #available(iOS 26, *) {
+        if Flexa.supportsGlass {
             return false
         }
         return true
@@ -44,7 +44,7 @@ struct PersonalInformationView: View {
     }
 
     private var termsEdgeInsets: EdgeInsets {
-        if #available(iOS 26, *) {
+        if Flexa.supportsGlass {
             return EdgeInsets(top: 16, leading: 0, bottom: 16, trailing: 0)
         }
         return EdgeInsets()
@@ -56,7 +56,7 @@ struct PersonalInformationView: View {
                 ScrollView(.vertical) {
                     VStack(alignment: .center, spacing: 12) {
                         header.padding(.horizontal, 20)
-                        if #available(iOS 26, *) {
+                        if #available(iOS 26, *), Flexa.supportsGlass {
                             form.frame(minHeight: 310)
                                 .offset(y: -24)
                                 .listSectionSpacing(.compact)
@@ -120,7 +120,7 @@ struct PersonalInformationView: View {
 
     @ToolbarContentBuilder
     private var toolbar: some ToolbarContent {
-        if #unavailable(iOS 26) {
+        if !Flexa.supportsGlass {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {
                     goBack()

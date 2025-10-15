@@ -17,7 +17,7 @@ public struct SheetCornerRadiusModifier: ViewModifier {
     }
 
     public func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
+        if FlexaUICore.supportsGlass {
             content
         } else if #available(iOS 16.4, *) {
             content.presentationCornerRadius(cornerRadius)

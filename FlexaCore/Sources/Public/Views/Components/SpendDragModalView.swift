@@ -64,7 +64,7 @@ public struct SpendDragModalView<Content: View>: View {
     private var cardPadding: CGFloat {
         if presentationMode == .sheet {
             return 0
-        } else if #available(iOS 26.0, *) {
+        } else if Flexa.supportsGlass {
             return 6
         } else {
             return 16
@@ -72,7 +72,7 @@ public struct SpendDragModalView<Content: View>: View {
     }
 
     private var backgroundOpacity: CGFloat {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return 0.8
         }
         return 1
@@ -234,7 +234,7 @@ public struct SpendDragModalView<Content: View>: View {
                         if let rightHeaderView {
                             AnyView(rightHeaderView)
                         }
-                        if #available(iOS 26, *) {
+                        if Flexa.supportsGlass {
                             Button {
                                 isShowing = false
                             } label: {
@@ -262,7 +262,7 @@ public struct SpendDragModalView<Content: View>: View {
     @ViewBuilder
     private var modalBackground: some View {
         ZStack {
-            if #available(iOS 26.0, *) {
+            if #available(iOS 26.0, *), Flexa.supportsGlass {
                 ZStack(alignment: .top) {
                     UnevenRoundedRectangle(
                         topLeadingRadius: 40,
@@ -270,8 +270,10 @@ public struct SpendDragModalView<Content: View>: View {
                         bottomTrailingRadius: 0,
                         topTrailingRadius: 40
                     ).frame(height: 40)
+#if FX_ENABLE_GLASS
                     ConcentricRectangle(corners: .concentric)
                         .padding(.top, 40)
+#endif
                 }
             } else {
                 RoundedRectangle(cornerRadius: cornerRadius)

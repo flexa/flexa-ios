@@ -21,7 +21,7 @@ public struct FlexaWebView: View {
     }
 
     public var body: some View {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             NavigationView {
                 content
                     .ignoresSafeArea()
@@ -64,7 +64,7 @@ public struct FlexaWebView: View {
                 }
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            if #unavailable(iOS 26.0) {
+            if !Flexa.supportsGlass {
                 closeButton
             }
         }

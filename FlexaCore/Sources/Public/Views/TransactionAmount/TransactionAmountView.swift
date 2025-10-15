@@ -74,7 +74,7 @@ public struct TransactionAmountView: View {
     }
 
     public var body: some View {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             NavigationView {
                 content.toolbar {
                         toolBar
@@ -101,7 +101,7 @@ public struct TransactionAmountView: View {
                     }
             }
             VStack(alignment: .center, spacing: 0) {
-                if #unavailable(iOS 26.0) {
+                if !Flexa.supportsGlass {
                     brandLogo
                 }
                 if viewModel.hasPromotion {
@@ -120,7 +120,7 @@ public struct TransactionAmountView: View {
             }
             .padding([.horizontal, .bottom], .padding)
             .padding(.top, .topPadding)
-            if #unavailable(iOS 26.0) {
+            if !Flexa.supportsGlass {
                 closeButton
             }
         }
@@ -223,7 +223,7 @@ public struct TransactionAmountView: View {
             viewModelAsset.hasAmount = viewModel.hasAmount
             showAssetsModal = true
         }
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             glassAssetSwitcherButton(action)
         } else {
             legacyAssetSwitcherButton(action)
@@ -265,7 +265,7 @@ public struct TransactionAmountView: View {
 
     @ToolbarContentBuilder
     var toolBar: some ToolbarContent {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             ToolbarItem(placement: .principal) {
                 brandLogo
             }
@@ -438,7 +438,6 @@ public struct TransactionAmountView: View {
         }
     }
 
-    @available(iOS 26.0, *)
     private func glassAssetSwitcherButton(_ action: @escaping () -> Void) -> some View {
         Button {
             action()
@@ -457,7 +456,7 @@ public struct TransactionAmountView: View {
                 }.frame(width: 17, height: 17, alignment: .center)
             }
         }
-        .buttonStyle(.glass)
+        .glassButtonStyle()
     }
 
     private func blankView() -> some View {

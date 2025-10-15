@@ -19,7 +19,7 @@ struct WalletSelectorView: View {
     }
 
     private var height: CGFloat {
-        if #available(iOS 26, *) {
+        if Flexa.supportsGlass {
             return 52
         }
         return 44

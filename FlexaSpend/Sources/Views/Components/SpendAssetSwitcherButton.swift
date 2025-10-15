@@ -13,7 +13,12 @@ struct SpendAssetSwitcherButton: View {
     @Binding private var asset: AssetWrapper?
     private var action: () -> Void
     private var horizontalPadding: CGFloat {
-        mainTheme.views.primary.padding ?? 0 + 6
+        let padding = mainTheme.views.primary.padding ?? 0
+        if Flexa.supportsGlass {
+            return padding
+        } else {
+            return padding + 6
+        }
     }
 
     init(asset: Binding<AssetWrapper?>, _ action: @escaping () -> Void) {
@@ -22,14 +27,13 @@ struct SpendAssetSwitcherButton: View {
     }
 
     var body: some View {
-        if #available(iOS 26, *) {
+        if Flexa.supportsGlass {
             button
         } else {
             legacyButton
         }
     }
 
-    @available(iOS 26, *)
     private var button: some View {
         HStack {
             Button {
@@ -48,7 +52,7 @@ struct SpendAssetSwitcherButton: View {
                     }.frame(width: 17, height: 17, alignment: .center)
                 }
             }
-            .buttonStyle(.glass)
+            .glassButtonStyle()
             .padding(.horizontal, horizontalPadding)
             .padding(.top, 40)
             Spacer()

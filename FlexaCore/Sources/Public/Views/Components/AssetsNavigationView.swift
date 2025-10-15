@@ -20,7 +20,7 @@ public struct AssetsNavigationView: View {
     private var updateAsset: UpdateAssetClosure
 
     private var listTopPadding: CGFloat {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return -20
         }
         return 0
@@ -53,7 +53,7 @@ public struct AssetsNavigationView: View {
     @ToolbarContentBuilder
     var doneButton: some ToolbarContent {
         ToolbarItem(placement: .confirmationAction) {
-            if #available(iOS 26.0, *) {
+            if Flexa.supportsGlass {
                 FlexaRoundedButton(.checkmark) {
                     showAssetsModal = false
                 }.tint(.flexaTintColor)

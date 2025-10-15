@@ -66,7 +66,7 @@ struct FlexaBalanceView: View {
 
     @ViewBuilder
     private var iconView: some View {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             ZStack {
                 Circle()
                     .fill(Color.flexaTintColor.opacity(0.2))

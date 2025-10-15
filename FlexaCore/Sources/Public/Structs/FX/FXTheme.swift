@@ -40,7 +40,7 @@ public struct FXTheme: FlexaThemable {
     }
 
     private static var defaultTintColor: Color {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             return Color(hex: "8800FF")
         }
         return Color.purple

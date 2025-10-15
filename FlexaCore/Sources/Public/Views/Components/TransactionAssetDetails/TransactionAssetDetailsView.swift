@@ -23,7 +23,7 @@ public struct TransactionAssetDetailsView: View {
     }
 
     public var body: some View {
-        if #available(iOS 26.0, *) {
+        if Flexa.supportsGlass {
             contentView
                 .toolbar {
                     ToolbarItem(placement: .confirmationAction) {
