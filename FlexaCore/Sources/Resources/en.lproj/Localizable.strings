@@ -24,7 +24,7 @@
 
 // Privacy
 "auth.privacy.alerts.about.title" = "Email Address Privacy";
-"auth.privacy.alerts.about.message" = "Flexa uses your email address to sign you in and send you receipts for your payments. Your email address is never shared with %s or any other business.";
+"auth.privacy.alerts.about.message" = "Flexa uses your email address to sign you in and send you receipts for your payments. Your email address is never shared with %@ or any other business.";
 
 // Navigation Menu
 "navigation_menu.settings.items.find_places_to_pay.title" = "Find Places to Pay";
@@ -34,7 +34,7 @@
 "navigation_menu.settings.items.help.items.report_issue.title" = "Report an Issue";
 
 // Main
-"auth.main.header.title" = "%s invites you to";
+"auth.main.header.title" = "%@ invites you to";
 "auth.main.header.subtitle" = "Pay with Flexa";
 "auth.main.sections.spend.title" = "Spend How You Want";
 "auth.main.sections.spend.description" = "Use your assets at thousands of places—with no card required.";
@@ -62,7 +62,7 @@
 "auth.personal_info.header.title" = "Create your
 Flexa Account";
 "auth.personal_info.header.subtitle" = "Please provide a few details to start making payments with Flexa.";
-"auth.personal_info.sections.terms_of_service" = "The information you provide is used only to comply with local financial regulations, and will never be shared with %s or any of the businesses you pay. By creating an account, you agree to Flexa’s [Terms of Service](https://flexa.co/legal/terms).";
+"auth.personal_info.sections.terms_of_service" = "The information you provide is used only to comply with local financial regulations, and will never be shared with %@ or any of the businesses you pay. By creating an account, you agree to Flexa’s [Terms of Service](https://flexa.co/legal/terms).";
 "auth.personal_info.buttons.about.title" = "About Flexa & Privacy...";
 "auth.personal_info.buttons.next.title" = "Get Started";
 "auth.personal_info.textfields.full_name.placeholder" = "Your Name";
@@ -89,42 +89,42 @@ Flexa Account";
 
 // Updating balance
 "updating_balance.title" = "Balance Updating...";
-"updating_balance.text" = "Your recent transaction is still mining.\nYou can spend up to **%s** now, or wait for your full balance to become available.";
+"updating_balance.text" = "Your recent transaction is still mining.\nYou can spend up to **%@** now, or wait for your full balance to become available.";
 
 // Payment Card
-"payment.pay_merchant" = "Pay %s";
+"payment.pay_merchant" = "Pay %@";
 "payment.done" = "Done";
 "payment.pay_now" = "Pay Now";
 "payment.balance_unavailable.title" = "Balance Not Yet Available";
 "payment.using" = "Using";
 "payment.your_flexa_account.title" = "Your Flexa Account";
-"payment.not_enough" = "Not enough %s for this payment";
+"payment.not_enough" = "Not enough %@ for this payment";
 
 // Payment Primary View
 "payment.pay_using.title" = "Pay Using";
-"payment.balance.title" = "%s Balance";
-"payment.currency_avaliable.title" = "%s Available";
+"payment.balance.title" = "%@ Balance";
+"payment.currency_avaliable.title" = "%@ Available";
 "payment.hide_short_balances.title" = "Hide Short Balances";
-"payment.using_ticker.subtitle" = "Using %s";
+"payment.using_ticker.subtitle" = "Using %@";
 
 //Transaction Details
 "payment.transaction_details.footer" = "Flexa automatically selects the best exchange rate and network fee for your payments. [Learn more...](https://flexa.co)";
 "payment.transaction_details.title" = "Details";
 
 // Exchange Rate
-"payment.asset.exchange_rate.value" = "1 %s = %s";
+"payment.asset.exchange_rate.value" = "1 %@ = %@";
 "payment.asset.exchange_rate.cannot_load_network_fee" = "Network fee cannot be loaded";
-"payment.asset.exchange_rate.network_fee" = "%s network fee";
-"payment.asset.exchange_rate.less_than_min_network_fee" = "Less than %s network fee";
+"payment.asset.exchange_rate.network_fee" = "%@ network fee";
+"payment.asset.exchange_rate.less_than_min_network_fee" = "Less than %@ network fee";
 "payment.asset.exchange_rate.free" = "Free";
-"payment.asset.exchange_rate.amount" = "%s %s";
+"payment.asset.exchange_rate.amount" = "%@ %@";
 
 // Account balance
-"account_balance.title" = "%s in your Flexa Account";
+"account_balance.title" = "%@ in your Flexa Account";
 "account_balance.next_payment.text" = "Applied to your next payment";
 "account_balance.current_payment.text" = "Applied to this payment";
 "account_balance.full_amount.text" = "The balance of your Flexa Account\nwill cover this payment. You don’t\nneed to send anything else.";
-"account_balance.pay_remaining.title" = "PAY REMAINING %s USING";
+"account_balance.pay_remaining.title" = "PAY REMAINING %@ USING";
 
 // Web Links
 "web_links.privacy" = "https://flexa.co/legal/privacy";
@@ -136,11 +136,11 @@ Flexa Account";
 // Flexa Account
 "account.navigation.title" = "Account";
 "account.alerts.sign_out.title" = "Sign Out of Flexa?";
-"account.alerts.sign_out.message" = "Signing out will remove all Flexa data that is stored with %s on this device. Your wallet and your transaction history will not be affected.";
+"account.alerts.sign_out.message" = "Signing out will remove all Flexa data that is stored with %@ on this device. Your wallet and your transaction history will not be affected.";
 "account.alerts.sign_out.buttons.sign_out.title" = "Sign Out";
-"account.header.labels.joined_in" = "Joined in %s";
+"account.header.labels.joined_in" = "Joined in %@";
 "account.sections.limit.header.title" = "Your Flexa Account";
-"account.sections.limit.footer.title" = "Limits reset on %s at %s.";
+"account.sections.limit.footer.title" = "Limits reset on %@ at %@.";
 "account.sections.data_and_privacy.cells.data_and_privacy.title" = "Data & Privacy";
 "account.sections.sign_out.cells.sign_out.title" = "Sign Out of Flexa";
 
@@ -172,16 +172,16 @@ Flexa Account";
 "confirm_account_deletion.buttons.open_email.title" = "Open \"Mail\"";
 
 // Legacy Flexcode
-"legacy_flexcode.amount_entry.labels.minimum_amount" = "Minimum Amount: %s";
-"legacy_flexcode.amount_entry.labels.maximum_amount" = "Maximum Amount: %s";
+"legacy_flexcode.amount_entry.labels.minimum_amount" = "Minimum Amount: %@";
+"legacy_flexcode.amount_entry.labels.maximum_amount" = "Maximum Amount: %@";
 "legacy_flexcode.amount_entry.buttons.payment.enter_amount.title" = "Enter Amount";
 "legacy_flexcode.amount_entry.buttons.payment.confirm.title" = "Confirm";
 "legacy_flexcode.amount_entry.buttons.balance_unavailable.title" = "Balance Not Yet Available";
-"legacy_flexcode.promotions.labels.saving" = "Saving %s";
+"legacy_flexcode.promotions.labels.saving" = "Saving %@";
 "legacy_flexcode.prevent_screenshot_text" = "Flexa loves you <3";
 
 // Asset Switcher
 "asset_switcher.using_flexa_account.title" = "Using your Flexa Account";
 
 // Payment Card
-"payment.pay_merchant" = "Pay %s";
+"payment.pay_merchant" = "Pay %@";

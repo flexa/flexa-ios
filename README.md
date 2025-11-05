@@ -30,7 +30,7 @@ Alternatively, you can directly update Package.swift with this dependency:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/flexa/flexa-ios.git", from: "1.1.3")
+    .package(url: "https://github.com/flexa/flexa-ios.git", from: "1.1.4")
 ]
 ```
 

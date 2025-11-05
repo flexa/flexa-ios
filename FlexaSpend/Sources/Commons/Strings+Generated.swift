@@ -88,26 +88,26 @@ internal enum L10n {
       internal static let label = L10n.tr("Localizable", "no_assets.add_asset_button.label", fallback: "Add Assets")
     }
     internal enum Description {
-      /// Flexa doesn’t currently support %s.
-      internal static func oneInvalidAsset(_ p1: UnsafePointer<CChar>) -> String {
-        return L10n.tr("Localizable", "no_assets.description.one_invalid_asset", p1, fallback: "Flexa doesn’t currently support %s.")
+      /// Flexa doesn’t currently support %@.
+      internal static func oneInvalidAsset(_ p1: Any) -> String {
+        return L10n.tr("Localizable", "no_assets.description.one_invalid_asset", String(describing: p1), fallback: "Flexa doesn’t currently support %@.")
       }
-      /// Flexa doesn’t currently support %s, %s, or any of the other assets in your wallet.
-      internal static func otherInvalidAssets(_ p1: UnsafePointer<CChar>, _ p2: UnsafePointer<CChar>) -> String {
-        return L10n.tr("Localizable", "no_assets.description.other_invalid_assets", p1, p2, fallback: "Flexa doesn’t currently support %s, %s, or any of the other assets in your wallet.")
+      /// Flexa doesn’t currently support %@, %@, or any of the other assets in your wallet.
+      internal static func otherInvalidAssets(_ p1: Any, _ p2: Any) -> String {
+        return L10n.tr("Localizable", "no_assets.description.other_invalid_assets", String(describing: p1), String(describing: p2), fallback: "Flexa doesn’t currently support %@, %@, or any of the other assets in your wallet.")
       }
-      /// Flexa doesn’t currently support %s or %s.
-      internal static func twoInvalidAssets(_ p1: UnsafePointer<CChar>, _ p2: UnsafePointer<CChar>) -> String {
-        return L10n.tr("Localizable", "no_assets.description.two_invalid_assets", p1, p2, fallback: "Flexa doesn’t currently support %s or %s.")
+      /// Flexa doesn’t currently support %@ or %@.
+      internal static func twoInvalidAssets(_ p1: Any, _ p2: Any) -> String {
+        return L10n.tr("Localizable", "no_assets.description.two_invalid_assets", String(describing: p1), String(describing: p2), fallback: "Flexa doesn’t currently support %@ or %@.")
       }
       /// There are no assets in your wallet
       internal static let zeroAssets = L10n.tr("Localizable", "no_assets.description.zero_assets", fallback: "There are no assets in your wallet")
     }
   }
   internal enum Payment {
-    /// %s avaliable
-    internal static func description(_ p1: UnsafePointer<CChar>) -> String {
-      return L10n.tr("Localizable", "payment.description", p1, fallback: "%s avaliable")
+    /// %@ avaliable
+    internal static func description(_ p1: Any) -> String {
+      return L10n.tr("Localizable", "payment.description", String(describing: p1), fallback: "%@ avaliable")
     }
     /// Done
     internal static let done = L10n.tr("Localizable", "payment.done", fallback: "Done")
@@ -115,32 +115,32 @@ internal enum L10n {
     internal static let errorLoginToAuthorize = L10n.tr("Localizable", "payment.error_login_to_authorize", fallback: "Login to authorize the transaction.")
     internal enum Asset {
       internal enum ExchangeRate {
-        /// %s %s
-        internal static func amount(_ p1: UnsafePointer<CChar>, _ p2: UnsafePointer<CChar>) -> String {
-          return L10n.tr("Localizable", "payment.asset.exchange_rate.amount", p1, p2, fallback: "%s %s")
+        /// %@ %@
+        internal static func amount(_ p1: Any, _ p2: Any) -> String {
+          return L10n.tr("Localizable", "payment.asset.exchange_rate.amount", String(describing: p1), String(describing: p2), fallback: "%@ %@")
         }
-        /// %s avaliable
-        internal static func avaliable(_ p1: UnsafePointer<CChar>) -> String {
-          return L10n.tr("Localizable", "payment.asset.exchange_rate.avaliable", p1, fallback: "%s avaliable")
+        /// %@ avaliable
+        internal static func avaliable(_ p1: Any) -> String {
+          return L10n.tr("Localizable", "payment.asset.exchange_rate.avaliable", String(describing: p1), fallback: "%@ avaliable")
         }
         /// No network fees
         internal static let noNetworkFee = L10n.tr("Localizable", "payment.asset.exchange_rate.no_network_fee", fallback: "No network fees")
-        /// 1 %s = %s
-        internal static func value(_ p1: UnsafePointer<CChar>, _ p2: UnsafePointer<CChar>) -> String {
-          return L10n.tr("Localizable", "payment.asset.exchange_rate.value", p1, p2, fallback: "1 %s = %s")
+        /// 1 %@ = %@
+        internal static func value(_ p1: Any, _ p2: Any) -> String {
+          return L10n.tr("Localizable", "payment.asset.exchange_rate.value", String(describing: p1), String(describing: p2), fallback: "1 %@ = %@")
         }
       }
     }
     internal enum Balance {
-      /// %s Balance
-      internal static func title(_ p1: UnsafePointer<CChar>) -> String {
-        return L10n.tr("Localizable", "payment.balance.title", p1, fallback: "%s Balance")
+      /// %@ Balance
+      internal static func title(_ p1: Any) -> String {
+        return L10n.tr("Localizable", "payment.balance.title", String(describing: p1), fallback: "%@ Balance")
       }
     }
     internal enum CurrencyAvaliable {
-      /// %s Available
-      internal static func title(_ p1: UnsafePointer<CChar>) -> String {
-        return L10n.tr("Localizable", "payment.currency_avaliable.title", p1, fallback: "%s Available")
+      /// %@ Available
+      internal static func title(_ p1: Any) -> String {
+        return L10n.tr("Localizable", "payment.currency_avaliable.title", String(describing: p1), fallback: "%@ Available")
       }
     }
     internal enum Message {
@@ -160,9 +160,9 @@ internal enum L10n {
       internal static let footer = L10n.tr("Localizable", "payment.transaction_details.footer", fallback: "Flexa automatically selects the best exchange rate and network fee for your payments. [Learn more...](https://flexa.co)")
     }
     internal enum UsingTicker {
-      /// Using %s
-      internal static func subtitle(_ p1: UnsafePointer<CChar>) -> String {
-        return L10n.tr("Localizable", "payment.using_ticker.subtitle", p1, fallback: "Using %s")
+      /// Using %@
+      internal static func subtitle(_ p1: Any) -> String {
+        return L10n.tr("Localizable", "payment.using_ticker.subtitle", String(describing: p1), fallback: "Using %@")
       }
     }
   }

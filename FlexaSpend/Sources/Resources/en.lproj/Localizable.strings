@@ -13,16 +13,16 @@
 
 // Primary view
 "payment.pay_with_flexa.title" = "Pay with Flexa";
-"payment.using_ticker.subtitle" = "Using %s";
+"payment.using_ticker.subtitle" = "Using %@";
 "payment.error_login_to_authorize" = "Login to authorize the transaction.";
 
 // No Assets View.
 // The description has different parameters, and different messages for each amount, that is why we are not using pluralization here
 "no_assets.title" = "Nothing to Spend";
 "no_assets.description.zero_assets" = "There are no assets in your wallet";
-"no_assets.description.one_invalid_asset" = "Flexa doesn’t currently support %s.";
-"no_assets.description.two_invalid_assets" = "Flexa doesn’t currently support %s or %s.";
-"no_assets.description.other_invalid_assets" = "Flexa doesn’t currently support %s, %s, or any of the other assets in your wallet.";
+"no_assets.description.one_invalid_asset" = "Flexa doesn’t currently support %@.";
+"no_assets.description.two_invalid_assets" = "Flexa doesn’t currently support %@ or %@.";
+"no_assets.description.other_invalid_assets" = "Flexa doesn’t currently support %@, %@, or any of the other assets in your wallet.";
 "no_assets.add_asset_button.label" = "Add Assets";
 
 // Notifications/messages
@@ -31,7 +31,7 @@
 "payment.message.button" = "Learn More";
 
 // Payment Card
-"payment.description" = "%s avaliable";
+"payment.description" = "%@ avaliable";
 
 // Legacy flexcode tray
 "legacy_flexcode_tray.title" = "Get a one-time code";
@@ -49,14 +49,14 @@
 "legacy_flexcode.alerts.scan_help.title" = "Tips for Using Flexcodes at %@";
 
 // Exchange Rate
-"payment.asset.exchange_rate.avaliable" = "%s avaliable";
+"payment.asset.exchange_rate.avaliable" = "%@ avaliable";
 "payment.asset.exchange_rate.no_network_fee" = "No network fees";
-"payment.asset.exchange_rate.value" = "1 %s = %s";
-"payment.asset.exchange_rate.amount" = "%s %s";
+"payment.asset.exchange_rate.value" = "1 %@ = %@";
+"payment.asset.exchange_rate.amount" = "%@ %@";
 
 // Payment Primary View
-"payment.balance.title" = "%s Balance";
-"payment.currency_avaliable.title" = "%s Available";
+"payment.balance.title" = "%@ Balance";
+"payment.currency_avaliable.title" = "%@ Available";
 
 // Transaction Details
 "payment.transaction_details.footer" = "Flexa automatically selects the best exchange rate and network fee for your payments. [Learn more...](https://flexa.co)";

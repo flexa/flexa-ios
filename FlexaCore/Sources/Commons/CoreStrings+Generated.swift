@@ -13,9 +13,9 @@ internal enum CoreStrings {
   internal enum Account {
     internal enum Alerts {
       internal enum SignOut {
-        /// Signing out will remove all Flexa data that is stored with %s on this device. Your wallet and your transaction history will not be affected.
-        internal static func message(_ p1: UnsafePointer<CChar>) -> String {
-          return CoreStrings.tr("Localizable", "account.alerts.sign_out.message", p1, fallback: "Signing out will remove all Flexa data that is stored with %s on this device. Your wallet and your transaction history will not be affected.")
+        /// Signing out will remove all Flexa data that is stored with %@ on this device. Your wallet and your transaction history will not be affected.
+        internal static func message(_ p1: Any) -> String {
+          return CoreStrings.tr("Localizable", "account.alerts.sign_out.message", String(describing: p1), fallback: "Signing out will remove all Flexa data that is stored with %@ on this device. Your wallet and your transaction history will not be affected.")
         }
         /// Sign Out of Flexa?
         internal static let title = CoreStrings.tr("Localizable", "account.alerts.sign_out.title", fallback: "Sign Out of Flexa?")
@@ -29,9 +29,9 @@ internal enum CoreStrings {
     }
     internal enum Header {
       internal enum Labels {
-        /// Joined in %s
-        internal static func joinedIn(_ p1: UnsafePointer<CChar>) -> String {
-          return CoreStrings.tr("Localizable", "account.header.labels.joined_in", p1, fallback: "Joined in %s")
+        /// Joined in %@
+        internal static func joinedIn(_ p1: Any) -> String {
+          return CoreStrings.tr("Localizable", "account.header.labels.joined_in", String(describing: p1), fallback: "Joined in %@")
         }
       }
     }
@@ -50,9 +50,9 @@ internal enum CoreStrings {
       }
       internal enum Limit {
         internal enum Footer {
-          /// Limits reset on %s at %s.
-          internal static func title(_ p1: UnsafePointer<CChar>, _ p2: UnsafePointer<CChar>) -> String {
-            return CoreStrings.tr("Localizable", "account.sections.limit.footer.title", p1, p2, fallback: "Limits reset on %s at %s.")
+          /// Limits reset on %@ at %@.
+          internal static func title(_ p1: Any, _ p2: Any) -> String {
+            return CoreStrings.tr("Localizable", "account.sections.limit.footer.title", String(describing: p1), String(describing: p2), fallback: "Limits reset on %@ at %@.")
           }
         }
         internal enum Header {
@@ -71,9 +71,9 @@ internal enum CoreStrings {
     }
   }
   internal enum AccountBalance {
-    /// %s in your Flexa Account
-    internal static func title(_ p1: UnsafePointer<CChar>) -> String {
-      return CoreStrings.tr("Localizable", "account_balance.title", p1, fallback: "%s in your Flexa Account")
+    /// %@ in your Flexa Account
+    internal static func title(_ p1: Any) -> String {
+      return CoreStrings.tr("Localizable", "account_balance.title", String(describing: p1), fallback: "%@ in your Flexa Account")
     }
     internal enum CurrentPayment {
       /// Applied to this payment
@@ -90,9 +90,9 @@ internal enum CoreStrings {
       internal static let text = CoreStrings.tr("Localizable", "account_balance.next_payment.text", fallback: "Applied to your next payment")
     }
     internal enum PayRemaining {
-      /// PAY REMAINING %s USING
-      internal static func title(_ p1: UnsafePointer<CChar>) -> String {
-        return CoreStrings.tr("Localizable", "account_balance.pay_remaining.title", p1, fallback: "PAY REMAINING %s USING")
+      /// PAY REMAINING %@ USING
+      internal static func title(_ p1: Any) -> String {
+        return CoreStrings.tr("Localizable", "account_balance.pay_remaining.title", String(describing: p1), fallback: "PAY REMAINING %@ USING")
       }
     }
   }
@@ -143,9 +143,9 @@ internal enum CoreStrings {
       internal enum Header {
         /// Pay with Flexa
         internal static let subtitle = CoreStrings.tr("Localizable", "auth.main.header.subtitle", fallback: "Pay with Flexa")
-        /// %s invites you to
-        internal static func title(_ p1: UnsafePointer<CChar>) -> String {
-          return CoreStrings.tr("Localizable", "auth.main.header.title", p1, fallback: "%s invites you to")
+        /// %@ invites you to
+        internal static func title(_ p1: Any) -> String {
+          return CoreStrings.tr("Localizable", "auth.main.header.title", String(describing: p1), fallback: "%@ invites you to")
         }
       }
       internal enum Links {
@@ -198,9 +198,9 @@ internal enum CoreStrings {
         internal static let title = CoreStrings.tr("Localizable", "auth.personal_info.header.title", fallback: "Create your\nFlexa Account")
       }
       internal enum Sections {
-        /// The information you provide is used only to comply with local financial regulations, and will never be shared with %s or any of the businesses you pay. By creating an account, you agree to Flexa’s [Terms of Service](https://flexa.co/legal/terms).
-        internal static func termsOfService(_ p1: UnsafePointer<CChar>) -> String {
-          return CoreStrings.tr("Localizable", "auth.personal_info.sections.terms_of_service", p1, fallback: "The information you provide is used only to comply with local financial regulations, and will never be shared with %s or any of the businesses you pay. By creating an account, you agree to Flexa’s [Terms of Service](https://flexa.co/legal/terms).")
+        /// The information you provide is used only to comply with local financial regulations, and will never be shared with %@ or any of the businesses you pay. By creating an account, you agree to Flexa’s [Terms of Service](https://flexa.co/legal/terms).
+        internal static func termsOfService(_ p1: Any) -> String {
+          return CoreStrings.tr("Localizable", "auth.personal_info.sections.terms_of_service", String(describing: p1), fallback: "The information you provide is used only to comply with local financial regulations, and will never be shared with %@ or any of the businesses you pay. By creating an account, you agree to Flexa’s [Terms of Service](https://flexa.co/legal/terms).")
         }
       }
       internal enum Textfields {
@@ -225,9 +225,9 @@ internal enum CoreStrings {
     internal enum Privacy {
       internal enum Alerts {
         internal enum About {
-          /// Flexa uses your email address to sign you in and send you receipts for your payments. Your email address is never shared with %s or any other business.
-          internal static func message(_ p1: UnsafePointer<CChar>) -> String {
-            return CoreStrings.tr("Localizable", "auth.privacy.alerts.about.message", p1, fallback: "Flexa uses your email address to sign you in and send you receipts for your payments. Your email address is never shared with %s or any other business.")
+          /// Flexa uses your email address to sign you in and send you receipts for your payments. Your email address is never shared with %@ or any other business.
+          internal static func message(_ p1: Any) -> String {
+            return CoreStrings.tr("Localizable", "auth.privacy.alerts.about.message", String(describing: p1), fallback: "Flexa uses your email address to sign you in and send you receipts for your payments. Your email address is never shared with %@ or any other business.")
           }
           /// Email Address Privacy
           internal static let title = CoreStrings.tr("Localizable", "auth.privacy.alerts.about.title", fallback: "Email Address Privacy")
@@ -446,21 +446,21 @@ internal enum CoreStrings {
         }
       }
       internal enum Labels {
-        /// Maximum Amount: %s
-        internal static func maximumAmount(_ p1: UnsafePointer<CChar>) -> String {
-          return CoreStrings.tr("Localizable", "legacy_flexcode.amount_entry.labels.maximum_amount", p1, fallback: "Maximum Amount: %s")
+        /// Maximum Amount: %@
+        internal static func maximumAmount(_ p1: Any) -> String {
+          return CoreStrings.tr("Localizable", "legacy_flexcode.amount_entry.labels.maximum_amount", String(describing: p1), fallback: "Maximum Amount: %@")
         }
-        /// Minimum Amount: %s
-        internal static func minimumAmount(_ p1: UnsafePointer<CChar>) -> String {
-          return CoreStrings.tr("Localizable", "legacy_flexcode.amount_entry.labels.minimum_amount", p1, fallback: "Minimum Amount: %s")
+        /// Minimum Amount: %@
+        internal static func minimumAmount(_ p1: Any) -> String {
+          return CoreStrings.tr("Localizable", "legacy_flexcode.amount_entry.labels.minimum_amount", String(describing: p1), fallback: "Minimum Amount: %@")
         }
       }
     }
     internal enum Promotions {
       internal enum Labels {
-        /// Saving %s
-        internal static func saving(_ p1: UnsafePointer<CChar>) -> String {
-          return CoreStrings.tr("Localizable", "legacy_flexcode.promotions.labels.saving", p1, fallback: "Saving %s")
+        /// Saving %@
+        internal static func saving(_ p1: Any) -> String {
+          return CoreStrings.tr("Localizable", "legacy_flexcode.promotions.labels.saving", String(describing: p1), fallback: "Saving %@")
         }
       }
     }
@@ -502,13 +502,13 @@ internal enum CoreStrings {
   internal enum Payment {
     /// Done
     internal static let done = CoreStrings.tr("Localizable", "payment.done", fallback: "Done")
-    /// Not enough %s for this payment
-    internal static func notEnough(_ p1: UnsafePointer<CChar>) -> String {
-      return CoreStrings.tr("Localizable", "payment.not_enough", p1, fallback: "Not enough %s for this payment")
+    /// Not enough %@ for this payment
+    internal static func notEnough(_ p1: Any) -> String {
+      return CoreStrings.tr("Localizable", "payment.not_enough", String(describing: p1), fallback: "Not enough %@ for this payment")
     }
-    /// Pay %s
-    internal static func payMerchant(_ p1: UnsafePointer<CChar>) -> String {
-      return CoreStrings.tr("Localizable", "payment.pay_merchant", p1, fallback: "Pay %s")
+    /// Pay %@
+    internal static func payMerchant(_ p1: Any) -> String {
+      return CoreStrings.tr("Localizable", "payment.pay_merchant", String(describing: p1), fallback: "Pay %@")
     }
     /// Pay Now
     internal static let payNow = CoreStrings.tr("Localizable", "payment.pay_now", fallback: "Pay Now")
@@ -516,32 +516,32 @@ internal enum CoreStrings {
     internal static let using = CoreStrings.tr("Localizable", "payment.using", fallback: "Using")
     internal enum Asset {
       internal enum ExchangeRate {
-        /// %s %s
-        internal static func amount(_ p1: UnsafePointer<CChar>, _ p2: UnsafePointer<CChar>) -> String {
-          return CoreStrings.tr("Localizable", "payment.asset.exchange_rate.amount", p1, p2, fallback: "%s %s")
+        /// %@ %@
+        internal static func amount(_ p1: Any, _ p2: Any) -> String {
+          return CoreStrings.tr("Localizable", "payment.asset.exchange_rate.amount", String(describing: p1), String(describing: p2), fallback: "%@ %@")
         }
         /// Network fee cannot be loaded
         internal static let cannotLoadNetworkFee = CoreStrings.tr("Localizable", "payment.asset.exchange_rate.cannot_load_network_fee", fallback: "Network fee cannot be loaded")
         /// Free
         internal static let free = CoreStrings.tr("Localizable", "payment.asset.exchange_rate.free", fallback: "Free")
-        /// Less than %s network fee
-        internal static func lessThanMinNetworkFee(_ p1: UnsafePointer<CChar>) -> String {
-          return CoreStrings.tr("Localizable", "payment.asset.exchange_rate.less_than_min_network_fee", p1, fallback: "Less than %s network fee")
+        /// Less than %@ network fee
+        internal static func lessThanMinNetworkFee(_ p1: Any) -> String {
+          return CoreStrings.tr("Localizable", "payment.asset.exchange_rate.less_than_min_network_fee", String(describing: p1), fallback: "Less than %@ network fee")
         }
-        /// %s network fee
-        internal static func networkFee(_ p1: UnsafePointer<CChar>) -> String {
-          return CoreStrings.tr("Localizable", "payment.asset.exchange_rate.network_fee", p1, fallback: "%s network fee")
+        /// %@ network fee
+        internal static func networkFee(_ p1: Any) -> String {
+          return CoreStrings.tr("Localizable", "payment.asset.exchange_rate.network_fee", String(describing: p1), fallback: "%@ network fee")
         }
-        /// 1 %s = %s
-        internal static func value(_ p1: UnsafePointer<CChar>, _ p2: UnsafePointer<CChar>) -> String {
-          return CoreStrings.tr("Localizable", "payment.asset.exchange_rate.value", p1, p2, fallback: "1 %s = %s")
+        /// 1 %@ = %@
+        internal static func value(_ p1: Any, _ p2: Any) -> String {
+          return CoreStrings.tr("Localizable", "payment.asset.exchange_rate.value", String(describing: p1), String(describing: p2), fallback: "1 %@ = %@")
         }
       }
     }
     internal enum Balance {
-      /// %s Balance
-      internal static func title(_ p1: UnsafePointer<CChar>) -> String {
-        return CoreStrings.tr("Localizable", "payment.balance.title", p1, fallback: "%s Balance")
+      /// %@ Balance
+      internal static func title(_ p1: Any) -> String {
+        return CoreStrings.tr("Localizable", "payment.balance.title", String(describing: p1), fallback: "%@ Balance")
       }
     }
     internal enum BalanceUnavailable {
@@ -549,9 +549,9 @@ internal enum CoreStrings {
       internal static let title = CoreStrings.tr("Localizable", "payment.balance_unavailable.title", fallback: "Balance Not Yet Available")
     }
     internal enum CurrencyAvaliable {
-      /// %s Available
-      internal static func title(_ p1: UnsafePointer<CChar>) -> String {
-        return CoreStrings.tr("Localizable", "payment.currency_avaliable.title", p1, fallback: "%s Available")
+      /// %@ Available
+      internal static func title(_ p1: Any) -> String {
+        return CoreStrings.tr("Localizable", "payment.currency_avaliable.title", String(describing: p1), fallback: "%@ Available")
       }
     }
     internal enum HideShortBalances {
@@ -569,9 +569,9 @@ internal enum CoreStrings {
       internal static let title = CoreStrings.tr("Localizable", "payment.transaction_details.title", fallback: "Details")
     }
     internal enum UsingTicker {
-      /// Using %s
-      internal static func subtitle(_ p1: UnsafePointer<CChar>) -> String {
-        return CoreStrings.tr("Localizable", "payment.using_ticker.subtitle", p1, fallback: "Using %s")
+      /// Using %@
+      internal static func subtitle(_ p1: Any) -> String {
+        return CoreStrings.tr("Localizable", "payment.using_ticker.subtitle", String(describing: p1), fallback: "Using %@")
       }
     }
     internal enum YourFlexaAccount {
@@ -581,9 +581,9 @@ internal enum CoreStrings {
   }
   internal enum UpdatingBalance {
     /// Your recent transaction is still mining.
-    /// You can spend up to **%s** now, or wait for your full balance to become available.
-    internal static func text(_ p1: UnsafePointer<CChar>) -> String {
-      return CoreStrings.tr("Localizable", "updating_balance.text", p1, fallback: "Your recent transaction is still mining.\nYou can spend up to **%s** now, or wait for your full balance to become available.")
+    /// You can spend up to **%@** now, or wait for your full balance to become available.
+    internal static func text(_ p1: Any) -> String {
+      return CoreStrings.tr("Localizable", "updating_balance.text", String(describing: p1), fallback: "Your recent transaction is still mining.\nYou can spend up to **%@** now, or wait for your full balance to become available.")
     }
     /// Balance Updating...
     internal static let title = CoreStrings.tr("Localizable", "updating_balance.title", fallback: "Balance Updating...")
