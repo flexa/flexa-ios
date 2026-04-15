@@ -9,7 +9,7 @@
 import PackagePlugin
 
 @main
-struct SwiftLintPlugin: BuildToolPlugin {
+struct FlexaSwiftLintPlugin: BuildToolPlugin {
     private func configPath(_ target: Target) -> String {
         let path = target.name == "Flexa" || target.name == "FlexaTests" ? "" : "../"
         return "/../\(path).swiftlint.yml"
